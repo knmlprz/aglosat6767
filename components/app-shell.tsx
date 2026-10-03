@@ -18,12 +18,18 @@ export function AppShell({
 }) {
   return (
     <SidebarProvider style={sidebarStyle}>
+      <a
+        href="#tresc"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-slate-900 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
+      >
+        Przejdź do treści
+      </a>
       <AppSidebar variant="inset" />
       <SidebarInset>
         <SiteHeader title={title} />
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
-            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+            <div id="tresc" tabIndex={-1} className="flex flex-col gap-4 py-4 outline-none md:gap-6 md:py-6">
               {children}
             </div>
           </div>

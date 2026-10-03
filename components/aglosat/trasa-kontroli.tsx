@@ -57,10 +57,10 @@ export function TrasaKontroliPanel({
   return (
     <section aria-labelledby="kontrola-tytul" className="flex flex-col gap-3">
       <div>
-        <h3 id="kontrola-tytul" className="text-sm font-bold text-slate-800">
+        <h3 id="kontrola-tytul" tabIndex={-1} className="text-sm font-bold text-slate-800 outline-none">
           Trasa kontroli
         </h3>
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-slate-600">
           Spacer przez miejsca z czoła rankingu, które mieszczą się w czasie. Czas obejmuje przejście, sprawdzanie i powrót
           do startu. Miejsca sprawdzone w tej sesji pomijamy.
         </p>

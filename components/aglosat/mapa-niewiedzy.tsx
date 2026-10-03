@@ -5,7 +5,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
-import { MapContainer, TileLayer, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, ZoomControl, useMap } from "react-leaflet";
 import type { LatLon, Pilot } from "@/lib/aglosat/types.ts";
 import type { OcenaOdcinka } from "@/lib/aglosat/profile.ts";
 import { CECHA_LABEL, KATEGORIA_LABEL, TYP_LABEL } from "@/lib/aglosat/vocabulary.ts";
@@ -14,6 +14,9 @@ import { STYL_MAPY, kategoriaMapy, type KategoriaMapy } from "@/lib/aglosat/styl
 const ESRI_URL =
   "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
 const ESRI_ATTR = "Podkład: Esri World Imagery; sieć piesza: © współtwórcy OpenStreetMap (ODbL)";
+
+/** Użytkownik prosi o ograniczenie ruchu: mapa przeskakuje zamiast przelatywać. */
+const ograniczRuch = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 type Wspolne = {
   pilot: Pilot;
@@ -188,7 +191,7 @@ function WarstwaWyboru({
   useEffect(() => {
     if (wybrane.length === 0) return;
     const geometrie = pilot.odcinki.filter((o) => wybrane.includes(o.id)).flatMap((o) => o.geometria);
-    map.flyToBounds(L.latLngBounds(geometrie).pad(4), { maxZoom: 18, duration: 0.6 });
+    map.flyToBounds(L.latLngBounds(geometrie).pad(4), { maxZoom: 18, duration: 0.6, animate: !ograniczRuch() });
   }, [map, pilot, wybrane]);
 
   return null;
@@ -229,7 +232,7 @@ function WarstwaTrasy({ pilot, trasa, fokusTrasy, renderer }: Pick<Wspolne, "pil
     const odcinki = new Map(pilot.odcinki.map((o) => [o.id, o]));
     const ids = [...(trasa.piesza ?? []), ...(trasa.weryfikacji ?? []), ...(trasa.udokumentowana ?? [])];
     const punkty = [trasa.start, trasa.cel, ...ids.flatMap((id) => odcinki.get(id)!.geometria)];
-    map.flyToBounds(L.latLngBounds(punkty).pad(0.15), { maxZoom: 18, duration: 0.6 });
+    map.flyToBounds(L.latLngBounds(punkty).pad(0.15), { maxZoom: 18, duration: 0.6, animate: !ograniczRuch() });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reagujemy tylko na nowe żądanie
   }, [map, fokusTrasy]);
 
@@ -282,7 +285,7 @@ function WarstwaKontroli({
     if (!fokusKontroli || !kontrola) return;
     const odcinki = new Map(pilot.odcinki.map((o) => [o.id, o]));
     const punkty = [kontrola.start, ...kontrola.odcinki.flatMap((id) => odcinki.get(id)?.geometria ?? [])];
-    map.flyToBounds(L.latLngBounds(punkty).pad(0.1), { maxZoom: 18, duration: 0.6 });
+    map.flyToBounds(L.latLngBounds(punkty).pad(0.1), { maxZoom: 18, duration: 0.6, animate: !ograniczRuch() });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reagujemy tylko na nowe żądanie
   }, [map, fokusKontroli]);
 
@@ -301,9 +304,11 @@ export function MapaNiewiedzy(props: Wspolne) {
       maxZoom={19}
       preferCanvas
       scrollWheelZoom
+      zoomControl={false}
       className="h-full w-full"
       style={{ height: "100%", width: "100%", background: "#0f172a" }}
     >
+      <ZoomControl position="topleft" zoomInTitle="Przybliż mapę" zoomOutTitle="Oddal mapę" />
       <TileLayer url={ESRI_URL} attribution={ESRI_ATTR} maxZoom={19} maxNativeZoom={19} className="agl-podklad" />
       <WarstwaOdcinkow
         pilot={props.pilot}

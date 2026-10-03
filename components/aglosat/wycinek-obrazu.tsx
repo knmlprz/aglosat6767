@@ -81,7 +81,7 @@ export function WycinekObrazu({
           pokaż przebieg z OSM
         </label>
         {obserwacje.map((o) => (
-          <span key={o.id} className={odrzucone.has(o.id) ? "text-slate-400" : "text-slate-700"}>
+          <span key={o.id} className={odrzucone.has(o.id) ? "text-slate-500" : "text-slate-700"}>
             {odrzucone.has(o.id) ? <s>Model wizyjny</s> : "Model wizyjny"}: <strong>{formatujWartosc("ciaglosc", o.klasa)}</strong>, ocena{" "}
             {o.ocena.toFixed(2).replace(".", ",")}. {o.uzasadnienie}.
             {odrzucone.has(o.id) && " Odrzucone w terenie."}

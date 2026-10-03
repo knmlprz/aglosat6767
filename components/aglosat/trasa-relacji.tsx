@@ -58,7 +58,7 @@ export function TrasaRelacji({
           <h3 id="relacja-tytul" className="text-sm font-bold text-slate-800">
             Dojście do usługi, przeliczane na żywo
           </h3>
-          <label className="mt-1 block text-xs text-slate-500">
+          <label className="mt-1 block text-xs text-slate-600">
             <span className="sr-only">Wybierz dojście</span>
             <select
               value={`${relacja.budynekId}|${relacja.uslugaId}`}
@@ -165,7 +165,7 @@ export function TrasaRelacji({
           )}
         </Komorka>
       </div>
-      <p className="mt-2 text-xs text-slate-500">
+      <p className="mt-2 text-xs text-slate-600">
         Start: {budynek.adres ?? "budynek mieszkalny"}. Cel: {usluga.nazwa}
         {usluga.wejscie?.wheelchair ? ` (wejście w OSM: wheelchair=${usluga.wejscie.wheelchair})` : " (brak danych o wejściu w OSM)"}.
       </p>
@@ -190,7 +190,7 @@ function Komorka({
     ton === "ok" ? "border-emerald-200 bg-emerald-50" : ton === "brak" ? "border-rose-200 bg-rose-50" : "border-slate-200 bg-slate-50";
   return (
     <div className={`rounded-xl border p-3 ${kolor}`}>
-      <div className="flex items-center gap-2 text-xs font-semibold uppercase text-slate-500">
+      <div className="flex items-center gap-2 text-xs font-semibold uppercase text-slate-600">
         {znak}
         {tytul}
       </div>

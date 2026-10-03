@@ -2,6 +2,7 @@
 
 // Szczegóły miejsca: dlaczego jest ważne, co sprawdzić w terenie, co wiadomo i skąd.
 
+import { useEffect, useRef } from "react";
 import type { Cecha, Pilot, Profil, StanCechy, Status, Weryfikacja, WynikWplywu } from "@/lib/aglosat/types.ts";
 import { FormularzKontroli } from "@/components/aglosat/formularz-kontroli";
 import { WycinekObrazu } from "@/components/aglosat/wycinek-obrazu";
@@ -52,6 +53,11 @@ export function SzczegolyMiejsca({
   onZamknij: () => void;
 }) {
   const odc = pilot.odcinki.find((o) => o.id === odcinekId)!;
+  // Kliknięty przycisk listy znika, więc fokus przenosimy na nagłówek panelu (klawiatura, czytnik ekranu).
+  const naglowek = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    naglowek.current?.focus({ preventScroll: true });
+  }, [odcinekId]);
   const stany = stanOdcinka(odc, pilot.obserwacje, weryfikacje);
   // Odrzucone wykrycia nie liczą się do statusu, ale pokazujemy je: tak wygląda błąd modelu.
   const naMiejscu = new Set(wynik?.odcinki ?? [odcinekId]);
@@ -73,13 +79,13 @@ export function SzczegolyMiejsca({
     <section aria-labelledby="szczegoly-tytul" className="flex flex-col gap-4">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <p className="text-xs font-semibold uppercase text-slate-500">
+          <p className="text-xs font-semibold uppercase text-slate-600">
             {pozycja ? `Miejsce ${pozycja} w rankingu` : "Odcinek poza rankingiem"}
           </p>
-          <h3 id="szczegoly-tytul" className="text-lg font-bold text-slate-900">
+          <h3 id="szczegoly-tytul" ref={naglowek} tabIndex={-1} className="text-lg font-bold text-slate-900 outline-none">
             {lokalizacja(odc, pilot)}
           </h3>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-600">
             {Math.round(dlugosc)} m{liczbaOdcinkow > 1 ? `, ${liczbaOdcinkow} ${odmiana(liczbaOdcinkow, ["odcinek", "odcinki", "odcinków"])} w OSM` : ""} · {kat.etykieta}
           </p>
         </div>
@@ -126,7 +132,7 @@ export function SzczegolyMiejsca({
               </li>
             ))}
           </ul>
-          <p className="mt-2 text-xs text-slate-500">
+          <p className="mt-2 text-xs text-slate-600">
             Wynik mówi, że miejsce jest istotne. Nie mówi, że jego sprawdzenie rozstrzygnie trasę: po drodze mogą być inne
             niewiadome.
           </p>
@@ -183,7 +189,7 @@ export function SzczegolyMiejsca({
 
       <div>
         <h4 className="text-sm font-bold text-slate-800">Co wiadomo i skąd</h4>
-        <p className="text-xs text-slate-500">Cechy wymagane przez profil „{profil.nazwa}”.</p>
+        <p className="text-xs text-slate-600">Cechy wymagane przez profil „{profil.nazwa}”.</p>
         <ul className="mt-2 flex flex-col gap-2">
           {profil.wymagane.map((c) => (
             <WierszCechy key={c} cecha={c} stan={stany[c]} />
@@ -215,11 +221,11 @@ function WierszCechy({ cecha, stan }: { cecha: Cecha; stan: StanCechy }) {
       </div>
       <p className="text-sm text-slate-700">{formatujWartosc(cecha, stan.wartosc)}</p>
       {stan.dowody.length === 0 ? (
-        <p className="mt-1 text-xs text-slate-500">Żadne źródło nie opisuje tej cechy.</p>
+        <p className="mt-1 text-xs text-slate-600">Żadne źródło nie opisuje tej cechy.</p>
       ) : (
         <ul className="mt-1 flex flex-col gap-0.5">
           {stan.dowody.map((d, i) => (
-            <li key={i} className="text-xs text-slate-500">
+            <li key={i} className="text-xs text-slate-600">
               {ZRODLO_LABEL[d.zrodlo]}: {formatujWartosc(cecha, d.wartosc)} · {DATA_LABEL[d.rodzajDaty]} {d.data}
               {d.ref && d.zrodlo !== "teren" && <> · <code className="text-[11px]">{d.ref}</code></>}
               {d.opis && <> · {d.opis}</>}

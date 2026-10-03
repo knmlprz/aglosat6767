@@ -63,6 +63,28 @@ Obszar i parametry są w `scripts/aglosat/config.ts`. Nowe miasto to nowy obszar
 - **Data ortofotomapy** pochodzi ze skorowidza GUGiK dla arkusza M-34-65-C-c-1-2; zakładamy, że usługa WMS HighResolution pokazuje najnowszy arkusz.
 - **Kostka granitowa** jest traktowana jako utrudnienie, nie bariera.
 
+## Dostępność interfejsu
+
+Cel: WCAG 2.2 AA. Stan na 2026-10-03.
+
+**Sprawdzone i działa**
+
+- Audyt automatyczny (axe-core, reguły WCAG 2.0–2.2 A i AA): 0 naruszeń na stronie głównej, w widoku mieszkańca i w widoku planisty, także z otwartym panelem miejsca, trasą kontroli i paskiem trybu demo.
+- Pełna obsługa klawiaturą głównego scenariusza: wybór miejsca z rankingu, wpis kontroli, cofnięcie, powrót do listy, tryb demo (strzałki ← →). Link „Przejdź do treści”, widoczny wskaźnik fokusa, logiczna kolejność.
+- Fokus nie ginie, gdy treść się zmienia: po wyborze miejsca przechodzi na nagłówek panelu, po zapisie kontroli na nagłówek formularza, po powrocie na nagłówek listy.
+- Komunikaty dla czytnika ekranu: wynik zapisu kontroli, przeliczone trasy, krok trybu demo.
+- Wszystko z mapy jest też tekstem: ranking miejsc, legenda z liczbami, lista sprzecznych źródeł, opis trasy mieszkańca (z przyciskiem „Odczytaj na głos”), lista miejsc na trasie.
+- Kategorie na mapie różnią się nie tylko kolorem, ale też grubością i przerywaniem linii.
+- Zawijanie treści przy szerokości 320 px (powiększenie 400%) bez przewijania w poziomie.
+- Ograniczenie ruchu w systemie wyłącza pulsowanie znacznika i animacje przelotu mapy.
+
+**Wymaga pracy**
+
+- Test z prawdziwym czytnikiem ekranu (VoiceOver, NVDA): sprawdziliśmy semantykę i komunikaty w kodzie i w przeglądarce, ale nie przeszliśmy scenariusza z czytnikiem.
+- Pojedyncze odcinki na mapie nie są osiągalne klawiaturą. Tekstowo dostępne są miejsca z rankingu, sprzeczne źródła i odcinki tras; nie ma listy wszystkich odcinków nieprzejezdnych.
+- Kontrast podkładu satelitarnego i linii na mapie nie jest mierzony automatycznie.
+- Link do Leaflet w atrybucji mapy pochodzi z biblioteki; jego kontrast nie jest sprawdzany.
+
 ## Struktura
 
 ```

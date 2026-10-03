@@ -80,7 +80,7 @@ export function LandingPage({ liczby }: { liczby: LiczbyStrony }) {
 
       <main>
         <section className="mx-auto max-w-6xl px-4 pb-12 pt-14 lg:px-6 lg:pt-20">
-          <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">Pilot: {liczby.obszar}</p>
+          <p className="text-sm font-semibold uppercase tracking-wide text-slate-600">Pilot: {liczby.obszar}</p>
           <h1 className="mt-3 max-w-4xl text-4xl font-black leading-tight tracking-tight sm:text-6xl">
             Przeszkody, których miasto nie ma na mapie
           </h1>
@@ -108,7 +108,7 @@ export function LandingPage({ liczby }: { liczby: LiczbyStrony }) {
           <section aria-labelledby="przypadek" className="border-y border-slate-200 bg-slate-50">
             <div className="mx-auto grid max-w-6xl gap-6 px-4 py-12 lg:grid-cols-[1fr_1.2fr] lg:px-6">
               <div>
-                <h2 id="przypadek" className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+                <h2 id="przypadek" className="text-sm font-semibold uppercase tracking-wide text-slate-600">
                   Jeden przypadek
                 </h2>
                 <p className="mt-2 text-2xl font-bold leading-snug">
@@ -130,7 +130,7 @@ export function LandingPage({ liczby }: { liczby: LiczbyStrony }) {
         )}
 
         <section aria-labelledby="mianownik" className="mx-auto max-w-6xl px-4 py-12 lg:px-6">
-          <h2 id="mianownik" className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+          <h2 id="mianownik" className="text-sm font-semibold uppercase tracking-wide text-slate-600">
             To nie wyjątek
           </h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
@@ -144,7 +144,7 @@ export function LandingPage({ liczby }: { liczby: LiczbyStrony }) {
             />
             <Liczba wartosc={String(liczby.miejscDoKontroli)} opis="miejsc do kontroli, uporządkowanych według wpływu na dojścia" />
           </div>
-          <p className="mt-3 text-xs text-slate-500">
+          <p className="mt-3 text-xs text-slate-600">
             OpenStreetMap, dane pobrane {liczby.pobranoOsm}. Profil: bez schodów, krawężnik do 3 cm, utwardzona nawierzchnia.
             Brak informacji to nie bariera: nie wiemy, czy przejście jest.
           </p>
@@ -152,13 +152,13 @@ export function LandingPage({ liczby }: { liczby: LiczbyStrony }) {
 
         <section aria-labelledby="role" className="border-t border-slate-200">
           <div className="mx-auto max-w-6xl px-4 py-12 lg:px-6">
-            <h2 id="role" className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+            <h2 id="role" className="text-sm font-semibold uppercase tracking-wide text-slate-600">
               Trzy role, zawsze w tej kolejności
             </h2>
             <ol className="mt-4 grid gap-4 md:grid-cols-3">
               {ROLE.map((r, i) => (
                 <li key={r.tytul} className="rounded-2xl border border-slate-200 p-5">
-                  <div className="flex items-center gap-2 text-slate-500">
+                  <div className="flex items-center gap-2 text-slate-600">
                     <r.ikona className="size-5" aria-hidden />
                     <span className="text-sm font-semibold">{i + 1}.</span>
                   </div>
@@ -172,7 +172,7 @@ export function LandingPage({ liczby }: { liczby: LiczbyStrony }) {
 
         <section aria-labelledby="stan" className="border-t border-slate-200 bg-slate-50">
           <div className="mx-auto max-w-6xl px-4 py-12 lg:px-6">
-            <h2 id="stan" className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+            <h2 id="stan" className="text-sm font-semibold uppercase tracking-wide text-slate-600">
               Stan prototypu
             </h2>
             <div className="mt-4 grid gap-4 md:grid-cols-3">
@@ -185,7 +185,7 @@ export function LandingPage({ liczby }: { liczby: LiczbyStrony }) {
       </main>
 
       <footer className="border-t border-slate-200">
-        <div className="mx-auto max-w-6xl px-4 py-6 text-xs text-slate-500 lg:px-6">
+        <div className="mx-auto max-w-6xl px-4 py-6 text-xs text-slate-600 lg:px-6">
           Dane: © współtwórcy OpenStreetMap (ODbL)
           {liczby.dataNalotu && <>; ortofotomapa GUGiK (Geoportal), nalot {liczby.dataNalotu}</>}; podkład mapy: Esri World
           Imagery.

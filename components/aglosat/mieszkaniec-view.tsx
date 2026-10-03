@@ -108,7 +108,7 @@ export function MieszkaniecView() {
   return (
     <div className="flex flex-col gap-6 px-4 pb-40 lg:px-6">
       <header>
-        <p className="text-sm font-medium text-slate-500">{pilot.meta.obszar.nazwa}</p>
+        <p className="text-sm font-medium text-slate-600">{pilot.meta.obszar.nazwa}</p>
         <h2 className="text-2xl font-black text-slate-900">Czy dojadę i na ile to pewne?</h2>
         <p className="max-w-3xl text-sm text-slate-600">
           Nie mówimy „dostępne”. Mówimy, co wiadomo, skąd i od kiedy, oraz czego nie potwierdzają dostępne dane.
@@ -182,7 +182,7 @@ export function MieszkaniecView() {
           Wynik
         </h3>
         <div className={`rounded-2xl border p-4 ${trasy.udokumentowana ? "border-emerald-200 bg-emerald-50" : "border-rose-200 bg-rose-50"}`}>
-          <p className="text-xs font-semibold uppercase text-slate-500">{TRASA_LABEL.udokumentowana}</p>
+          <p className="text-xs font-semibold uppercase text-slate-600">{TRASA_LABEL.udokumentowana}</p>
           {trasy.udokumentowana ? (
             <>
               <p className="text-3xl font-black text-slate-900">{m(trasy.udokumentowana.dlugoscM)}</p>
@@ -202,7 +202,7 @@ export function MieszkaniecView() {
           )}
         </div>
         <div className={`rounded-2xl border p-4 ${trasy.weryfikacji ? "border-amber-200 bg-amber-50" : "border-rose-200 bg-rose-50"}`}>
-          <p className="text-xs font-semibold uppercase text-slate-500">{TRASA_LABEL.weryfikacji}</p>
+          <p className="text-xs font-semibold uppercase text-slate-600">{TRASA_LABEL.weryfikacji}</p>
           {trasy.weryfikacji ? (
             <>
               <p className="text-3xl font-black text-slate-900">{m(trasy.weryfikacji.dlugoscM)}</p>
@@ -232,7 +232,11 @@ export function MieszkaniecView() {
       </section>
 
       <section className="grid gap-4 lg:grid-cols-[1fr_420px]">
-        <div className="h-[460px] overflow-hidden rounded-2xl border border-slate-200 shadow-sm lg:h-[560px]">
+        <div
+          role="region"
+          aria-label="Mapa trasy. Ta sama informacja jest w opisie trasy i na liście miejsc obok."
+          className="h-[460px] overflow-hidden rounded-2xl border border-slate-200 shadow-sm lg:h-[560px]"
+        >
           <MapaNiewiedzy
             pilot={pilot}
             oceny={oceny}
@@ -246,13 +250,13 @@ export function MieszkaniecView() {
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-4 lg:h-[560px] lg:overflow-y-auto">
-          <div role="tablist" aria-label="Która trasa" className="flex gap-1 rounded-lg bg-slate-100 p-1">
+          <h3 className="mb-2 text-sm font-bold text-slate-800">Miejsca na trasie</h3>
+          <div role="group" aria-label="Która trasa" className="flex gap-1 rounded-lg bg-slate-100 p-1">
             {(["udokumentowana", "weryfikacji"] as const).map((k) => (
               <button
                 key={k}
                 type="button"
-                role="tab"
-                aria-selected={pokazana === k}
+                aria-pressed={pokazana === k}
                 disabled={!trasy[k]}
                 onClick={() => setWyborTrasy(k)}
                 className={`flex-1 rounded-md px-2 py-1.5 text-sm font-medium disabled:opacity-40 ${
@@ -289,7 +293,7 @@ function ListaOdcinkow({
   const pozostale = trasa.odcinki.length - miejsca.length;
   return (
     <div className="mt-3 flex flex-col gap-2">
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-slate-600">
         {m(trasa.dlugoscM)}, {trasa.odcinki.length} {odmiana(trasa.odcinki.length, ["odcinek", "odcinki", "odcinków"])} w OSM.
       </p>
       <ol className="flex flex-col gap-2">
@@ -311,10 +315,10 @@ function ListaOdcinkow({
                   <li key={c} className="text-xs text-slate-700">
                     {CECHA_LABEL[c]}: <strong>{formatujWartosc(c, stany[c].wartosc)}</strong> · {STATUS_LABEL[stany[c].status]}
                     {stany[c].dowody.length === 0 && (
-                      <span className="block pl-2 text-slate-500">żadne źródło nie opisuje tej cechy</span>
+                      <span className="block pl-2 text-slate-600">żadne źródło nie opisuje tej cechy</span>
                     )}
                     {stany[c].dowody.map((d, i) => (
-                      <span key={i} className="block pl-2 text-slate-500">
+                      <span key={i} className="block pl-2 text-slate-600">
                         {ZRODLO_LABEL[d.zrodlo]}: {formatujWartosc(c, d.wartosc)}, {DATA_LABEL[d.rodzajDaty]} {d.data}
                         {d.przykladowe && " (dane przykładowe)"}
                       </span>

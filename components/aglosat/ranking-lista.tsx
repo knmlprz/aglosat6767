@@ -28,10 +28,10 @@ export function RankingLista({
   return (
     <section aria-labelledby="ranking-tytul" className="flex min-h-0 flex-col gap-3">
       <div>
-        <h3 id="ranking-tytul" className="text-sm font-bold text-slate-800">
+        <h3 id="ranking-tytul" tabIndex={-1} className="text-sm font-bold text-slate-800 outline-none">
           Miejsca, których sprawdzenie najbardziej zmienia dostęp do usług
         </h3>
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-slate-600">
           Priorytet weryfikacji: co się stanie z dojściami, jeśli miejsce okaże się nieprzejezdne. {ETYKIETA_ANALIZA_BAZOWA}:
           kontrole z tej sesji nie zmieniają kolejności.
         </p>
