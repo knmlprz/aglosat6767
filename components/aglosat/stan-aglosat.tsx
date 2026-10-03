@@ -4,9 +4,10 @@
 // Kontrola wpisana u planisty od razu zmienia trasy mieszkańca (ten sam graf, te same weryfikacje).
 
 import { Fragment, createContext, useCallback, useContext, useMemo, useState } from "react";
-import type { Weryfikacja } from "@/lib/aglosat/types.ts";
+import type { StanZgloszenia, Weryfikacja, Zgloszenie } from "@/lib/aglosat/types.ts";
 import { usePilot, type StanWczytania } from "@/lib/aglosat/use-pilot.ts";
 import { idWpisu } from "@/lib/aglosat/weryfikacja.ts";
+import { rozpatrzone } from "@/lib/aglosat/zgloszenia.ts";
 
 /**
  * Stan początkowy widoków narzucony przez tryb demo. Widoki czytają go przy montowaniu;
@@ -25,6 +26,10 @@ type StanAglosat = {
   cofnijKontrole: (idWpisu: string) => void;
   przywroc: () => void;
   ustawKontrole: (w: Weryfikacja[]) => void;
+  /** Zgłoszenia mieszkańców z tej sesji; widok planisty je rozpatruje. */
+  zgloszenia: Zgloszenie[];
+  dodajZgloszenia: (z: Zgloszenie[]) => void;
+  rozpatrzZgloszenie: (id: string, stan: StanZgloszenia, uzasadnienie?: string) => void;
   zadanie: ZadanieDemo | null;
   ustawZadanie: (z: ZadanieDemo | null, przemontuj: boolean) => void;
   klucz: number;
@@ -35,6 +40,7 @@ const Kontekst = createContext<StanAglosat | null>(null);
 export function AglosatProvider({ children }: { children: React.ReactNode }) {
   const wczytanie = usePilot();
   const [weryfikacje, setWeryfikacje] = useState<Weryfikacja[]>([]);
+  const [zgloszenia, setZgloszenia] = useState<Zgloszenie[]>([]);
   const [zadanie, setZadanie] = useState<ZadanieDemo | null>(null);
   const [klucz, setKlucz] = useState(0);
   const dodajKontrole = useCallback((w: Weryfikacja[]) => setWeryfikacje((prev) => [...prev, ...w]), []);
@@ -42,7 +48,16 @@ export function AglosatProvider({ children }: { children: React.ReactNode }) {
     (id: string) => setWeryfikacje((prev) => prev.filter((w) => idWpisu(w) !== id)),
     [],
   );
-  const przywroc = useCallback(() => setWeryfikacje([]), []);
+  const dodajZgloszenia = useCallback((z: Zgloszenie[]) => setZgloszenia((prev) => [...z, ...prev]), []);
+  const rozpatrzZgloszenie = useCallback(
+    (id: string, stan: StanZgloszenia, uzasadnienie?: string) =>
+      setZgloszenia((prev) => prev.map((z) => (z.id === id ? rozpatrzone(z, stan, uzasadnienie) : z))),
+    [],
+  );
+  const przywroc = useCallback(() => {
+    setWeryfikacje([]);
+    setZgloszenia([]);
+  }, []);
   const ustawZadanie = useCallback((z: ZadanieDemo | null, przemontuj: boolean) => {
     setZadanie(z);
     if (przemontuj) setKlucz((k) => k + 1);
@@ -55,11 +70,26 @@ export function AglosatProvider({ children }: { children: React.ReactNode }) {
       cofnijKontrole,
       przywroc,
       ustawKontrole: setWeryfikacje,
+      zgloszenia,
+      dodajZgloszenia,
+      rozpatrzZgloszenie,
       zadanie,
       ustawZadanie,
       klucz,
     }),
-    [wczytanie, weryfikacje, dodajKontrole, cofnijKontrole, przywroc, zadanie, ustawZadanie, klucz],
+    [
+      wczytanie,
+      weryfikacje,
+      dodajKontrole,
+      cofnijKontrole,
+      przywroc,
+      zgloszenia,
+      dodajZgloszenia,
+      rozpatrzZgloszenie,
+      zadanie,
+      ustawZadanie,
+      klucz,
+    ],
   );
   return <Kontekst.Provider value={wartosc}>{children}</Kontekst.Provider>;
 }

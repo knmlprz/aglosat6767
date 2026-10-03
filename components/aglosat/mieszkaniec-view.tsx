@@ -9,6 +9,7 @@ import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import {
+  CameraIcon,
   ChevronDownIcon,
   ChevronRightIcon,
   Maximize2Icon,
@@ -19,13 +20,15 @@ import {
 } from "lucide-react";
 import { useAglosat } from "@/components/aglosat/stan-aglosat";
 import { WyborMiejsca, type PozycjaWyboru } from "@/components/aglosat/wybor-miejsca";
+import { FormularzZgloszenia } from "@/components/aglosat/formularz-zgloszenia";
 import { Instalacja } from "@/components/pwa/instalacja";
 import { ocenWszystkie, trasyRelacji, zbudujGraf, type Trasa } from "@/lib/aglosat/routing.ts";
 import { PROFILE } from "@/lib/aglosat/profile.ts";
 import { stanOdcinka } from "@/lib/aglosat/status.ts";
 import { lokalizacja, odlegloscM } from "@/lib/aglosat/opis.ts";
 import { miejscaNaTrasie, opisTrasy } from "@/lib/aglosat/opis-trasy.ts";
-import type { KategoriaUslugi, Pilot, Weryfikacja } from "@/lib/aglosat/types.ts";
+import type { Cecha, KategoriaUslugi, Odcinek, Pilot, Weryfikacja, Zgloszenie } from "@/lib/aglosat/types.ts";
+import { ETYKIETA_STANU } from "@/lib/aglosat/zgloszenia.ts";
 import type { OcenaOdcinka } from "@/lib/aglosat/profile.ts";
 import { KOLEJNOSC_KATEGORII } from "@/lib/aglosat/styl.ts";
 import {
@@ -53,7 +56,7 @@ const m = (x: number) => `${Math.round(x)} m`;
 const minuty = (metry: number) => Math.max(1, Math.round(metry / 66.7));
 
 export function MieszkaniecView() {
-  const { wczytanie, weryfikacje } = useAglosat();
+  const { wczytanie, weryfikacje, zgloszenia, dodajZgloszenia } = useAglosat();
   const pilot = wczytanie.stan === "gotowe" ? wczytanie.pilot : null;
 
   const [startId, setStartId] = useState<string | null>(null);
@@ -65,6 +68,7 @@ export function MieszkaniecView() {
   const [otwartyWybor, setOtwartyWybor] = useState<"start" | "cel" | null>(null);
   const [pelnaMapa, setPelnaMapa] = useState(false);
   const [komunikat, setKomunikat] = useState("");
+  const [zglaszane, setZglaszane] = useState<{ odcinek: Odcinek; cechy: Cecha[] } | null>(null);
 
   const profil = PROFILE.find((p) => p.id === profilId)!;
   const domyslny = pilot?.kandydaci[0];
@@ -73,8 +77,8 @@ export function MieszkaniecView() {
 
   const graf = useMemo(() => (pilot ? zbudujGraf(pilot.odcinki) : null), [pilot]);
   const oceny = useMemo(
-    () => (pilot ? ocenWszystkie(pilot.odcinki, pilot.obserwacje, weryfikacje, profil) : null),
-    [pilot, weryfikacje, profil],
+    () => (pilot ? ocenWszystkie(pilot.odcinki, pilot.obserwacje, weryfikacje, profil, zgloszenia) : null),
+    [pilot, weryfikacje, profil, zgloszenia],
   );
   const trasy = useMemo(
     () => (graf && oceny && start && cel ? trasyRelacji(graf, oceny, start.wezel, cel.wezel) : null),
@@ -400,7 +404,14 @@ export function MieszkaniecView() {
         </summary>
         <div className="border-t border-slate-200 p-4">
           {wybrana ? (
-            <ListaOdcinkow trasa={wybrana} pilot={pilot} oceny={oceny} weryfikacje={weryfikacje} />
+            <ListaOdcinkow
+              trasa={wybrana}
+              pilot={pilot}
+              oceny={oceny}
+              weryfikacje={weryfikacje}
+              zgloszenia={zgloszenia}
+              naZgloszenie={(odcinek, cechy) => setZglaszane({ odcinek, cechy })}
+            />
           ) : (
             <p className="text-sm text-slate-700">Tej trasy nie ma dla wybranych preferencji.</p>
           )}
@@ -419,6 +430,10 @@ export function MieszkaniecView() {
           <li>Obszar pilota: {pilot.meta.obszar.nazwa}.</li>
           <li>Sieć piesza, nawierzchnie i usługi: OpenStreetMap, dane pobrane {pilot.meta.pobranoOsm}.</li>
           <li>Kontrole w terenie: {ostatniaKontrola ? `ostatnia ${ostatniaKontrola}` : "brak w tej sesji"}.</li>
+          <li>
+            Zgłoszenia mieszkańców liczą się jako źródło dopiero wtedy, gdy urząd je obejrzy i przyjmie. Do tego czasu
+            są widoczne przy miejscu, ale trasy zostają bez zmian.
+          </li>
           <li>Brak danych nigdy nie staje się „przejezdne”: nieopisana cecha zostaje niewiadomą.</li>
           <li>© współtwórcy OpenStreetMap (ODbL), podkład mapy: Esri World Imagery.</li>
         </ul>
@@ -450,6 +465,20 @@ export function MieszkaniecView() {
           setFokus((f) => f + 1);
         }}
       />
+
+      {zglaszane && (
+        <FormularzZgloszenia
+          otwarty
+          naZmiane={(o) => !o && setZglaszane(null)}
+          odcinekId={zglaszane.odcinek.id}
+          nazwaMiejsca={lokalizacja(zglaszane.odcinek, pilot)}
+          cechy={zglaszane.cechy}
+          naWyslanie={(z) => {
+            dodajZgloszenia(z);
+            setKomunikat("Dziękujemy. Zgłoszenie czeka na decyzję urzędu — trasy na razie bez zmian.");
+          }}
+        />
+      )}
     </Ramka>
   );
 }
@@ -528,11 +557,15 @@ function ListaOdcinkow({
   pilot,
   oceny,
   weryfikacje,
+  zgloszenia,
+  naZgloszenie,
 }: {
   trasa: Trasa;
   pilot: Pilot;
   oceny: Map<string, OcenaOdcinka>;
   weryfikacje: Weryfikacja[];
+  zgloszenia: Zgloszenie[];
+  naZgloszenie: (odcinek: Odcinek, cechy: Cecha[]) => void;
 }) {
   const miejsca = miejscaNaTrasie(trasa, pilot, oceny);
   const pozostale = trasa.odcinki.length - miejsca.length;
@@ -543,7 +576,8 @@ function ListaOdcinkow({
       </p>
       <ol className="flex flex-col gap-2">
         {miejsca.map((mm) => {
-          const stany = stanOdcinka(mm.odcinek, pilot.obserwacje, weryfikacje);
+          const stany = stanOdcinka(mm.odcinek, pilot.obserwacje, weryfikacje, zgloszenia);
+          const moje = zgloszenia.filter((z) => z.odcinekId === mm.odcinek.id);
           return (
             <li
               key={mm.odcinek.id}
@@ -575,6 +609,27 @@ function ListaOdcinkow({
                   </li>
                 ))}
               </ul>
+
+              {moje.length > 0 && (
+                <ul className="mt-2 flex flex-col gap-1 border-t border-slate-300/70 pt-2">
+                  {moje.map((z) => (
+                    <li key={z.id} className="text-xs text-slate-800">
+                      Twoje zgłoszenie: {CECHA_LABEL[z.cecha]} — <strong>{formatujWartosc(z.cecha, z.wartosc)}</strong>
+                      {z.zdjecie && ", ze zdjęciem"} · {ETYKIETA_STANU[z.stan]}
+                      {z.uzasadnienie && <span className="block pl-2 text-slate-600">urząd: „{z.uzasadnienie}”</span>}
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <button
+                type="button"
+                onClick={() => naZgloszenie(mm.odcinek, mm.cechy)}
+                className="mt-2 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-slate-400 bg-white px-3 text-base font-semibold text-slate-900 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+              >
+                <CameraIcon className="size-5" aria-hidden />
+                Zgłoś, jak tu jest
+              </button>
             </li>
           );
         })}

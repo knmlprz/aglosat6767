@@ -3,7 +3,7 @@
 // Szczegóły miejsca: dlaczego jest ważne, co sprawdzić w terenie, co wiadomo i skąd.
 
 import { useEffect, useRef } from "react";
-import type { Cecha, Pilot, Profil, StanCechy, Status, Weryfikacja, WynikWplywu } from "@/lib/aglosat/types.ts";
+import type { Cecha, Pilot, Profil, StanCechy, Status, Weryfikacja, WynikWplywu, Zgloszenie } from "@/lib/aglosat/types.ts";
 import { FormularzKontroli } from "@/components/aglosat/formularz-kontroli";
 import { WycinekObrazu } from "@/components/aglosat/wycinek-obrazu";
 import type { OcenaOdcinka } from "@/lib/aglosat/profile.ts";
@@ -23,6 +23,7 @@ import { STYL_MAPY, kategoriaMapy } from "@/lib/aglosat/styl.ts";
 const STATUS_KLASA: Record<Status, string> = {
   potwierdzone: "bg-emerald-100 text-emerald-900",
   otwarte_zrodlo: "bg-sky-100 text-sky-900",
+  przyjete_zgloszenie: "bg-teal-100 text-teal-900",
   zgloszone: "bg-violet-100 text-violet-900",
   podejrzenie_obraz: "bg-amber-100 text-amber-900",
   nieznane: "bg-slate-200 text-slate-800",
@@ -37,6 +38,7 @@ export function SzczegolyMiejsca({
   ocena,
   profil,
   weryfikacje,
+  zgloszenia,
   onDodaj,
   onCofnij,
   onZamknij,
@@ -48,6 +50,7 @@ export function SzczegolyMiejsca({
   ocena: OcenaOdcinka;
   profil: Profil;
   weryfikacje: Weryfikacja[];
+  zgloszenia: Zgloszenie[];
   onDodaj: (w: Weryfikacja[]) => void;
   onCofnij: (idWpisu: string) => void;
   onZamknij: () => void;
@@ -58,7 +61,7 @@ export function SzczegolyMiejsca({
   useEffect(() => {
     naglowek.current?.focus({ preventScroll: true });
   }, [odcinekId]);
-  const stany = stanOdcinka(odc, pilot.obserwacje, weryfikacje);
+  const stany = stanOdcinka(odc, pilot.obserwacje, weryfikacje, zgloszenia);
   // Odrzucone wykrycia nie liczą się do statusu, ale pokazujemy je: tak wygląda błąd modelu.
   const naMiejscu = new Set(wynik?.odcinki ?? [odcinekId]);
   const wycinek = pilot.wycinki.find((w) => naMiejscu.has(w.odcinekId)) ?? null;

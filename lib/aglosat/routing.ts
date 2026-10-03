@@ -5,7 +5,7 @@
 // - wymagająca weryfikacji: przejezdne + nieznane; najpierw najmniej niewiadomych,
 //   potem najkrótsza, z limitem objazdu.
 
-import type { Odcinek, Profil, Obserwacja, Weryfikacja } from "./types.ts";
+import type { Odcinek, Profil, Obserwacja, Weryfikacja, Zgloszenie } from "./types.ts";
 import { ocenOdcinek, type OcenaOdcinka } from "./profile.ts";
 import { stanOdcinka } from "./status.ts";
 
@@ -35,9 +35,10 @@ export function ocenWszystkie(
   obserwacje: Obserwacja[],
   weryfikacje: Weryfikacja[],
   profil: Profil,
+  zgloszenia: Zgloszenie[] = [],
 ): Map<string, OcenaOdcinka> {
   const wynik = new Map<string, OcenaOdcinka>();
-  for (const o of odcinki) wynik.set(o.id, ocenOdcinek(stanOdcinka(o, obserwacje, weryfikacje), profil));
+  for (const o of odcinki) wynik.set(o.id, ocenOdcinek(stanOdcinka(o, obserwacje, weryfikacje, zgloszenia), profil));
   return wynik;
 }
 

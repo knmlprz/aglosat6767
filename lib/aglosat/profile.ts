@@ -65,9 +65,12 @@ function spelnia(cecha: Cecha, w: Wartosc, p: Profil): boolean {
 }
 
 export function ocenCeche(stan: StanCechy, p: Profil): OcenaCechy {
-  // Tylko potwierdzone i otwarte źródło są udokumentowane. Podejrzenie, zgłoszenie,
-  // sprzeczność i brak danych to niewiadoma, nigdy „spełnia”.
-  if (stan.status !== "potwierdzone" && stan.status !== "otwarte_zrodlo") return "nieznane";
+  // Udokumentowane są tylko: kontrola w terenie, otwarte źródło i zgłoszenie, które urząd
+  // obejrzał i przyjął. Podejrzenie modelu, zgłoszenie bez decyzji, sprzeczność i brak danych
+  // to niewiadoma, nigdy „spełnia”.
+  if (stan.status !== "potwierdzone" && stan.status !== "otwarte_zrodlo" && stan.status !== "przyjete_zgloszenie") {
+    return "nieznane";
+  }
   if (stan.wartosc === null) return "nieznane";
   if (!spelnia(stan.cecha, stan.wartosc, p)) return "nie_spelnia";
   if (stan.cecha === "nawierzchnia" && p.utrudnioneNawierzchnie.includes(String(stan.wartosc))) return "utrudnienie";

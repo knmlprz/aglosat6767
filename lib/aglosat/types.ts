@@ -13,6 +13,7 @@ export type Cecha = "ciaglosc" | "schody" | "nawierzchnia" | "kraweznik" | "szer
 export type Status =
   | "potwierdzone"
   | "otwarte_zrodlo"
+  | "przyjete_zgloszenie"
   | "zgloszone"
   | "podejrzenie_obraz"
   | "nieznane"
@@ -42,6 +43,8 @@ export type Dowod = {
   ref?: string;
   /** Dane przykładowe, nie z prawdziwego źródła. Interfejs musi to oznaczyć. */
   przykladowe?: boolean;
+  /** Zgłoszenie, które urząd obejrzał i przyjął. Dopiero wtedy liczy się jak udokumentowane. */
+  przyjete?: boolean;
 };
 
 export type StanCechy = {
@@ -83,6 +86,26 @@ export type Obserwacja = {
   /** Ścieżka do wycinka w public/; null, dopóki nie ma wycinka. */
   wycinek: string | null;
   przykladowe: boolean;
+};
+
+export type StanZgloszenia = "oczekuje" | "przyjete" | "odrzucone";
+
+/**
+ * Zgłoszenie mieszkańca: co zastał na odcinku, najlepiej ze zdjęciem.
+ * Samo zgłoszenie nie rozstrzyga cechy — dopóki urząd go nie przyjmie, cecha zostaje niewiadomą.
+ */
+export type Zgloszenie = {
+  id: string;
+  odcinekId: string;
+  cecha: Cecha;
+  wartosc: Wartosc;
+  /** Zdjęcie jako data URL (JPEG), zmniejszone przed zapisem; null = zgłoszenie bez zdjęcia. */
+  zdjecie: string | null;
+  opis?: string;
+  dataZgloszenia: string;
+  stan: StanZgloszenia;
+  /** Notatka urzędu przy przyjęciu albo powód odrzucenia. */
+  uzasadnienie?: string;
 };
 
 export type Weryfikacja = {

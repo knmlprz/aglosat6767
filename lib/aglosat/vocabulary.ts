@@ -6,7 +6,8 @@ import type { Cecha, KategoriaUslugi, RodzajDaty, RodzajZrodla, Status, Wartosc 
 export const STATUS_LABEL: Record<Status, string> = {
   potwierdzone: "potwierdzone",
   otwarte_zrodlo: "z otwartego źródła",
-  zgloszone: "zgłoszone",
+  przyjete_zgloszenie: "zgłoszenie przyjęte przez urząd",
+  zgloszone: "zgłoszone, czeka na urząd",
   podejrzenie_obraz: "podejrzenie z obrazu",
   nieznane: "nieznane",
   sprzeczne: "sprzeczne",
