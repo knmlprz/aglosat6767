@@ -37,6 +37,23 @@ function policzLiczby(): LiczbyStrony {
         : null,
     dataNalotu: p.wycinki[0]?.dataObrazu ?? null,
     model: p.obserwacje.find((o) => !o.przykladowe && o.model)?.model ?? null,
+    ocena: (() => {
+      const o = p.ocenaModelu;
+      if (!o || o.zbior !== "testowy" || !o.n || o.trafnosc === null) return null;
+      const v1 = p.porownaniePromptow?.find((x) => x.wersjaPromptu === 1 && x.zbior === "testowy");
+      return {
+        model: o.model.replace(/^.*\//, "").replace("claude-sonnet-", "Claude Sonnet ").replace(/-/g, " "),
+        wersjaPromptu: o.wersjaPromptu ?? 0,
+        wycinki: Math.round(o.n / (o.osoby || 1)),
+        osoby: o.osoby ?? 1,
+        trafnosc: o.trafnosc,
+        zgodnoscLudzi: o.zgodnoscLudzi?.zgodnosc ?? null,
+        precyzjaCiagly: o.precyzjaCiagly ?? null,
+        grozne: o.grozne ?? 0,
+        pary: o.n,
+        trafnoscV1: v1?.trafnosc ?? null,
+      };
+    })(),
     sentinel:
       p.strefyZmian.length > 0 && p.strefyZmian.every((s) => !s.ilustracja)
         ? { strefy: p.strefyZmian.length, pary: `${p.strefyZmian[0].scenaPrzed.slice(0, 4)}→${p.strefyZmian[0].scenaPo.slice(0, 4)}` }
