@@ -47,6 +47,24 @@ export const PRZYPADKI: { przypadek: string; klasa: KlasaObrazu | "zalezy"; dlac
   { przypadek: "Zieleń: nie wiadomo, czy to trawnik, czy korony drzew nad chodnikiem", klasa: "niewidoczny", dlaczego: "„nie wiem” to pełnoprawna odpowiedź" },
 ];
 
+/**
+ * Przypadki z tabeli istotne dla typu odcinka z OSM (nie z odpowiedzi modelu), pokazywane przy wycinku.
+ * Indeksy w PRZYPADKI; drzewa i „nie wiem” dotyczą każdego wycinka.
+ */
+const PRZYPADKI_DLA_TYPU: Record<string, number[]> = {
+  przejscie: [1, 2, 4],
+  droga_osiedlowa: [0, 3, 4],
+  schody: [5],
+  sciezka: [6, 7, 8],
+  chodnik: [3, 7, 8],
+  ciag_pieszy: [6, 7, 8],
+};
+const ZAWSZE = [9, 12];
+
+export function przypadkiDlaTypu(typ: string): (typeof PRZYPADKI)[number][] {
+  return [...new Set([...(PRZYPADKI_DLA_TYPU[typ] ?? []), ...ZAWSZE])].map((i) => PRZYPADKI[i]);
+}
+
 export type EtykietaReczna = {
   klasa: KlasaObrazu;
   kiedy: string;

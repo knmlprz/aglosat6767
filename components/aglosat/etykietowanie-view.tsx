@@ -15,17 +15,20 @@ import {
   WERSJA_INSTRUKCJI,
   ZASADA,
   paryDoOceny,
+  przypadkiDlaTypu,
   zgodnoscLudzi,
   type PlikEtykiet,
 } from "@/lib/aglosat/etykiety.ts";
 import { lokalizacja } from "@/lib/aglosat/opis.ts";
-import { formatujWartosc } from "@/lib/aglosat/vocabulary.ts";
+import { TYP_LABEL, formatujWartosc } from "@/lib/aglosat/vocabulary.ts";
 import type { KlasaObrazu, Wycinek } from "@/lib/aglosat/types.ts";
 
 const PUSTY_ZBIOR = new Set<string>();
 const CEL = 40;
 /** Poniżej tylu sekund na wycinek ocena jest raczej zgadywaniem. */
 const ZA_SZYBKO_S = 4;
+/** Przez tyle sekund po pokazaniu wycinka nie da się go opisać: najpierw obejrzyj całą linię. */
+const BLOKADA_S = 3;
 
 /** Stała, wymieszana kolejność: żeby nie opisywać po kolei według rankingu. */
 function wymieszaj(lista: Wycinek[]): Wycinek[] {
@@ -95,12 +98,24 @@ export function EtykietowanieView() {
   const ludzie = useMemo(() => (plik ? zgodnoscLudzi(plik) : null), [plik]);
 
   const wycinek = kolejka[nr];
+
+  // Blokada po pokazaniu wycinka. Zegar tyka co 250 ms; początek blokady zapisujemy przy zmianie wycinka.
+  const [teraz, setTeraz] = useState(() => Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setTeraz(Date.now()), 250);
+    return () => clearInterval(t);
+  }, []);
+  const [pokazany, setPokazany] = useState<{ id: string; od: number } | null>(null);
+  if (wycinek && pokazany?.id !== wycinek.id) setPokazany({ id: wycinek.id, od: teraz });
+  const zostalo = pokazany ? Math.max(0, Math.ceil(BLOKADA_S - (teraz - pokazany.od) / 1000)) : BLOKADA_S;
+  const zablokowany = zostalo > 0;
   const opisane = kolejka.filter((w) => moje[w.id]).length;
   const sredniCzas = czasy.length >= 5 ? czasy.slice(-5).reduce((s, x) => s + x, 0) / 5 : null;
 
   const zapisz = useCallback(
     async (klasa: KlasaObrazu | null) => {
       if (!wycinek) return;
+      if (klasa && zablokowany) return;
       if (!osoba) {
         setBlad("Najpierw wpisz, kto opisuje.");
         return;
@@ -129,7 +144,7 @@ export function EtykietowanieView() {
         setNr((n) => Math.min(n + 1, kolejka.length - 1));
       }
     },
-    [wycinek, osoba, kolejka.length],
+    [wycinek, osoba, kolejka.length, zablokowany],
   );
 
   useEffect(() => {
@@ -258,13 +273,29 @@ export function EtykietowanieView() {
             Linia pokazuje, gdzie biegnie odcinek, ale zasłania wąskie ścieżki. Odznacz „pokaż przebieg z OSM” pod obrazem i
             oceń nawierzchnię bez linii.
           </p>
+          <div className="rounded-lg border border-slate-200 bg-white p-2">
+            <p className="text-xs font-semibold text-slate-700">
+              Odcinek w OSM: {TYP_LABEL[odcinek.typ] ?? odcinek.typ}. Przypadki z tabeli, które tu najczęściej pasują:
+            </p>
+            <ul className="mt-1 flex flex-col gap-0.5 text-xs text-slate-700">
+              {przypadkiDlaTypu(odcinek.typ).map((p) => (
+                <li key={p.przypadek}>
+                  {p.przypadek}: <strong>{p.klasa === "zalezy" ? "zależy" : formatujWartosc("ciaglosc", p.klasa)}</strong>
+                  {p.dlaczego ? ` (${p.dlaczego})` : ""}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <p className="text-xs text-slate-600" aria-live="polite">
+            {zablokowany ? `Obejrzyj całą linię, ocena za ${zostalo} s.` : "\u00a0"}
+          </p>
           <div className="flex flex-col gap-2">
             {KLASY_OBRAZU.map((k) => (
               <button
                 key={k.klasa}
                 type="button"
                 aria-pressed={obecna === k.klasa}
-                disabled={!osoba}
+                disabled={!osoba || zablokowany}
                 onClick={() => void zapisz(k.klasa)}
                 className={`flex items-start gap-3 rounded-xl border p-3 text-left disabled:opacity-50 ${
                   obecna === k.klasa ? "border-slate-900 bg-slate-900 text-white" : "border-slate-300 bg-white hover:bg-slate-50"
