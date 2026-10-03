@@ -54,6 +54,17 @@ export type StanCechy = {
 
 export type TypOdcinka = "chodnik" | "przejscie" | "schody" | "sciezka" | "ciag_pieszy" | "droga_osiedlowa";
 
+/** Tagi OSM way istotne dla dostępności; null, gdy tagu nie ma. */
+export type OsmDostepnosc = {
+  highway: string | null;
+  wheelchair: string | null;
+  incline: string | null;
+  surface: string | null;
+  smoothness: string | null;
+  kerb: string | null;
+  width: string | null;
+};
+
 export type Odcinek = {
   id: string;
   a: string; // węzeł początkowy
@@ -65,6 +76,8 @@ export type Odcinek = {
   nazwa?: string;
   /** Dowody z OSM i jawnych założeń. Obserwacje i weryfikacje dochodzą osobno. */
   dowody: Partial<Record<Cecha, Dowod[]>>;
+  /** Surowe tagi OSM way (highway, wheelchair, surface, smoothness, …). */
+  osm: OsmDostepnosc;
   /** Odcinek w strefie zmian Sentinel-2: dane mogą być nieaktualne. */
   strefaZmian?: string;
 };

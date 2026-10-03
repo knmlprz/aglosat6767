@@ -19,6 +19,7 @@ import {
   odmiana,
 } from "@/lib/aglosat/vocabulary.ts";
 import { STYL_MAPY, kategoriaMapy } from "@/lib/aglosat/styl.ts";
+import { DaneOsmOdcinka } from "@/components/aglosat/dane-osm-odcinka";
 
 const STATUS_KLASA: Record<Status, string> = {
   potwierdzone: "bg-emerald-100 text-emerald-900",
@@ -138,6 +139,8 @@ export function SzczegolyMiejsca({
           </p>
         </div>
       )}
+
+      <DaneOsmOdcinka osm={odc.osm} />
 
       {ocena.nieznane.length > 0 && (
         <div>

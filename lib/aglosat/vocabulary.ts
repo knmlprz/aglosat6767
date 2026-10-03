@@ -1,7 +1,7 @@
 // Słownik: te same słowa w aplikacji, na slajdach i w odpowiedziach na pytania.
 // Nie używamy „bariera” dla niepotwierdzonych, „trasa dostępna”, „mapa barier”.
 
-import type { Cecha, KategoriaUslugi, RodzajDaty, RodzajZrodla, Status, Wartosc } from "./types.ts";
+import type { Cecha, KategoriaUslugi, OsmDostepnosc, RodzajDaty, RodzajZrodla, Status, Wartosc } from "./types.ts";
 
 export const STATUS_LABEL: Record<Status, string> = {
   potwierdzone: "potwierdzone",
@@ -52,6 +52,50 @@ export const TRASA_LABEL = {
 
 export const ETYKIETA_PRZYKLADOWE = "dane przykładowe";
 export const ETYKIETA_ANALIZA_BAZOWA = "analiza bazowa, policzona wcześniej";
+
+export const OSM_DOSTEPNOSC_LABEL: Record<keyof OsmDostepnosc, string> = {
+  highway: "typ drogi (highway)",
+  wheelchair: "dostępność (wheelchair)",
+  incline: "nachylenie (incline)",
+  surface: "nawierzchnia (surface)",
+  smoothness: "gładkość (smoothness)",
+  kerb: "krawężnik (kerb)",
+  width: "szerokość (width)",
+};
+
+export const OSM_DOSTEPNOSC_POLA = Object.keys(OSM_DOSTEPNOSC_LABEL) as (keyof OsmDostepnosc)[];
+
+const WHEELCHAIR: Record<string, string> = {
+  yes: "przystosowane",
+  designated: "przystosowane (wyznaczone)",
+  limited: "częściowo przystosowane",
+  no: "nieprzystosowane",
+};
+
+/** Tag wheelchair z OSM w języku interfejsu. Brak tagu to „brak danych”, nigdy „przystosowane”. */
+export function opisWheelchair(w: string | null | undefined): string {
+  if (!w) return "brak danych w OSM";
+  return WHEELCHAIR[w] ?? w;
+}
+
+const INCLINE: Record<string, string> = {
+  up: "pod górę",
+  down: "z górki",
+  yes: "jest",
+  no: "płasko",
+};
+
+/** Tag incline z OSM w języku interfejsu, np. „5%”, „pod górę”. */
+export function opisIncline(i: string | null | undefined): string {
+  if (!i) return "brak danych w OSM";
+  const t = i.trim();
+  if (INCLINE[t]) return INCLINE[t];
+  const proc = t.match(/^(-?\d+(?:[.,]\d+)?)\s*%$/);
+  if (proc) return `${proc[1].replace(".", ",").replace(/^-/, "")}%${proc[1].startsWith("-") ? " (w dół)" : ""}`;
+  const st = t.match(/^(-?\d+(?:[.,]\d+)?)\s*°$/);
+  if (st) return `${st[1].replace(".", ",").replace(/^-/, "")}°${st[1].startsWith("-") ? " (w dół)" : ""}`;
+  return t;
+}
 
 export const TYP_LABEL: Record<string, string> = {
   chodnik: "chodnik",

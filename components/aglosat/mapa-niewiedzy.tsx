@@ -8,7 +8,7 @@ import L from "leaflet";
 import { MapContainer, TileLayer, ZoomControl, useMap } from "react-leaflet";
 import type { LatLon, Pilot } from "@/lib/aglosat/types.ts";
 import type { OcenaOdcinka } from "@/lib/aglosat/profile.ts";
-import { CECHA_LABEL, KATEGORIA_LABEL, TYP_LABEL } from "@/lib/aglosat/vocabulary.ts";
+import { CECHA_LABEL, KATEGORIA_LABEL, TYP_LABEL, opisIncline, opisWheelchair } from "@/lib/aglosat/vocabulary.ts";
 import { STYL_MAPY, kategoriaMapy, type KategoriaMapy } from "@/lib/aglosat/styl.ts";
 
 const ESRI_URL =
@@ -58,6 +58,19 @@ export type TrasaNaMapie = {
  */
 type ZRendererem = { renderer: L.Canvas };
 
+/** Wiersz podpowiedzi z tagiem wheelchair z OSM (dla odcinka albo wejścia do usługi). */
+function wierszWheelchair(etykieta: string, w: string | null | undefined): string {
+  return `<br>${etykieta}: <b>${opisWheelchair(w)}</b>`;
+}
+
+function wierszIncline(i: string | null | undefined): string {
+  return `<br>nachylenie: <b>${opisIncline(i)}</b>`;
+}
+
+function podpowiedzUslugi(u: Pilot["uslugi"][number], przedrostek = ""): string {
+  return `${przedrostek}<b>${u.nazwa}</b><br>${KATEGORIA_LABEL[u.kategoria]}${wierszWheelchair("wejście", u.wejscie?.wheelchair)}`;
+}
+
 function WarstwaOdcinkow({
   pilot,
   oceny,
@@ -98,7 +111,7 @@ function WarstwaOdcinkow({
       const nie = ocena.niespelnione.length ? `<br>nie spełnia: ${ocena.niespelnione.map((c) => CECHA_LABEL[c]).join(", ")}` : "";
       L.polyline(odc.geometria, { ...styl.linia, opacity: krycie(styl.linia.opacity), renderer })
         .bindTooltip(
-          `<b>${TYP_LABEL[odc.typ] ?? odc.typ}</b>${odc.nazwa ? ` · ${odc.nazwa}` : ""}<br>${styl.etykieta}${brak}${nie}<br>${Math.round(odc.dlugoscM)} m`,
+          `<b>${TYP_LABEL[odc.typ] ?? odc.typ}</b>${odc.nazwa ? ` · ${odc.nazwa}` : ""}<br>${styl.etykieta}${brak}${nie}${wierszWheelchair("wózek", odc.osm?.wheelchair)}${wierszIncline(odc.osm?.incline)}<br>${Math.round(odc.dlugoscM)} m`,
           { sticky: true },
         )
         .on("click", () => wybierz.current(odc.id))
@@ -126,7 +139,7 @@ function WarstwaOdcinkow({
         fillOpacity: krycie(1),
         renderer,
       })
-        .bindTooltip(`<b>${u.nazwa}</b><br>${KATEGORIA_LABEL[u.kategoria]}`)
+        .bindTooltip(podpowiedzUslugi(u))
         .addTo(inne);
     }
 
@@ -236,8 +249,11 @@ function WarstwaTrasy({ pilot, trasa, fokusTrasy, renderer }: Pick<Wspolne, "pil
     L.circleMarker(trasa.start, { radius: 8, color: "#0f172a", weight: 3, fillColor: "#ffffff", fillOpacity: 1, renderer })
       .bindTooltip("start: budynek mieszkalny")
       .addTo(grupa);
+    const usluga = pilot.uslugi.find(
+      (u) => Math.abs(u.lat - trasa.cel[0]) < 1e-6 && Math.abs(u.lon - trasa.cel[1]) < 1e-6,
+    );
     L.circleMarker(trasa.cel, { radius: 9, color: "#0f172a", weight: 3, fillColor: "#38bdf8", fillOpacity: 1, renderer })
-      .bindTooltip("cel: usługa")
+      .bindTooltip(usluga ? podpowiedzUslugi(usluga, "cel: ") : "cel: usługa")
       .addTo(grupa);
     grupa.addTo(map);
     return () => {
