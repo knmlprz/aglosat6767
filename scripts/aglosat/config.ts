@@ -40,4 +40,4 @@ export const PRZYKLADOWE = {
  * Model, którego wyniki trafiają do danych pilota (plik w data/aglosat/klasyfikacje/).
  * Porównujemy tylko wersje promptu tego samego modelu; bez wpisu: model z najnowszego kompletnego pliku.
  */
-export const KLASYFIKACJA: { dostawca: string; model: string } | null = null;
+export const KLASYFIKACJA: { dostawca: string; model: string } | null = { dostawca: "openrouter", model: "anthropic/claude-sonnet-5.5" };
