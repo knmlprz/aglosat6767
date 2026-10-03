@@ -58,22 +58,26 @@ export function EtykietowanieView() {
   // Kolejność ustalana raz dla osoby (przy wpisaniu imienia): najpierw wycinki, których jeszcze nie opisała.
   // Nie przeliczamy jej po każdej etykiecie, żeby bieżący wycinek nie „uciekał”.
   const [kolejnosc, setKolejnosc] = useState<string[] | null>(null);
-  const ulozKolejnosc = (dla: string, p: PlikEtykiet | null) => {
+  // Zakres: druga osoba może opisać tylko zbiór testowy (do zgodności między ludźmi i raportu).
+  const [zakres, setZakres] = useState<"wszystkie" | "testowy">("wszystkie");
+  const ulozKolejnosc = (dla: string, p: PlikEtykiet | null, z = zakres) => {
     if (!pilot) return;
     const opisane = new Set(
       Object.entries((dla && p?.osoby[dla]) || {})
         .filter(([, x]) => x.wersjaInstrukcji === WERSJA_INSTRUKCJI)
         .map(([id]) => id),
     );
-    const lista = wymieszaj(pilot.wycinki);
+    const lista = wymieszaj(pilot.wycinki.filter((w) => z === "wszystkie" || w.zbior === "testowy"));
     setKolejnosc([...lista.filter((w) => !opisane.has(w.id)), ...lista.filter((w) => opisane.has(w.id))].map((w) => w.id));
     setNr(0);
   };
   const kolejka = useMemo(() => {
     if (!pilot) return [];
     const wgId = new Map(pilot.wycinki.map((w) => [w.id, w]));
-    return kolejnosc ? kolejnosc.map((id) => wgId.get(id)!).filter(Boolean) : wymieszaj(pilot.wycinki);
-  }, [pilot, kolejnosc]);
+    return kolejnosc
+      ? kolejnosc.map((id) => wgId.get(id)!).filter(Boolean)
+      : wymieszaj(pilot.wycinki.filter((w) => zakres === "wszystkie" || w.zbior === "testowy"));
+  }, [pilot, kolejnosc, zakres]);
   // Model widział przebieg całego miejsca (np. przejście z wysepką), więc człowiek też.
   const miejsca = useMemo(() => new Map(pilot?.ranking.map((r) => [r.odcinekId, r.odcinki]) ?? []), [pilot]);
   const moje = useMemo(() => {
@@ -177,10 +181,34 @@ export function EtykietowanieView() {
             placeholder="np. Michał"
           />
         </label>
+        <fieldset className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-800">
+          <legend className="mb-1 font-medium">Zakres</legend>
+          {(
+            [
+              ["wszystkie", `wszystkie wycinki (${pilot.wycinki.length})`],
+              ["testowy", `tylko zbiór testowy (${pilot.wycinki.filter((w) => w.zbior === "testowy").length}), np. dla drugiej osoby`],
+            ] as const
+          ).map(([z, etykieta]) => (
+            <label key={z} className="flex items-center gap-2">
+              <input
+                type="radio"
+                name="zakres"
+                checked={zakres === z}
+                onChange={() => {
+                  setZakres(z);
+                  ulozKolejnosc(osoba, plik, z);
+                }}
+                className="accent-slate-900"
+              />
+              {etykieta}
+            </label>
+          ))}
+        </fieldset>
         {osoba && (
           <>
             <p className="text-sm font-semibold text-slate-800" aria-live="polite">
-              {osoba}: opisane {opisane} z {kolejka.length} (cel: co najmniej {CEL})
+              {osoba}: opisane {opisane} z {kolejka.length}
+              {zakres === "wszystkie" ? ` (cel: co najmniej ${CEL})` : " w zbiorze testowym"}
             </p>
             <div className="h-2 w-full max-w-md overflow-hidden rounded-full bg-slate-200" aria-hidden>
               <div className="h-full bg-slate-900" style={{ width: `${(100 * opisane) / kolejka.length}%` }} />
