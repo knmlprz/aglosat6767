@@ -11,14 +11,16 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import sharp from "sharp";
 import { ORTO } from "./config.ts";
-import { KLASY_OBRAZU } from "../../lib/aglosat/etykiety.ts";
+import { KLASY_OBRAZU, PRZYPADKI, ZASADA } from "../../lib/aglosat/etykiety.ts";
 import type { PilotZapisany } from "../../lib/aglosat/data.ts";
 import type { KlasaObrazu, LatLon, Wycinek } from "../../lib/aglosat/types.ts";
 
 const API = "https://api.groq.com/openai/v1";
 const MODEL = process.env.GROQ_MODEL ?? "qwen/qwen3.8-27b";
-const WERSJA_PROMPTU = 1;
-const PLIK = "data/aglosat/klasyfikacje-modelu.json";
+/** Wersja promptu: GROQ_PROMPT=1 odtwarza pierwszy przebieg. Każda wersja ma własny plik wyników. */
+const WERSJA_PROMPTU = Number(process.env.GROQ_PROMPT ?? 2);
+export const plikWersji = (v: number) => `data/aglosat/klasyfikacje-modelu-v${v}.json`;
+const PLIK = plikWersji(WERSJA_PROMPTU);
 const PRZERWA_MS = 2500;
 
 export type WynikModelu = { klasa: KlasaObrazu; ocena: number; uzasadnienie: string };
@@ -46,12 +48,33 @@ async function zapytaj(sciezka: string, body?: unknown): Promise<Response> {
   });
 }
 
-const PROMPT = `You are reviewing an aerial orthophoto (north up, ${ORTO.rozmiarPx}x${ORTO.rozmiarPx} px).
-A pedestrian path segment from OpenStreetMap is drawn on it as a dashed cyan line with a dark outline.
+const WSTEP = `You are reviewing an aerial orthophoto (north up, ${ORTO.rozmiarPx}x${ORTO.rozmiarPx} px).
+A pedestrian path segment from OpenStreetMap is drawn on it as a dashed cyan line with a dark outline.`;
+const FORMAT = `Answer with JSON only: {"klasa": "ciagly" | "przerwany" | "niewidoczny", "ocena": number from 0 to 1 (your confidence), "uzasadnienie": "one short sentence in Polish describing what you see along the line"}`;
+
+/** Prompty zamrożone: tekst v1 jest dokładnie tym, który dał pierwszy przebieg. */
+const PROMPTY: Record<number, string> = {
+  1: `${WSTEP}
 Judge ONLY the pedestrian surface along the drawn line, and choose exactly one class:
-${KLASY_OBRAZU.map((k) => `- "${k.klasa}": ${k.definicja}`).join("\n")}
+- "ciagly": Pas nawierzchni pieszej jest widoczny wzdłuż całej zaznaczonej linii, bez przerw.
+- "przerwany": Na zaznaczonej linii widać przerwę w nawierzchni: trawę, ziemię, ogrodzenie, rozkop albo koniec chodnika.
+- "niewidoczny": Większości przebiegu nie widać: zasłaniają go drzewa, cień albo dach budynku. Nie da się ocenić.
 (The class definitions are in Polish: "ciagly" = continuous, "przerwany" = interrupted, "niewidoczny" = not visible.)
-Answer with JSON only: {"klasa": "ciagly" | "przerwany" | "niewidoczny", "ocena": number from 0 to 1 (your confidence), "uzasadnienie": "one short sentence in Polish describing what you see along the line"}`;
+${FORMAT}`,
+  // v2: zasada i tabela przypadków spornych uzgodnione w zespole, te same co w instrukcji dla ludzi.
+  2: `${WSTEP}
+Question: is there one uninterrupted walkable strip along the drawn line, without a permanent obstacle?
+Rule (in Polish): ${ZASADA}
+Choose exactly one class:
+${KLASY_OBRAZU.map((k) => `- "${k.klasa}": ${k.definicja}`).join("\n")}
+Agreed rules for difficult cases (case → class, reason):
+${PRZYPADKI.map((p) => `- ${p.przypadek} → ${p.klasa === "zalezy" ? "zależy" : p.klasa}${p.dlaczego ? ` (${p.dlaczego})` : ""}`).join("\n")}
+Important: an asphalt road or a pedestrian crossing along the line counts as continuous. Green colour may be tree crowns above a sidewalk, not a lawn; if you cannot tell, answer "niewidoczny".
+(Classes: "ciagly" = continuous, "przerwany" = interrupted, "niewidoczny" = not visible.)
+${FORMAT}`,
+};
+const PROMPT = PROMPTY[WERSJA_PROMPTU];
+if (!PROMPT) throw new Error(`Nieznana wersja promptu: ${WERSJA_PROMPTU}`);
 
 /** Wycinek z narysowanym przebiegiem odcinków (jak nakładka w interfejsie). */
 async function obrazZPrzebiegiem(w: Wycinek, przebiegi: LatLon[][]): Promise<string> {

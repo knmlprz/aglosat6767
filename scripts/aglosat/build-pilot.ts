@@ -5,7 +5,7 @@
 // szerokość, nachylenie), budynki, usługi, ranking i mianownik policzone na tym grafie.
 // Co jest przykładowe (oznaczone polem przykladowe): obserwacje z obrazu, strefa zmian Sentinel-2.
 
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { OBSZAR, ORTO, PRZYKLADOWE } from "./config.ts";
 import type {
   Budynek, Dowod, KategoriaUslugi, LatLon, Obserwacja, Odcinek, Pilot, StrefaZmian, TypOdcinka, Usluga, Wycinek,
@@ -15,7 +15,7 @@ import { ocenWszystkie } from "../../lib/aglosat/routing.ts";
 import { policzAnalize } from "../../lib/aglosat/impact.ts";
 import { OPIS_ISTNIENIA_W_OSM, OPIS_ZALOZENIA_KRAWEZNIKA, zwinPilot, type PilotZapisany } from "../../lib/aglosat/data.ts";
 import type { PlikKlasyfikacji } from "./klasyfikuj.ts";
-import type { PlikEtykiet } from "../../lib/aglosat/etykiety.ts";
+import { paryDoOceny, wczytajEtykiety, zgodnoscLudzi } from "../../lib/aglosat/etykiety.ts";
 import { policzOcene } from "../../lib/aglosat/metryki.ts";
 
 type N = { id: number; lat: number; lon: number; tags?: Record<string, string> };
@@ -272,8 +272,15 @@ const uslugi: Usluga[] = uslugiSurowe
 
 // --- obserwacje z obrazu: wyniki modelu, a bez nich dane przykładowe -------------------------
 
-const PLIK_MODELU = "data/aglosat/klasyfikacje-modelu.json";
-const klasyfikacje = existsSync(PLIK_MODELU) ? (JSON.parse(readFileSync(PLIK_MODELU, "utf8")) as PlikKlasyfikacji) : null;
+// Wyniki każdej wersji promptu w osobnym pliku (klasyfikacje-modelu-vN.json; plik bez numeru to v1).
+const wersjeModelu = readdirSync("data/aglosat")
+  .map((f) => f.match(/^klasyfikacje-modelu(?:-v(\d+))?\.json$/))
+  .filter((m): m is RegExpMatchArray => !!m)
+  .map((m) => ({ wersja: Number(m[1] ?? 1), plik: JSON.parse(readFileSync(`data/aglosat/${m[0]}`, "utf8")) as PlikKlasyfikacji }))
+  .sort((a, b2) => a.wersja - b2.wersja);
+// Do danych pilota bierzemy najnowszą wersję, ale tylko kompletną (wszystkie wycinki); inaczej poprzednią.
+const kompletne = wersjeModelu.filter((w) => Object.keys(w.plik.wyniki).length >= 80);
+const klasyfikacje = (kompletne.at(-1) ?? wersjeModelu.at(-1))?.plik ?? null;
 const istniejace = new Set(odcinki.map((o) => o.id));
 const obserwacje: Obserwacja[] = [];
 
@@ -379,16 +386,17 @@ for (const o of obserwacje) {
 // --- ocena modelu na próbce opisanej ręcznie (strona /app/etykiety) ------------------------
 
 const PLIK_ETYKIET = "data/aglosat/etykiety-reczne.json";
-const etykiety = existsSync(PLIK_ETYKIET) ? (JSON.parse(readFileSync(PLIK_ETYKIET, "utf8")) as PlikEtykiet) : null;
-const ocenaModelu =
-  klasyfikacje && etykiety
-    ? policzOcene(
-        klasyfikacje.model,
-        Object.entries(etykiety.etykiety)
-          .filter(([id]) => klasyfikacje.wyniki[id])
-          .map(([id, e]) => ({ czlowiek: e.klasa, model: klasyfikacje.wyniki[id].klasa })),
-      )
-    : null;
+const etykiety = existsSync(PLIK_ETYKIET) ? wczytajEtykiety(JSON.parse(readFileSync(PLIK_ETYKIET, "utf8"))) : null;
+const ludzie = etykiety ? zgodnoscLudzi(etykiety) : undefined;
+// Wszystkie wersje promptu oceniane na tej samej próbce (etykiety według bieżącej instrukcji).
+const porownaniePromptow = etykiety
+  ? wersjeModelu.map((w) => ({
+      ...policzOcene(w.plik.model, paryDoOceny(etykiety, (id) => w.plik.wyniki[id]?.klasa)),
+      wersjaPromptu: w.wersja,
+      zgodnoscLudzi: ludzie,
+    }))
+  : [];
+const ocenaModelu = klasyfikacje ? (porownaniePromptow.find((o) => o.wersjaPromptu === klasyfikacje.wersjaPromptu) ?? null) : null;
 
 const pilot: Pilot = {
   meta: {
@@ -405,7 +413,7 @@ const pilot: Pilot = {
       "Ranking: analiza bazowa, policzona wcześniej dla profilu domyślnego.",
     ],
   },
-  wezly, odcinki, obserwacje, budynki, uslugi, strefyZmian, wycinki, ocenaModelu,
+  wezly, odcinki, obserwacje, budynki, uslugi, strefyZmian, wycinki, ocenaModelu, porownaniePromptow,
   ranking: analiza.ranking.slice(0, 200),
   mianownik: analiza.mianownik,
   kandydaci: analiza.kandydaci,
@@ -417,7 +425,11 @@ console.log(`odcinki: ${odcinki.length}, węzły: ${Object.keys(wezly).length}`)
 console.log(`przejezdne: ${licz((s) => s === "przejezdny")}, nieznane: ${licz((s) => s === "nieznany")}, nieprzejezdne: ${licz((s) => s === "nieprzejezdny")}`);
 console.log(`budynki: ${budynki.length} (kondygnacje przybliżone: ${budynki.filter((b) => b.kondygnacjePrzyblizone).length}), usługi: ${uslugi.length}`);
 console.log(`wycinki: ${wycinki.length}`);
-console.log(ocenaModelu ? `ocena modelu: n=${ocenaModelu.n}, trafność ${ocenaModelu.trafnosc}, precyzja „przerwany” ${ocenaModelu.precyzjaPrzerwany}, czułość ${ocenaModelu.czuloscPrzerwany}` : "ocena modelu: brak (potrzebne wyniki modelu i etykiety ręczne)");
+for (const o of porownaniePromptow) {
+  console.log(`ocena modelu ${o.model} prompt v${o.wersjaPromptu}: n=${o.n}, trafność ${o.trafnosc}, precyzja „przerwany” ${o.precyzjaPrzerwany}, czułość ${o.czuloscPrzerwany}, poprawne „niewidoczny” ${o.poprawneNiewidoczny}`);
+}
+if (ludzie) console.log(`zgodność ludzi: ${ludzie.zgodnosc} na ${ludzie.n} wycinkach`);
+console.log(`dane pilota: obserwacje z ${klasyfikacje ? `promptu v${klasyfikacje.wersjaPromptu}` : "danych przykładowych"}`);
 console.log(`obserwacje: ${obserwacje.length} (${klasyfikacje ? `model ${klasyfikacje.model}` : "przykładowe"}), strefy zmian: ${strefyZmian.length}, odcinki w strefie: ${odcinki.filter((o) => o.strefaZmian).length}`);
 console.log(`ranking: ${analiza.ranking.length} miejsc do kontroli z wpływem, kandydaci: ${analiza.kandydaci.length}, analiza ${Date.now() - t0} ms`);
 console.log("mianownik:", analiza.mianownik);

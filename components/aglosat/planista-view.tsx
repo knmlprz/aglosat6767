@@ -389,7 +389,9 @@ export function PlanistaView() {
 
       {pilot.obserwacje.some((o) => !o.przykladowe) && (
         <div className="grid gap-4 lg:grid-cols-2">
-          {pilot.ocenaModelu && pilot.ocenaModelu.n > 0 && <OcenaModeluKarta ocena={pilot.ocenaModelu} />}
+          {pilot.ocenaModelu && pilot.ocenaModelu.n > 0 && (
+            <OcenaModeluKarta ocena={pilot.ocenaModelu} porownanie={pilot.porownaniePromptow ?? []} />
+          )}
           <ModelKontraTeren obserwacje={pilot.obserwacje.filter((o) => !o.przykladowe)} weryfikacje={weryfikacje} />
         </div>
       )}

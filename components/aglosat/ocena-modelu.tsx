@@ -5,17 +5,43 @@
 import { KLASY, procent, type OcenaModelu } from "@/lib/aglosat/metryki.ts";
 import { formatujWartosc } from "@/lib/aglosat/vocabulary.ts";
 
-export function OcenaModeluKarta({ ocena, naZywo = false }: { ocena: OcenaModelu; naZywo?: boolean }) {
+export function OcenaModeluKarta({
+  ocena,
+  naZywo = false,
+  porownanie = [],
+}: {
+  ocena: OcenaModelu;
+  naZywo?: boolean;
+  /** Ta sama próbka dla wszystkich wersji promptu. */
+  porownanie?: OcenaModelu[];
+}) {
   return (
     <section aria-labelledby="ocena-modelu-tytul" className="rounded-2xl border border-slate-200 bg-white p-4">
       <h3 id="ocena-modelu-tytul" className="text-sm font-bold text-slate-800">
         Jak często model się myli
       </h3>
       <p className="mt-1 text-xs text-slate-600">
-        Model {ocena.model} kontra człowiek na {ocena.n} {ocena.n === 1 ? "wycinku" : "wycinkach"}
+        Model {ocena.model}
+        {ocena.wersjaPromptu ? ` (prompt v${ocena.wersjaPromptu})` : ""} kontra człowiek na {ocena.n} {ocena.n === 1 ? "wycinku" : "wycinkach"}
         {naZywo ? " (liczone na żywo z bieżących etykiet)" : " opisanych ręcznie"}. Zgodność z obrazem to nie to samo co stan w
         terenie: rozstrzyga kontrola.
       </p>
+      {(porownanie.length > 1 || !!ocena.zgodnoscLudzi?.n) && (
+        <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-700">
+          {porownanie.length > 1 &&
+            porownanie.map((p) => (
+              <li key={p.wersjaPromptu}>
+                prompt v{p.wersjaPromptu}: trafność <strong>{procent(p.trafnosc)}</strong>, precyzja „przerwany”{" "}
+                {procent(p.precyzjaPrzerwany)}
+              </li>
+            ))}
+          {ocena.zgodnoscLudzi && ocena.zgodnoscLudzi.n > 0 && (
+            <li>
+              zgodność dwóch osób: <strong>{procent(ocena.zgodnoscLudzi.zgodnosc)}</strong> na {ocena.zgodnoscLudzi.n} wycinkach
+            </li>
+          )}
+        </ul>
+      )}
       {ocena.n === 0 ? (
         <p className="mt-2 text-sm text-slate-700">Brak wycinków opisanych przez człowieka.</p>
       ) : (

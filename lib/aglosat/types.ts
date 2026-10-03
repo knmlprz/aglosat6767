@@ -195,6 +195,8 @@ export type Pilot = {
   wycinki: Wycinek[];
   /** Porównanie modelu z próbką opisaną ręcznie; null, gdy brak wyników modelu lub etykiet. */
   ocenaModelu?: import("./metryki.ts").OcenaModelu | null;
+  /** Ta sama próbka dla każdej wersji promptu: „przed i po” poprawce. */
+  porownaniePromptow?: import("./metryki.ts").OcenaModelu[];
   /** Analiza bazowa: policzona przez skrypt, nie przeliczana na żywo. */
   ranking: WynikWplywu[];
   mianownik: {

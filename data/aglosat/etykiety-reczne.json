@@ -1,45 +1,423 @@
 {
-  "opis": "Ręczne etykiety wycinków ortofotomapy (próbka referencyjna). Klucz: identyfikator wycinka.",
-  "etykiety": {
-    "w_s1157054648_2723": {
-      "klasa": "ciagly",
-      "kiedy": "2026-10-03T20:36:06.141Z"
-    },
-    "w_s1163307025_2728": {
-      "klasa": "przerwany",
-      "kiedy": "2026-10-03T20:36:40.808Z"
-    },
-    "w_s128505080_523": {
-      "klasa": "ciagly",
-      "kiedy": "2026-10-03T20:36:21.912Z"
-    },
-    "w_s1333426188_3324": {
-      "klasa": "ciagly",
-      "kiedy": "2026-10-03T20:36:23.777Z"
-    },
-    "w_s1364486601_3929": {
-      "klasa": "ciagly",
-      "kiedy": "2026-10-03T20:36:22.019Z"
-    },
-    "w_s1413962211_4238": {
-      "klasa": "przerwany",
-      "kiedy": "2026-10-03T20:36:17.645Z"
-    },
-    "w_s1413962405_4247": {
-      "klasa": "niewidoczny",
-      "kiedy": "2026-10-03T20:36:20.212Z"
-    },
-    "w_s1420061428_4431": {
-      "klasa": "przerwany",
-      "kiedy": "2026-10-03T20:36:34.797Z"
-    },
-    "w_s300509969_1003": {
-      "klasa": "ciagly",
-      "kiedy": "2026-10-03T20:36:11.477Z"
-    },
-    "w_s970756713_2069": {
-      "klasa": "przerwany",
-      "kiedy": "2026-10-03T20:36:32.805Z"
+  "opis": "Ręczne etykiety wycinków ortofotomapy (próbka referencyjna). osoby → identyfikator wycinka → etykieta.",
+  "wersjaFormatu": 2,
+  "osoby": {
+    "bez imienia": {
+      "w_s107575312_110": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:57:15.523Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s107637004_136": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:58:09.688Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s107637025_160": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:57:04.408Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1127918859_2662": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:57:27.458Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1157054648_2723": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:54:36.326Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1163307025_2728": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:55:02.793Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1169593660_2744": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:56:33.374Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1182209816_2748": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:57:38.725Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1229753784_2843": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:56:29.059Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1270624765_2991": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:55:08.507Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1282401951_3024": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:58:20.358Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1282401958_3028": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:56:06.040Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s128447588_373": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:56:18.108Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s128447590_393": {
+        "klasa": "niewidoczny",
+        "kiedy": "2026-10-03T20:57:58.141Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s128504981_409": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:57:31.193Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s128505019_441": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:56:19.392Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s128505070_505": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:58:13.424Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s128505080_523": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:54:48.676Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s128614883_586": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:56:49.591Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1286404732_3038": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:56:10.924Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1287298904_3066": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:56:37.291Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s128986774_663": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:55:58.142Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1308888826_3175": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:56:38.673Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1333419929_3263": {
+        "klasa": "niewidoczny",
+        "kiedy": "2026-10-03T20:57:01.170Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1333426153_3290": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:56:30.292Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1333426185_3321": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:57:45.625Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1333426188_3324": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:54:59.092Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1333426190_3327": {
+        "klasa": "niewidoczny",
+        "kiedy": "2026-10-03T20:56:01.659Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1338573503_3349": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:55:34.940Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1338573503_3350": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:55:42.243Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1338723143_3365": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:56:59.991Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1353023854_3403": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:57:39.758Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1355357746_3456": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:58:15.191Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1356385271_3469": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:55:06.609Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1359849741_3547": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:58:17.974Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1359849744_3552": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:55:30.476Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1359849747_3557": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:58:12.475Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1359849748_3559": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:56:27.291Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1360628824_3687": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:58:03.941Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1360885960_3694": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:58:08.209Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1360885988_3696": {
+        "klasa": "niewidoczny",
+        "kiedy": "2026-10-03T20:57:59.325Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1361674993_3741": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:56:16.859Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1363144949_3801": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:57:06.541Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1364260390_3848": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:57:37.324Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1364486601_3929": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:54:54.309Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1364490252_3994": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:58:14.373Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1364574972_4003": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:55:10.242Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1413962211_4238": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:54:43.388Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1413962405_4247": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:54:46.209Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1418177933_4346": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:57:32.741Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1418889240_4380": {
+        "klasa": "niewidoczny",
+        "kiedy": "2026-10-03T20:56:31.723Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1418889242_4383": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:57:35.926Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1420061428_4431": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:55:01.539Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1434813379_4470": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:57:49.541Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1459204499_4563": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:56:09.459Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1468667523_4603": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:58:19.056Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1468667530_4606": {
+        "klasa": "niewidoczny",
+        "kiedy": "2026-10-03T20:57:09.374Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1468667532_4609": {
+        "klasa": "niewidoczny",
+        "kiedy": "2026-10-03T20:55:48.759Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1523981154_4719": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:57:34.324Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s1543139949_4736": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:57:26.174Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s186239828_753": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:57:23.508Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s228553204_805": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:56:54.592Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s232470220_850": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:56:58.190Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s232470221_854": {
+        "klasa": "niewidoczny",
+        "kiedy": "2026-10-03T20:55:36.558Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s300114914_986": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:55:25.176Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s300509968_1001": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:56:24.492Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s300509969_1003": {
+        "klasa": "niewidoczny",
+        "kiedy": "2026-10-03T20:54:41.308Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s300509970_1004": {
+        "klasa": "niewidoczny",
+        "kiedy": "2026-10-03T20:57:17.791Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s300509977_1013": {
+        "klasa": "niewidoczny",
+        "kiedy": "2026-10-03T20:57:02.793Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s376133680_1092": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:57:16.625Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s552402693_1130": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:57:22.457Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s887197405_1267": {
+        "klasa": "niewidoczny",
+        "kiedy": "2026-10-03T20:55:40.608Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s907785966_1287": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:57:53.273Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s944367545_1476": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:57:21.423Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s957870842_1651": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:57:43.923Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s957870880_1708": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:55:32.921Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s964100280_1801": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:55:59.675Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s969876369_2045": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:58:16.340Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s969876369_2046": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:58:17.142Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s970756713_2069": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:55:00.492Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s993165382_2243": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:57:28.675Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s993165389_2255": {
+        "klasa": "ciagly",
+        "kiedy": "2026-10-03T20:56:20.726Z",
+        "wersjaInstrukcji": 1
+      },
+      "w_s993165419_2300": {
+        "klasa": "przerwany",
+        "kiedy": "2026-10-03T20:56:44.326Z",
+        "wersjaInstrukcji": 1
+      }
     }
   }
 }
