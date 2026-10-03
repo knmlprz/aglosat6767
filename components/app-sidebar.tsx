@@ -24,6 +24,7 @@ import {
   Settings2Icon,
   CircleHelpIcon,
   ListChecksIcon,
+  RouteIcon,
 } from "lucide-react"
 
 const data = {
@@ -34,6 +35,7 @@ const data = {
   },
   navMain: [
     { title: "Planista", url: "/app/planista", icon: <ListChecksIcon /> },
+    { title: "Mieszkaniec", url: "/app/mieszkaniec", icon: <RouteIcon /> },
     { title: "Panel główny", url: "/app", icon: <HomeIcon /> },
     { title: "Mapa", url: "/app#mapa", icon: <MapIcon /> },
   ],
