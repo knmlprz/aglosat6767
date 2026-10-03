@@ -7,13 +7,13 @@
 
 import { useCallback, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
-import { usePilot } from "@/lib/aglosat/use-pilot.ts";
 import { ocenWszystkie, trasyRelacji, zbudujGraf } from "@/lib/aglosat/routing.ts";
 import { PROFIL_DOMYSLNY } from "@/lib/aglosat/profile.ts";
 import { ETYKIETA_ANALIZA_BAZOWA, ETYKIETA_PRZYKLADOWE } from "@/lib/aglosat/vocabulary.ts";
 import { KOLEJNOSC_KATEGORII, STYL_MAPY, kategoriaMapy, type KategoriaMapy } from "@/lib/aglosat/styl.ts";
-import type { Weryfikacja, WynikWplywu } from "@/lib/aglosat/types.ts";
+import type { WynikWplywu } from "@/lib/aglosat/types.ts";
 import { idWpisu } from "@/lib/aglosat/weryfikacja.ts";
+import { useAglosat } from "@/components/aglosat/stan-aglosat";
 import { lokalizacja } from "@/lib/aglosat/opis.ts";
 import { TrasaRelacji, type Relacja } from "@/components/aglosat/trasa-relacji";
 import { RankingLista } from "@/components/aglosat/ranking-lista";
@@ -32,12 +32,11 @@ const MapaNiewiedzy = dynamic(
 const procent = (a: number, b: number) => `${Math.round((100 * a) / Math.max(b, 1))}%`;
 
 export function PlanistaView() {
-  const wczytanie = usePilot();
+  const { wczytanie, weryfikacje, dodajKontrole, cofnijKontrole, przywroc } = useAglosat();
   const profil = PROFIL_DOMYSLNY;
   const [widoczne, setWidoczne] = useState<Set<KategoriaMapy>>(() => new Set(KOLEJNOSC_KATEGORII));
   const [wybranyOdcinek, setWybranyOdcinek] = useState<string | null>(null);
   const wybierz = useCallback((id: string) => setWybranyOdcinek(id), []);
-  const [weryfikacje, setWeryfikacje] = useState<Weryfikacja[]>([]);
   const [wybranaRelacja, setRelacja] = useState<Relacja | null>(null);
   const [fokusTrasy, setFokusTrasy] = useState(0);
 
@@ -87,11 +86,7 @@ export function PlanistaView() {
     [trasy, punkty],
   );
   const sprawdzone = useMemo(() => new Set(weryfikacje.map((w) => w.odcinekId)), [weryfikacje]);
-  const dodajKontrole = useCallback((w: Weryfikacja[]) => setWeryfikacje((prev) => [...prev, ...w]), []);
-  const cofnijKontrole = useCallback(
-    (id: string) => setWeryfikacje((prev) => prev.filter((w) => idWpisu(w) !== id)),
-    [],
-  );
+
   const podsumowanie = useMemo(() => {
     if (!pilot || !oceny) return null;
     const wynik = Object.fromEntries(KOLEJNOSC_KATEGORII.map((k) => [k, { liczba: 0, metry: 0 }])) as Record<
@@ -200,7 +195,7 @@ export function PlanistaView() {
           }}
           onWybierzOdcinek={wybierz}
           onPokazNaMapie={() => setFokusTrasy((f) => f + 1)}
-          onPrzywroc={() => setWeryfikacje([])}
+          onPrzywroc={przywroc}
         />
       )}
 
