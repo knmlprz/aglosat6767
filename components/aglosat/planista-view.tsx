@@ -35,17 +35,18 @@ const MapaNiewiedzy = dynamic(
 const procent = (a: number, b: number) => `${Math.round((100 * a) / Math.max(b, 1))}%`;
 
 export function PlanistaView() {
-  const { wczytanie, weryfikacje, dodajKontrole, cofnijKontrole, przywroc } = useAglosat();
+  const { wczytanie, weryfikacje, dodajKontrole, cofnijKontrole, przywroc, zadanie } = useAglosat();
   const profil = PROFIL_DOMYSLNY;
   const [widoczne, setWidoczne] = useState<Set<KategoriaMapy>>(() => new Set(KOLEJNOSC_KATEGORII));
-  const [wybranyOdcinek, setWybranyOdcinek] = useState<string | null>(null);
+  // Stan początkowy może narzucić tryb demo (czytany tylko przy montowaniu).
+  const [wybranyOdcinek, setWybranyOdcinek] = useState<string | null>(() => zadanie?.wybierz ?? null);
   const wybierz = useCallback((id: string) => setWybranyOdcinek(id), []);
   const [wybranaRelacja, setRelacja] = useState<Relacja | null>(null);
   const [fokusTrasy, setFokusTrasy] = useState(0);
-  const [zakladka, setZakladka] = useState<"ranking" | "kontrola">("ranking");
+  const [zakladka, setZakladka] = useState<"ranking" | "kontrola">(() => zadanie?.zakladka ?? "ranking");
   // Mapa pokazuje albo dojście, albo trasę kontroli, żeby linie się nie nakładały.
-  const [pokazKontrole, setPokazKontrole] = useState(false);
-  const [fokusKontroli, setFokusKontroli] = useState(0);
+  const [pokazKontrole, setPokazKontrole] = useState(() => zadanie?.pokazKontrole ?? false);
+  const [fokusKontroli, setFokusKontroli] = useState(() => (zadanie?.pokazKontrole ? 1 : 0));
   const [ustawieniaKontroli, setUstawieniaKontroli] = useState<UstawieniaKontroli | null>(null);
 
   const pilot = wczytanie.stan === "gotowe" ? wczytanie.pilot : null;
@@ -181,7 +182,7 @@ export function PlanistaView() {
     });
 
   return (
-    <div className="flex flex-col gap-6 px-4 lg:px-6 pb-12">
+    <div className="flex flex-col gap-6 px-4 lg:px-6 pb-40">
       <header className="flex flex-col gap-2">
         <p className="text-sm font-medium text-slate-500">{pilot.meta.obszar.nazwa}</p>
         <h2 className="text-2xl font-black text-slate-900">Mapa niewiedzy</h2>

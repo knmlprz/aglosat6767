@@ -106,7 +106,7 @@ export function MieszkaniecView() {
     trasy.udokumentowana && trasy.weryfikacji ? trasy.udokumentowana.dlugoscM - trasy.weryfikacji.dlugoscM : null;
 
   return (
-    <div className="flex flex-col gap-6 px-4 pb-12 lg:px-6">
+    <div className="flex flex-col gap-6 px-4 pb-40 lg:px-6">
       <header>
         <p className="text-sm font-medium text-slate-500">{pilot.meta.obszar.nazwa}</p>
         <h2 className="text-2xl font-black text-slate-900">Czy dojadę i na ile to pewne?</h2>
