@@ -205,6 +205,10 @@ export function EtykietowanieView() {
             Twoja ocena
           </h3>
           <p className="text-sm text-slate-700">{ZASADA}</p>
+          <p className="rounded-lg bg-cyan-50 p-2 text-sm text-cyan-950">
+            Linia pokazuje, gdzie biegnie odcinek, ale zasłania wąskie ścieżki. Odznacz „pokaż przebieg z OSM” pod obrazem i
+            oceń nawierzchnię bez linii.
+          </p>
           <div className="flex flex-col gap-2">
             {KLASY_OBRAZU.map((k) => (
               <button

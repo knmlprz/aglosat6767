@@ -1,8 +1,9 @@
 // Klasyfikacja wycinków ortofotomapy modelem wizyjnym (Groq albo OpenRouter, API zgodne z OpenAI).
-// Uruchomienie: npm run aglosat:klasyfikuj -- [--dostawca groq|openrouter] [--model ID] [--prompt 1|2]
+// Uruchomienie: npm run aglosat:klasyfikuj -- [--dostawca groq|openrouter] [--model ID] [--prompt 1|2|3]
 //   --modele    lista modeli z obsługą obrazów dla klucza
 //   --podglad   zapisuje wejście modelu dla 3 wycinków, bez API
 //   --limit N   tylko pierwsze N wycinków (próba modelu)
+//   --tylko ID,ID  tylko wskazane wycinki
 //   --od-nowa   klasyfikuje wszystko jeszcze raz
 // Klucze: GROQ_API_KEY / OPENROUTER_API_KEY w zmiennej środowiskowej albo w .env.local (nie trafia do repo).
 // Wyniki: data/aglosat/klasyfikacje/<dostawca>__<model>__v<prompt>.json; demo działa bez klucza.
@@ -89,8 +90,28 @@ Important: an asphalt road or a pedestrian crossing along the line counts as con
 (Classes: "ciagly" = continuous, "przerwany" = interrupted, "niewidoczny" = not visible.)
 ${FORMAT}`,
 };
+// v3: te same zasady co v2, ale dwa obrazy. Nakładka z linią zasłaniała wąskie ścieżki,
+// o które pytamy (fałszywe „przerwany” na trawniku), więc nawierzchnię model ocenia na obrazie bez linii.
+PROMPTY[3] = PROMPTY[2].replace(
+  WSTEP,
+  `You get TWO images of the same place, an aerial orthophoto (north up, ${ORTO.rozmiarPx}x${ORTO.rozmiarPx} px).
+IMAGE 1 is the raw orthophoto. IMAGE 2 is the same image with a pedestrian path segment from OpenStreetMap drawn as a dashed cyan line with a dark outline.
+Use IMAGE 2 ONLY to locate where the path runs. Judge the surface along that path in IMAGE 1: the drawn line in IMAGE 2 covers narrow paths, so never conclude "grass" or "no path" from IMAGE 2.`,
+);
+/** Od v3 model dostaje obraz surowy i obraz z przebiegiem. */
+const DWA_OBRAZY = WERSJA_PROMPTU >= 3;
 const PROMPT = PROMPTY[WERSJA_PROMPTU];
 if (!PROMPT) throw new Error(`Nieznana wersja promptu: ${WERSJA_PROMPTU}`);
+
+async function obrazSurowy(w: Wycinek): Promise<string> {
+  return `data:image/jpeg;base64,${readFileSync(`public${w.plik}`).toString("base64")}`;
+}
+
+/** Wejście modelu: od v3 obraz surowy i obraz z przebiegiem, wcześniej tylko z przebiegiem. */
+async function wejscie(w: Wycinek, przebiegi: LatLon[][]): Promise<string[]> {
+  const zLinia = await obrazZPrzebiegiem(w, przebiegi);
+  return DWA_OBRAZY ? [await obrazSurowy(w), zLinia] : [zLinia];
+}
 
 /** Wycinek z narysowanym przebiegiem odcinków (jak nakładka w interfejsie). */
 async function obrazZPrzebiegiem(w: Wycinek, przebiegi: LatLon[][]): Promise<string> {
@@ -118,7 +139,7 @@ function sprawdzOdpowiedz(tekst: string): WynikModelu {
 
 let trybJson = true;
 
-async function klasyfikuj(obraz: string): Promise<WynikModelu> {
+async function klasyfikuj(obrazy: string[]): Promise<WynikModelu> {
   for (let proba = 1; proba <= 4; proba++) {
     const res = await zapytaj("/chat/completions", {
       model: MODEL,
@@ -126,7 +147,12 @@ async function klasyfikuj(obraz: string): Promise<WynikModelu> {
       // Modele z rozumowaniem zużywają część limitu na myślenie, więc zapas jest większy.
       max_tokens: DOSTAWCA === "openrouter" ? 2000 : 300,
       ...(trybJson ? { response_format: { type: "json_object" } } : {}),
-      messages: [{ role: "user", content: [{ type: "text", text: PROMPT }, { type: "image_url", image_url: { url: obraz } }] }],
+      messages: [
+        {
+          role: "user",
+          content: [{ type: "text", text: PROMPT }, ...obrazy.map((url) => ({ type: "image_url", image_url: { url } }))],
+        },
+      ],
     });
     if (res.status === 400 && trybJson) {
       // Nie każdy model obsługuje tryb JSON; odpowiedź i tak sprawdzamy sami.
@@ -196,7 +222,10 @@ if (process.argv.includes("--podglad")) {
 }
 
 const limit = Number(arg("--limit"));
-const doZrobienia = pilot.wycinki.filter((w) => !plik.wyniki[w.id]).slice(0, limit > 0 ? limit : undefined);
+const tylko = arg("--tylko")?.split(",");
+const doZrobienia = pilot.wycinki
+  .filter((w) => !plik.wyniki[w.id] && (!tylko || tylko.includes(w.id)))
+  .slice(0, limit > 0 ? limit : undefined);
 console.log(`${DOSTAWCA} / ${MODEL} / prompt v${WERSJA_PROMPTU}; wycinki: ${pilot.wycinki.length}, do klasyfikacji: ${doZrobienia.length}`);
 mkdirSync(KATALOG, { recursive: true });
 const zapisz = () => {
@@ -212,7 +241,7 @@ await Promise.all(
     for (let w = kolejka.shift(); w; w = kolejka.shift()) {
       const przebiegi = (miejsca.get(w.odcinekId) ?? [w.odcinekId]).map((id) => odcinki.get(id)!.geometria);
       try {
-        const r = await klasyfikuj(await obrazZPrzebiegiem(w, przebiegi));
+        const r = await klasyfikuj(await wejscie(w, przebiegi));
         plik.wyniki[w.id] = r;
         console.log(`  ${++gotowe}/${doZrobienia.length} ${w.id}: ${r.klasa} (${r.ocena}) ${r.uzasadnienie}`);
       } catch (e) {
