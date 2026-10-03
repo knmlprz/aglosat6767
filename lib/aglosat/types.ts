@@ -193,6 +193,8 @@ export type Pilot = {
     pieszoM: number;
     weryfikacjiM: number | null;
     udokumentowanaM: number | null;
+    /** Długość trasy, gdy niewiadome okażą się barierą; null = brak trasy. */
+    gdyBarieraM: number | null;
     niewiadome: string[];
   }[];
 };

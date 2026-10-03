@@ -8,6 +8,8 @@ import { dijkstra, sciezka, trasyRelacji, zbudujGraf, type Drzewo } from "./rout
 
 /** Dalej niż tyle metrów nie liczymy relacji budynek–usługa. */
 export const MAX_DOJSCIE_M = 1200;
+/** Skrajny przypadek ma być krótkim dojściem pieszo. */
+const MAX_PIESZO_KANDYDATA_M = 500;
 
 type Relacja = {
   budynek: Budynek;
@@ -73,21 +75,26 @@ export function policzAnalize(
       }
     }
 
-    // Kandydaci na skrajny przypadek: blisko pieszo, a trasy udokumentowanej brak albo jest dużo dłuższa.
+    // Kandydaci na skrajny przypadek: blisko pieszo, trasy udokumentowanej brak albo jest dużo dłuższa,
+    // a niewiadoma po drodze rozstrzyga o dojściu (jako bariera odbiera trasę albo wydłuża ją o 30%+).
     for (const u of uslugi) {
       if (u.kategoria !== "przychodnia" && u.kategoria !== "apteka") continue;
       const dp = piesze.dlugosc.get(u.wezel);
-      if (dp === undefined || dp < 80 || dp > 400) continue;
+      if (dp === undefined || dp < 80 || dp > MAX_PIESZO_KANDYDATA_M) continue;
       const dd = dok.dlugosc.get(u.wezel);
       if (dd !== undefined && dd < 2 * dp) continue;
       const t = trasyRelacji(graf, oceny, b.wezel, u.wezel);
       if (!t.weryfikacji || t.weryfikacji.niewiadome.length === 0 || t.weryfikacji.niewiadome.length > 2) continue;
+      const bariery = new Set(t.weryfikacji.niewiadome);
+      const gdyBariera = dijkstra(graf, b.wezel, { dopusc: (id) => !bariery.has(id) && dopuscWer(id) }).dlugosc.get(u.wezel);
+      if (gdyBariera !== undefined && gdyBariera < 1.3 * t.weryfikacji.dlugoscM) continue;
       kandydaci.push({
         budynekId: b.id,
         uslugaId: u.id,
         pieszoM: Math.round(dp),
         weryfikacjiM: Math.round(t.weryfikacji.dlugoscM),
         udokumentowanaM: t.udokumentowana ? Math.round(t.udokumentowana.dlugoscM) : null,
+        gdyBarieraM: gdyBariera === undefined ? null : Math.round(gdyBariera),
         niewiadome: t.weryfikacji.niewiadome,
       });
     }
@@ -163,8 +170,19 @@ export function policzAnalize(
   }
   ranking.sort((x, y) => y.wynik - x.wynik);
 
+  // Najpierw usługi z wejściem dostępnym według OSM, potem bez danych, na końcu wheelchair=no:
+  // dojście do drzwi, przez które nie da się wjechać, nie jest dobrym przykładem. Potem przypadki,
+  // w których bariera odbiera trasę całkowicie, potem skala budynku.
   const wagaBud = new Map(budynki.map((b) => [b.id, b.waga]));
-  kandydaci.sort((x, y) => (wagaBud.get(y.budynekId)! - wagaBud.get(x.budynekId)!) || x.pieszoM - y.pieszoM);
+  const wejscie = new Map(uslugi.map((u) => [u.id, u.wejscie?.wheelchair]));
+  const rangaWejscia = (id: string) => ({ yes: 0, limited: 1, no: 3 })[wejscie.get(id) ?? ""] ?? 2;
+  kandydaci.sort(
+    (x, y) =>
+      rangaWejscia(x.uslugaId) - rangaWejscia(y.uslugaId) ||
+      Number(x.gdyBarieraM !== null) - Number(y.gdyBarieraM !== null) ||
+      wagaBud.get(y.budynekId)! - wagaBud.get(x.budynekId)! ||
+      x.pieszoM - y.pieszoM,
+  );
 
   return { ranking, mianownik, kandydaci: kandydaci.slice(0, 20) };
 }
