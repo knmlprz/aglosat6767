@@ -18,6 +18,9 @@ const ESRI_ATTR = "Podkład: Esri World Imagery; sieć piesza: © współtwórcy
 /** Użytkownik prosi o ograniczenie ruchu: mapa przeskakuje zamiast przelatywać. */
 const ograniczRuch = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+/** Gdy na mapie leży trasa, cała sieć schodzi do tła: inaczej mgła i linie zagłuszają jej przebieg. */
+const PRZYGASZENIE = 0.3;
+
 type Wspolne = {
   pilot: Pilot;
   oceny: Map<string, OcenaOdcinka>;
@@ -60,8 +63,9 @@ function WarstwaOdcinkow({
   oceny,
   widoczne,
   onWybierz,
+  przygasz,
   renderer,
-}: Pick<Wspolne, "pilot" | "oceny" | "widoczne" | "onWybierz"> & ZRendererem) {
+}: Pick<Wspolne, "pilot" | "oceny" | "widoczne" | "onWybierz"> & { przygasz: boolean } & ZRendererem) {
   const map = useMap();
   // Callback w refie: zmiana funkcji rodzica nie przebudowuje 4,7 tys. linii.
   const wybierz = useRef(onWybierz);
@@ -73,6 +77,7 @@ function WarstwaOdcinkow({
     const mgla = L.layerGroup();
     const linie = L.layerGroup();
     const inne = L.layerGroup();
+    const krycie = (o: number) => (przygasz ? o * PRZYGASZENIE : o);
 
     for (const odc of pilot.odcinki) {
       const ocena = oceny.get(odc.id);
@@ -81,11 +86,17 @@ function WarstwaOdcinkow({
       if (!widoczne.has(kat)) continue;
       const styl = STYL_MAPY[kat];
       if (styl.mgla) {
-        L.polyline(odc.geometria, { ...styl.mgla, renderer, interactive: false, lineCap: "round" }).addTo(mgla);
+        L.polyline(odc.geometria, {
+          ...styl.mgla,
+          opacity: krycie(styl.mgla.opacity),
+          renderer,
+          interactive: false,
+          lineCap: "round",
+        }).addTo(mgla);
       }
       const brak = ocena.nieznane.length ? `<br>brakuje: ${ocena.nieznane.map((c) => CECHA_LABEL[c]).join(", ")}` : "";
       const nie = ocena.niespelnione.length ? `<br>nie spełnia: ${ocena.niespelnione.map((c) => CECHA_LABEL[c]).join(", ")}` : "";
-      L.polyline(odc.geometria, { ...styl.linia, renderer })
+      L.polyline(odc.geometria, { ...styl.linia, opacity: krycie(styl.linia.opacity), renderer })
         .bindTooltip(
           `<b>${TYP_LABEL[odc.typ] ?? odc.typ}</b>${odc.nazwa ? ` · ${odc.nazwa}` : ""}<br>${styl.etykieta}${brak}${nie}<br>${Math.round(odc.dlugoscM)} m`,
           { sticky: true },
@@ -95,16 +106,24 @@ function WarstwaOdcinkow({
     }
 
     for (const s of pilot.strefyZmian) {
-      L.polygon(s.wielokat, { color: "#67e8f9", weight: 2, dashArray: "4 4", fillOpacity: 0.08, renderer, interactive: false })
-        .addTo(inne);
+      L.polygon(s.wielokat, {
+        color: "#67e8f9",
+        weight: 2,
+        opacity: krycie(1),
+        dashArray: "4 4",
+        fillOpacity: krycie(0.08),
+        renderer,
+        interactive: false,
+      }).addTo(inne);
     }
     for (const u of pilot.uslugi) {
       L.circleMarker([u.lat, u.lon], {
         radius: 6,
         color: "#0f172a",
         weight: 2,
+        opacity: krycie(1),
         fillColor: "#38bdf8",
-        fillOpacity: 1,
+        fillOpacity: krycie(1),
         renderer,
       })
         .bindTooltip(`<b>${u.nazwa}</b><br>${KATEGORIA_LABEL[u.kategoria]}`)
@@ -119,7 +138,7 @@ function WarstwaOdcinkow({
       linie.remove();
       inne.remove();
     };
-  }, [map, pilot, oceny, widoczne, renderer]);
+  }, [map, pilot, oceny, widoczne, przygasz, renderer]);
 
   return null;
 }
@@ -335,6 +354,7 @@ export function MapaNiewiedzy(props: Wspolne) {
         oceny={props.oceny}
         widoczne={props.widoczne}
         onWybierz={props.onWybierz}
+        przygasz={props.trasa !== null || props.kontrola != null}
         renderer={renderer}
       />
       <WarstwaTrasy pilot={props.pilot} trasa={props.trasa} fokusTrasy={props.fokusTrasy} renderer={renderer} />

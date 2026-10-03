@@ -4,7 +4,7 @@
 // Każdy krok opisuje pełny stan (widok, wybór, kontrole), więc można iść w przód, w tył i od nowa.
 // Kroki zmieniające tylko kontrole nie montują widoku od nowa: przeliczenie widać na żywo.
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import type { Pilot, Weryfikacja } from "@/lib/aglosat/types.ts";
 import { wpisKontroli } from "@/lib/aglosat/weryfikacja.ts";
@@ -39,15 +39,6 @@ const K = {
     wybierz: null,
     kontrole: "brak",
   },
-  priorytety: {
-    tytul: "Planista: co sprawdzić najpierw?",
-    mowimy:
-      "Mapa niewiedzy: mgła przykrywa odcinki bez rozstrzygnięcia. Ranking mówi, od których miejsc zależy najwięcej dojść do usług.",
-    widok: "/app/planista",
-    wybierz: null,
-    zakladka: "ranking",
-    kontrole: "brak",
-  },
   miejsce1: {
     tytul: "To przejście jest pierwsze w rankingu",
     mowimy:
@@ -62,16 +53,6 @@ const K = {
       "Ortofotomapa GUGiK z kwietnia 2025: przejście jest pod drzewami, krawężnika z góry nie widać. Obraz wskazuje miejsce, rozstrzyga człowiek w terenie.",
     widok: "/app/planista",
     wybierz: "miejsce1",
-    kontrole: "brak",
-  },
-  trasaKontroli: {
-    tytul: "Trasa kontroli na godzinę",
-    mowimy:
-      "Ranking kończy się działaniem: godzina spaceru, cztery miejsca z czoła rankingu. Tą trasą poszliśmy rano.",
-    widok: "/app/planista",
-    wybierz: null,
-    zakladka: "kontrola",
-    pokazKontrole: true,
     kontrole: "brak",
   },
   kontrola: {
@@ -115,17 +96,17 @@ const K = {
   },
 } satisfies Record<string, Krok>;
 
-export const SCENARIUSZE: { id: string; nazwa: string; kroki: Krok[] }[] = [
-  {
-    id: "bez-barier",
-    nazwa: "Kraków bez barier",
-    kroki: [K.mieszkaniec, K.brakInformacji, K.miejsce1, K.dowod, K.kontrola, K.mieszkaniecPo, K.sprzeczne, K.odrzucenie, K.wysoki],
-  },
-  {
-    id: "smart-city",
-    nazwa: "Smart City",
-    kroki: [K.priorytety, K.miejsce1, K.dowod, K.trasaKontroli, K.kontrola, K.mieszkaniecPo, K.sprzeczne, K.odrzucenie, K.wysoki],
-  },
+/** Jeden scenariusz: od pytania mieszkańca, przez dowód z obrazu, do kontroli, która zmienia trasę. */
+export const KROKI: Krok[] = [
+  K.mieszkaniec,
+  K.brakInformacji,
+  K.miejsce1,
+  K.dowod,
+  K.kontrola,
+  K.mieszkaniecPo,
+  K.sprzeczne,
+  K.odrzucenie,
+  K.wysoki,
 ];
 
 /** Odcinek ze sprzecznymi źródłami do demo: wykrycie przerwy z najwyższą oceną. */
@@ -155,11 +136,9 @@ export function TrybDemo() {
   const router = useRouter();
   const sciezka = usePathname();
   const [aktywny, setAktywny] = useState(false);
-  const [scenariuszId, setScenariuszId] = useState(SCENARIUSZE[0].id);
   const [nr, setNr] = useState(0);
   const [poprzedni, setPoprzedni] = useState<Krok | null>(null);
-  const scenariusz = useMemo(() => SCENARIUSZE.find((s) => s.id === scenariuszId)!, [scenariuszId]);
-  const krok = scenariusz.kroki[nr];
+  const krok = KROKI[nr];
 
   const zastosuj = useCallback(
     (k: Krok, przed: Krok | null) => {
@@ -182,11 +161,11 @@ export function TrybDemo() {
 
   const idz = useCallback(
     (nowy: number) => {
-      const n = Math.max(0, Math.min(scenariusz.kroki.length - 1, nowy));
+      const n = Math.max(0, Math.min(KROKI.length - 1, nowy));
       setNr(n);
-      zastosuj(scenariusz.kroki[n], poprzedni);
+      zastosuj(KROKI[n], poprzedni);
     },
-    [scenariusz, zastosuj, poprzedni],
+    [zastosuj, poprzedni],
   );
 
   // Strzałki przełączają kroki, gdy fokus nie jest w polu formularza.
@@ -211,7 +190,7 @@ export function TrybDemo() {
         onClick={() => {
           setAktywny(true);
           setNr(0);
-          zastosuj(scenariusz.kroki[0], null);
+          zastosuj(KROKI[0], null);
         }}
         className="fixed bottom-4 right-4 z-50 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-lg hover:bg-slate-800"
       >
@@ -228,32 +207,12 @@ export function TrybDemo() {
       <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-3 md:flex-row md:items-center md:gap-4">
         <div className="min-w-0 flex-1" aria-live="polite">
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-            {scenariusz.nazwa} · krok {nr + 1} z {scenariusz.kroki.length}
+            krok {nr + 1} z {KROKI.length}
           </p>
           <p className="font-bold">{krok.tytul}</p>
           <p className="text-sm text-slate-300">{krok.mowimy}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <label className="sr-only" htmlFor="demo-scenariusz">
-            Scenariusz
-          </label>
-          <select
-            id="demo-scenariusz"
-            value={scenariuszId}
-            onChange={(e) => {
-              const s = SCENARIUSZE.find((x) => x.id === e.target.value)!;
-              setScenariuszId(s.id);
-              setNr(0);
-              zastosuj(s.kroki[0], null);
-            }}
-            className="rounded-lg border border-slate-600 bg-slate-800 px-2 py-1.5 text-sm"
-          >
-            {SCENARIUSZE.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.nazwa}
-              </option>
-            ))}
-          </select>
           <button
             type="button"
             onClick={() => idz(nr - 1)}
@@ -265,7 +224,7 @@ export function TrybDemo() {
           <button
             type="button"
             onClick={() => idz(nr + 1)}
-            disabled={nr === scenariusz.kroki.length - 1}
+            disabled={nr === KROKI.length - 1}
             className="rounded-lg bg-white px-3 py-1.5 text-sm font-semibold text-slate-900 disabled:opacity-40"
           >
             Dalej →
@@ -274,7 +233,7 @@ export function TrybDemo() {
             type="button"
             onClick={() => {
               setNr(0);
-              zastosuj(scenariusz.kroki[0], null);
+              zastosuj(KROKI[0], null);
             }}
             className="rounded-lg border border-slate-600 px-3 py-1.5 text-sm"
           >

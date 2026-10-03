@@ -11,8 +11,6 @@ import Link from "next/link";
 import {
   ChevronDownIcon,
   ChevronRightIcon,
-  LoaderCircleIcon,
-  LocateFixedIcon,
   Maximize2Icon,
   Minimize2Icon,
   SatelliteIcon,
@@ -53,8 +51,6 @@ const nic = () => {};
 const m = (x: number) => `${Math.round(x)} m`;
 /** Spacerem 4 km/h, czyli tyle, ile przyjmują kalkulatory tras pieszych. Z wózkiem bywa wolniej. */
 const minuty = (metry: number) => Math.max(1, Math.round(metry / 66.7));
-/** Poza tym promieniem od najbliższego znanego adresu jesteśmy już poza obszarem pilota. */
-const PROMIEN_OBSZARU_M = 500;
 
 export function MieszkaniecView() {
   const { wczytanie, weryfikacje } = useAglosat();
@@ -68,7 +64,6 @@ export function MieszkaniecView() {
   const [fokus, setFokus] = useState(1);
   const [otwartyWybor, setOtwartyWybor] = useState<"start" | "cel" | null>(null);
   const [pelnaMapa, setPelnaMapa] = useState(false);
-  const [szukaGps, setSzukaGps] = useState(false);
   const [komunikat, setKomunikat] = useState("");
 
   const profil = PROFILE.find((p) => p.id === profilId)!;
@@ -210,37 +205,6 @@ export function MieszkaniecView() {
     setFokus((f) => f + 1);
   };
 
-  const jestemTutaj = () => {
-    if (!("geolocation" in navigator)) {
-      setKomunikat("Ta przeglądarka nie udostępnia lokalizacji. Wybierz adres z listy.");
-      return;
-    }
-    setSzukaGps(true);
-    setKomunikat("Szukam Twojej lokalizacji…");
-    navigator.geolocation.getCurrentPosition(
-      (poz) => {
-        setSzukaGps(false);
-        const tu: [number, number] = [poz.coords.latitude, poz.coords.longitude];
-        let najblizszy: { adres: string; id: string; d: number } | null = null;
-        for (const b of budynki) {
-          const d = odlegloscM(tu, [b.lat, b.lon]);
-          if (!najblizszy || d < najblizszy.d) najblizszy = { adres: b.adres!, id: b.id, d };
-        }
-        if (!najblizszy || najblizszy.d > PROMIEN_OBSZARU_M) {
-          setKomunikat(`Jesteś poza obszarem pilota (${pilot.meta.obszar.nazwa}). Wybierz adres z listy.`);
-          return;
-        }
-        zmienStart(najblizszy.id);
-        setKomunikat(`Start ustawiony na najbliższy znany adres: ${najblizszy.adres}.`);
-      },
-      () => {
-        setSzukaGps(false);
-        setKomunikat("Nie udało się ustalić lokalizacji. Wybierz adres z listy.");
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
-    );
-  };
-
   const udostepnij = async () => {
     const dane = { title: "AgloSat — czy dojadę?", text: opis };
     if (navigator.share) {
@@ -283,20 +247,6 @@ export function MieszkaniecView() {
             onClick={() => setOtwartyWybor("cel")}
           />
         </div>
-
-        <button
-          type="button"
-          onClick={jestemTutaj}
-          disabled={szukaGps}
-          className="mt-2 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 text-base font-semibold text-slate-900 hover:bg-slate-50 disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
-        >
-          {szukaGps ? (
-            <LoaderCircleIcon className="size-5 animate-spin motion-reduce:animate-none" aria-hidden />
-          ) : (
-            <LocateFixedIcon className="size-5" aria-hidden />
-          )}
-          Zacznij od mojej lokalizacji
-        </button>
 
         <details className="group mt-2 overflow-hidden rounded-2xl border border-slate-300 bg-white">
           <summary className="flex min-h-14 cursor-pointer list-none items-center gap-3 px-4 py-2 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-slate-900 [&::-webkit-details-marker]:hidden">
