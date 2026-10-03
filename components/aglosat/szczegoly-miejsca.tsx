@@ -4,6 +4,7 @@
 
 import type { Cecha, Pilot, Profil, StanCechy, Status, Weryfikacja, WynikWplywu } from "@/lib/aglosat/types.ts";
 import { FormularzKontroli } from "@/components/aglosat/formularz-kontroli";
+import { WycinekObrazu } from "@/components/aglosat/wycinek-obrazu";
 import type { OcenaOdcinka } from "@/lib/aglosat/profile.ts";
 import { stanOdcinka } from "@/lib/aglosat/status.ts";
 import { lokalizacja } from "@/lib/aglosat/opis.ts";
@@ -54,6 +55,7 @@ export function SzczegolyMiejsca({
   const stany = stanOdcinka(odc, pilot.obserwacje, weryfikacje);
   // Odrzucone wykrycia nie liczą się do statusu, ale pokazujemy je: tak wygląda błąd modelu.
   const naMiejscu = new Set(wynik?.odcinki ?? [odcinekId]);
+  const wycinek = pilot.wycinki.find((w) => naMiejscu.has(w.odcinekId)) ?? null;
   const odrzucone = weryfikacje.flatMap((w) => {
     const o = w.odrzucaObserwacje ? pilot.obserwacje.find((x) => x.id === w.odrzucaObserwacje) : undefined;
     return o && naMiejscu.has(o.odcinekId) ? [{ o, w }] : [];
@@ -89,6 +91,15 @@ export function SzczegolyMiejsca({
           Wróć do listy
         </button>
       </div>
+
+      {wycinek && (
+        <WycinekObrazu
+          wycinek={wycinek}
+          przebiegi={[...naMiejscu].map((id) => pilot.odcinki.find((o) => o.id === id)!.geometria)}
+          obserwacje={pilot.obserwacje.filter((o) => naMiejscu.has(o.odcinekId))}
+          odrzucone={new Set(weryfikacje.map((w) => w.odrzucaObserwacje).filter((x): x is string => !!x))}
+        />
+      )}
 
       {wynik && (
         <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">

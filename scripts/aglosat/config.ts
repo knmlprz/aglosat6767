@@ -9,11 +9,29 @@ export const OBSZAR = {
   srodek: [50.0685, 20.0475] as [number, number],
 };
 
-/** Parametry danych przykładowych. Ziarno losowania stałe, żeby wynik był powtarzalny. */
+/**
+ * Ortofotomapa do wycinków: usługa WMS Geoportalu (GUGiK), otwarte dane.
+ * Data i piksel z skorowidza GUGiK (WFS Skorowidze, warstwa SkorowidzOrtofomapy2025) dla arkusza
+ * obejmującego pilota. Zakładamy, że usługa HighResolution pokazuje najnowszy arkusz.
+ */
+export const ORTO = {
+  wms: "https://mapy.geoportal.gov.pl/wss/service/PZGIK/ORTO/WMS/HighResolution",
+  warstwa: "Raster",
+  dataNalotu: "2025-04-28",
+  pikselM: 0.05,
+  arkusz: "M-34-65-C-c-1-2",
+  zrodlo: "Ortofotomapa GUGiK (Geoportal), piksel 5 cm",
+  rozmiarPx: 480,
+};
+
+/**
+ * Parametry danych przykładowych. Ziarno losowania stałe, żeby wynik był powtarzalny.
+ * Klasy modelu są przykładowe; obraz i jego data pochodzą z prawdziwej ortofotomapy.
+ */
 export const PRZYKLADOWE = {
   ziarno: 6767,
-  dataObrazu: "2024-07-15",
-  zrodloObrazu: "ortofotomapa (dane przykładowe)",
+  dataObrazu: ORTO.dataNalotu,
+  zrodloObrazu: ORTO.zrodlo,
   scenaPrzed: "2025-08-10",
   scenaPo: "2026-09-14",
 };

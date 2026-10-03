@@ -165,6 +165,18 @@ export type WynikWplywu = {
   brakujaceCechy: Cecha[];
 };
 
+/** Wycinek ortofotomapy wokół odcinka. Przebieg odcinka rysuje interfejs na podstawie bbox. */
+export type Wycinek = {
+  id: string;
+  odcinekId: string;
+  /** Ścieżka w public/, np. /aglosat/wycinki/w123.jpg */
+  plik: string;
+  /** [południe, zachód, północ, wschód] */
+  bbox: [number, number, number, number];
+  dataObrazu: string;
+  zrodlo: string;
+};
+
 export type Pilot = {
   meta: {
     obszar: { nazwa: string; bbox: [number, number, number, number]; srodek: LatLon };
@@ -178,6 +190,7 @@ export type Pilot = {
   budynki: Budynek[];
   uslugi: Usluga[];
   strefyZmian: StrefaZmian[];
+  wycinki: Wycinek[];
   /** Analiza bazowa: policzona przez skrypt, nie przeliczana na żywo. */
   ranking: WynikWplywu[];
   mianownik: {

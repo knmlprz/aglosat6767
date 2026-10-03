@@ -9,6 +9,7 @@
     "lint": "eslint",
     "aglosat:fetch": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/aglosat/fetch-osm.ts",
     "aglosat:build": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/aglosat/build-pilot.ts",
+    "aglosat:wycinki": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/aglosat/fetch-wycinki.ts",
     "aglosat:check": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/aglosat/check.ts"
   },
   "dependencies": {

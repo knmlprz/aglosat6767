@@ -6,9 +6,9 @@
 // Co jest przykładowe (oznaczone polem przykladowe): obserwacje z obrazu, strefa zmian Sentinel-2.
 
 import { readFileSync, writeFileSync } from "node:fs";
-import { OBSZAR, PRZYKLADOWE } from "./config.ts";
+import { OBSZAR, ORTO, PRZYKLADOWE } from "./config.ts";
 import type {
-  Budynek, Dowod, KategoriaUslugi, LatLon, Obserwacja, Odcinek, Pilot, StrefaZmian, TypOdcinka, Usluga,
+  Budynek, Dowod, KategoriaUslugi, LatLon, Obserwacja, Odcinek, Pilot, StrefaZmian, TypOdcinka, Usluga, Wycinek,
 } from "../../lib/aglosat/types.ts";
 import { PROFIL_DOMYSLNY } from "../../lib/aglosat/profile.ts";
 import { ocenWszystkie } from "../../lib/aglosat/routing.ts";
@@ -317,6 +317,36 @@ const oceny = ocenWszystkie(odcinki, obserwacje, [], PROFIL_DOMYSLNY);
 const t0 = Date.now();
 const analiza = policzAnalize(odcinki, budynki, uslugi, oceny, PROFIL_DOMYSLNY);
 
+// --- wycinki ortofotomapy: obserwacje modelu, miejsca z rankingu, niewiadome kandydatów ----------
+
+const odcinekPoId = new Map(odcinki.map((o) => [o.id, o]));
+function bboxWycinka(geometrie: LatLon[]): [number, number, number, number] {
+  const lat = geometrie.map((p) => p[0]), lon = geometrie.map((p) => p[1]);
+  const sLat = (Math.min(...lat) + Math.max(...lat)) / 2, sLon = (Math.min(...lon) + Math.max(...lon)) / 2;
+  const kLon = 111320 * Math.cos(rad(sLat));
+  const zasieg = Math.max((Math.max(...lat) - Math.min(...lat)) * 111320, (Math.max(...lon) - Math.min(...lon)) * kLon);
+  const bok = Math.min(120, Math.max(50, zasieg + 30));
+  const dLat = bok / 2 / 111320, dLon = bok / 2 / kLon;
+  const r = (x: number) => Math.round(x * 1e7) / 1e7;
+  return [r(sLat - dLat), r(sLon - dLon), r(sLat + dLat), r(sLon + dLon)];
+}
+const wycinki: Wycinek[] = [];
+const dodajWycinek = (odcinekId: string, odcinkiMiejsca: string[]) => {
+  if (wycinki.some((w) => w.odcinekId === odcinekId)) return;
+  const geometrie = odcinkiMiejsca.flatMap((id) => odcinekPoId.get(id)?.geometria ?? []);
+  if (geometrie.length === 0) return;
+  wycinki.push({
+    id: `w_${odcinekId}`, odcinekId, plik: `/aglosat/wycinki/w_${odcinekId}.jpg`,
+    bbox: bboxWycinka(geometrie), dataObrazu: ORTO.dataNalotu, zrodlo: ORTO.zrodlo,
+  });
+};
+for (const r of analiza.ranking) dodajWycinek(r.odcinekId, r.odcinki);
+for (const k of analiza.kandydaci) for (const id of k.niewiadome) dodajWycinek(id, [id]);
+for (const o of obserwacje) {
+  dodajWycinek(o.odcinekId, [o.odcinekId]);
+  o.wycinek = `/aglosat/wycinki/w_${o.odcinekId}.jpg`;
+}
+
 const pilot: Pilot = {
   meta: {
     obszar: { nazwa: OBSZAR.nazwa, bbox: OBSZAR.bboxGrafu, srodek: OBSZAR.srodek },
@@ -324,12 +354,13 @@ const pilot: Pilot = {
     wygenerowano: new Date().toISOString().slice(0, 10),
     uwagi: [
       "Geometria, tagi, budynki i usługi: OpenStreetMap (© współtwórcy OSM, ODbL).",
-      "Obserwacje z obrazu i strefa zmian Sentinel-2: dane przykładowe.",
+      `Wycinki: ${ORTO.zrodlo}, nalot ${ORTO.dataNalotu} (skorowidz GUGiK, arkusz ${ORTO.arkusz}).`,
+      "Klasy modelu dla wycinków i strefa zmian Sentinel-2: dane przykładowe.",
       "Waga budynku: powierzchnia zabudowy × kondygnacje; przybliżenie, nie liczba mieszkańców.",
       "Ranking: analiza bazowa, policzona wcześniej dla profilu domyślnego.",
     ],
   },
-  wezly, odcinki, obserwacje, budynki, uslugi, strefyZmian,
+  wezly, odcinki, obserwacje, budynki, uslugi, strefyZmian, wycinki,
   ranking: analiza.ranking.slice(0, 200),
   mianownik: analiza.mianownik,
   kandydaci: analiza.kandydaci,
@@ -340,6 +371,7 @@ const licz = (f: (s: string) => boolean) => [...oceny.values()].filter((o) => f(
 console.log(`odcinki: ${odcinki.length}, węzły: ${Object.keys(wezly).length}`);
 console.log(`przejezdne: ${licz((s) => s === "przejezdny")}, nieznane: ${licz((s) => s === "nieznany")}, nieprzejezdne: ${licz((s) => s === "nieprzejezdny")}`);
 console.log(`budynki: ${budynki.length} (kondygnacje przybliżone: ${budynki.filter((b) => b.kondygnacjePrzyblizone).length}), usługi: ${uslugi.length}`);
+console.log(`wycinki: ${wycinki.length}`);
 console.log(`obserwacje: ${obserwacje.length}, strefy zmian: ${strefyZmian.length}, odcinki w strefie: ${odcinki.filter((o) => o.strefaZmian).length}`);
 console.log(`ranking: ${analiza.ranking.length} miejsc do kontroli z wpływem, kandydaci: ${analiza.kandydaci.length}, analiza ${Date.now() - t0} ms`);
 console.log("mianownik:", analiza.mianownik);

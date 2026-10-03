@@ -1,7 +1,7 @@
 // Kontrola danych pilota i reguł modelu. Kończy się kodem 1, jeśli którakolwiek reguła pada.
 // Uruchomienie: npm run aglosat:check
 
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import type { Pilot, Weryfikacja } from "../../lib/aglosat/types.ts";
 import { rozwinPilot, type PilotZapisany } from "../../lib/aglosat/data.ts";
 import { PROFIL_DOMYSLNY, ocenCeche } from "../../lib/aglosat/profile.ts";
@@ -114,6 +114,14 @@ console.log(`     stabilność przy równych wagach: korelacja Spearmana ${spear
   `${w20}/10 pierwszych miejsc mieści się w pierwszej 20, ${zabudowa.slice(0, 10).filter((id) => (pozR.get(id) ?? Infinity) < 10).length}/10 w pierwszej 10`);
 const top = p.ranking.slice(0, 10);
 console.log(`     koncentracja: pierwsze 10 miejsc dotyka ${top.reduce((s, r) => s + r.utraconeRelacje + r.wydluzoneRelacje, 0)} relacji (z powtórzeniami)`);
+
+// 7. Wycinki: każdy plik jest w repo (demo działa bez sieci), każda obserwacja ma wycinek z datą obrazu.
+const brakujace = p.wycinki.filter((w) => !existsSync(`public${w.plik}`));
+sprawdz(brakujace.length === 0, `wszystkie wycinki są na dysku (${p.wycinki.length}; brak: ${brakujace.length})`);
+sprawdz(
+  p.obserwacje.every((o) => o.wycinek && p.wycinki.some((w) => w.odcinekId === o.odcinekId && w.dataObrazu === o.dataObrazu)),
+  "każda obserwacja modelu ma wycinek z tą samą datą obrazu",
+);
 
 console.log(bledy === 0 ? "\nWszystkie reguły spełnione." : `\n${bledy} reguł nie spełniono.`);
 process.exit(bledy === 0 ? 0 : 1);
