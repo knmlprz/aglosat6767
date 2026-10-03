@@ -481,14 +481,27 @@ const PLIK_ETYKIET = "data/aglosat/etykiety-reczne.json";
 const etykiety = existsSync(PLIK_ETYKIET) ? wczytajEtykiety(JSON.parse(readFileSync(PLIK_ETYKIET, "utf8"))) : null;
 const ludzie = etykiety ? zgodnoscLudzi(etykiety) : undefined;
 // Wszystkie wersje promptu oceniane na tej samej próbce (etykiety według bieżącej instrukcji).
+const zbiorWycinka = new Map(wycinki.map((w) => [w.id, w.zbior]));
+const ZBIORY = ["wszystkie", "roboczy", "testowy"] as const;
 const porownaniePromptow = etykiety
-  ? wersjeModelu.map((w) => ({
-      ...policzOcene(w.plik.model, paryDoOceny(etykiety, (id) => w.plik.wyniki[id]?.klasa)),
-      wersjaPromptu: w.wersja,
-      zgodnoscLudzi: ludzie,
-    }))
+  ? wersjeModelu.flatMap((w) =>
+      ZBIORY.map((zbior) => ({
+        ...policzOcene(
+          w.plik.model,
+          paryDoOceny(etykiety, (id) => w.plik.wyniki[id]?.klasa).filter((p) => zbior === "wszystkie" || zbiorWycinka.get(p.wycinekId) === zbior),
+        ),
+        wersjaPromptu: w.wersja,
+        zbior,
+        zgodnoscLudzi: ludzie,
+      })),
+    )
   : [];
-const ocenaModelu = klasyfikacje ? (porownaniePromptow.find((o) => o.wersjaPromptu === klasyfikacje.wersjaPromptu) ?? null) : null;
+// Do pokazania: najlepsza dostępna wersja promptu na zbiorze testowym (gdy ma etykiety), inaczej na wszystkich.
+const najwyzsza = wersjeModelu.at(-1)?.wersja;
+const ocenaModelu =
+  porownaniePromptow.find((o) => o.wersjaPromptu === najwyzsza && o.zbior === "testowy" && o.n > 0) ??
+  porownaniePromptow.find((o) => o.wersjaPromptu === najwyzsza && o.zbior === "wszystkie") ??
+  null;
 
 const pilot: Pilot = {
   meta: {
@@ -518,7 +531,7 @@ console.log(`przejezdne: ${licz((s) => s === "przejezdny")}, nieznane: ${licz((s
 console.log(`budynki: ${budynki.length} (kondygnacje przybliżone: ${budynki.filter((b) => b.kondygnacjePrzyblizone).length}), usługi: ${uslugi.length}`);
 console.log(`wycinki: ${wycinki.length} (ranking ${wycinki.filter((w) => w.proba === "ranking").length}, losowe ${wycinki.filter((w) => w.proba === "losowa").length}, ryzyko ${wycinki.filter((w) => w.proba === "ryzyko").length}; testowe ${wycinki.filter((w) => w.zbior === "testowy").length})`);
 for (const o of porownaniePromptow) {
-  console.log(`ocena modelu ${o.model} prompt v${o.wersjaPromptu}: n=${o.n}, trafność ${o.trafnosc}, precyzja „przerwany” ${o.precyzjaPrzerwany}, czułość ${o.czuloscPrzerwany}, poprawne „niewidoczny” ${o.poprawneNiewidoczny}`);
+  console.log(`ocena modelu ${o.model} prompt v${o.wersjaPromptu} [${o.zbior}]: n=${o.n}, trafność ${o.trafnosc}, precyzja „przerwany” ${o.precyzjaPrzerwany}, czułość ${o.czuloscPrzerwany}, poprawne „niewidoczny” ${o.poprawneNiewidoczny}`);
 }
 if (ludzie) console.log(`zgodność ludzi: ${ludzie.zgodnosc} na ${ludzie.n} wycinkach`);
 console.log(`dane pilota: obserwacje z ${klasyfikacje ? `promptu v${klasyfikacje.wersjaPromptu}` : "danych przykładowych"}`);

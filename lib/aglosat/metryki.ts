@@ -8,6 +8,8 @@ export const KLASY: KlasaObrazu[] = ["ciagly", "przerwany", "niewidoczny"];
 export type OcenaModelu = {
   model: string;
   wersjaPromptu?: number;
+  /** Na którym zbiorze liczone: testowy sprawdzamy raz i raportujemy; roboczy służy do poprawiania promptu. */
+  zbior?: "wszystkie" | "roboczy" | "testowy";
   /** Zgodność między ludźmi na wycinkach opisanych przez co najmniej dwie osoby: punkt odniesienia dla modelu. */
   zgodnoscLudzi?: { n: number; zgodnosc: number | null };
   /** Liczba wycinków z etykietą człowieka i wynikiem modelu. */

@@ -55,7 +55,25 @@ export function EtykietowanieView() {
   }, []);
 
   const osoba = kto.trim();
-  const kolejka = useMemo(() => (pilot ? wymieszaj(pilot.wycinki) : []), [pilot]);
+  // Kolejność ustalana raz dla osoby (przy wpisaniu imienia): najpierw wycinki, których jeszcze nie opisała.
+  // Nie przeliczamy jej po każdej etykiecie, żeby bieżący wycinek nie „uciekał”.
+  const [kolejnosc, setKolejnosc] = useState<string[] | null>(null);
+  const ulozKolejnosc = (dla: string, p: PlikEtykiet | null) => {
+    if (!pilot) return;
+    const opisane = new Set(
+      Object.entries((dla && p?.osoby[dla]) || {})
+        .filter(([, x]) => x.wersjaInstrukcji === WERSJA_INSTRUKCJI)
+        .map(([id]) => id),
+    );
+    const lista = wymieszaj(pilot.wycinki);
+    setKolejnosc([...lista.filter((w) => !opisane.has(w.id)), ...lista.filter((w) => opisane.has(w.id))].map((w) => w.id));
+    setNr(0);
+  };
+  const kolejka = useMemo(() => {
+    if (!pilot) return [];
+    const wgId = new Map(pilot.wycinki.map((w) => [w.id, w]));
+    return kolejnosc ? kolejnosc.map((id) => wgId.get(id)!).filter(Boolean) : wymieszaj(pilot.wycinki);
+  }, [pilot, kolejnosc]);
   // Model widział przebieg całego miejsca (np. przejście z wysepką), więc człowiek też.
   const miejsca = useMemo(() => new Map(pilot?.ranking.map((r) => [r.odcinekId, r.odcinki]) ?? []), [pilot]);
   const moje = useMemo(() => {
@@ -151,7 +169,10 @@ export function EtykietowanieView() {
           Kto opisuje (wymagane; każda osoba ma osobne etykiety)
           <input
             value={kto}
-            onChange={(e) => setKto(e.target.value)}
+            onChange={(e) => {
+              setKto(e.target.value);
+              ulozKolejnosc(e.target.value.trim(), plik);
+            }}
             className="rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
             placeholder="np. Michał"
           />

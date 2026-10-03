@@ -23,13 +23,14 @@ export function OcenaModeluKarta({
       <p className="mt-1 text-xs text-slate-600">
         Model {ocena.model}
         {ocena.wersjaPromptu ? ` (prompt v${ocena.wersjaPromptu})` : ""} kontra człowiek na {ocena.n} {ocena.n === 1 ? "wycinku" : "wycinkach"}
-        {naZywo ? " (liczone na żywo z bieżących etykiet)" : " opisanych ręcznie"}. Zgodność z obrazem to nie to samo co stan w
+        {naZywo ? " (liczone na żywo z bieżących etykiet)" : " opisanych ręcznie"}
+        {ocena.zbior === "testowy" ? ", zbiór testowy: nie używany przy poprawianiu promptu" : ""}. Zgodność z obrazem to nie to samo co stan w
         terenie: rozstrzyga kontrola.
       </p>
       {(porownanie.length > 1 || !!ocena.zgodnoscLudzi?.n) && (
         <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-700">
           {porownanie.length > 1 &&
-            porownanie.map((p) => (
+            porownanie.filter((p) => p.zbior === ocena.zbior).map((p) => (
               <li key={p.wersjaPromptu}>
                 prompt v{p.wersjaPromptu}: trafność <strong>{procent(p.trafnosc)}</strong>, precyzja „przerwany”{" "}
                 {procent(p.precyzjaPrzerwany)}
