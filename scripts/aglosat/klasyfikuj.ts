@@ -11,7 +11,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import sharp from "sharp";
 import { ORTO } from "./config.ts";
-import { KLASY_OBRAZU, PRZYPADKI, ZASADA } from "../../lib/aglosat/etykiety.ts";
+import { KLASY_OBRAZU, KLASY_OBRAZU_V2_ZAMROZONE, PRZYPADKI, PRZYPADKI_V2_ZAMROZONE, ZASADA } from "../../lib/aglosat/etykiety.ts";
 import type { PilotZapisany } from "../../lib/aglosat/data.ts";
 import type { KlasaObrazu, LatLon, Wycinek } from "../../lib/aglosat/types.ts";
 
@@ -69,6 +69,19 @@ const WSTEP = `You are reviewing an aerial orthophoto (north up, ${ORTO.rozmiarP
 A pedestrian path segment from OpenStreetMap is drawn on it as a dashed cyan line with a dark outline.`;
 const FORMAT = `Answer with JSON only: {"klasa": "ciagly" | "przerwany" | "niewidoczny", "ocena": number from 0 to 1 (your confidence), "uzasadnienie": "one short sentence in Polish describing what you see along the line"}`;
 
+function promptZTabela(klasy: typeof KLASY_OBRAZU, przypadki: typeof PRZYPADKI, dodatek = ""): string {
+  return `${WSTEP}
+Question: is there one uninterrupted walkable strip along the drawn line, without a permanent obstacle?
+Rule (in Polish): ${ZASADA}
+Choose exactly one class:
+${klasy.map((k) => `- "${k.klasa}": ${k.definicja}`).join("\n")}
+Agreed rules for difficult cases (case → class, reason):
+${przypadki.map((p) => `- ${p.przypadek} → ${p.klasa === "zalezy" ? "zależy" : p.klasa}${p.dlaczego ? ` (${p.dlaczego})` : ""}`).join("\n")}
+Important: an asphalt road or a pedestrian crossing along the line counts as continuous. Green colour may be tree crowns above a sidewalk, not a lawn; if you cannot tell, answer "niewidoczny".${dodatek}
+(Classes: "ciagly" = continuous, "przerwany" = interrupted, "niewidoczny" = not visible.)
+${FORMAT}`;
+}
+
 /** Prompty zamrożone: tekst v1 jest dokładnie tym, który dał pierwszy przebieg. */
 const PROMPTY: Record<number, string> = {
   1: `${WSTEP}
@@ -78,26 +91,23 @@ Judge ONLY the pedestrian surface along the drawn line, and choose exactly one c
 - "niewidoczny": Większości przebiegu nie widać: zasłaniają go drzewa, cień albo dach budynku. Nie da się ocenić.
 (The class definitions are in Polish: "ciagly" = continuous, "przerwany" = interrupted, "niewidoczny" = not visible.)
 ${FORMAT}`,
-  // v2: zasada i tabela przypadków spornych uzgodnione w zespole, te same co w instrukcji dla ludzi.
-  2: `${WSTEP}
-Question: is there one uninterrupted walkable strip along the drawn line, without a permanent obstacle?
-Rule (in Polish): ${ZASADA}
-Choose exactly one class:
-${KLASY_OBRAZU.map((k) => `- "${k.klasa}": ${k.definicja}`).join("\n")}
-Agreed rules for difficult cases (case → class, reason):
-${PRZYPADKI.map((p) => `- ${p.przypadek} → ${p.klasa === "zalezy" ? "zależy" : p.klasa}${p.dlaczego ? ` (${p.dlaczego})` : ""}`).join("\n")}
-Important: an asphalt road or a pedestrian crossing along the line counts as continuous. Green colour may be tree crowns above a sidewalk, not a lawn; if you cannot tell, answer "niewidoczny".
-(Classes: "ciagly" = continuous, "przerwany" = interrupted, "niewidoczny" = not visible.)
-${FORMAT}`,
+  // v2: zasada i tabela przypadków spornych uzgodnione w zespole, te same co w instrukcji dla ludzi (brzmienie zamrożone).
+  2: promptZTabela(KLASY_OBRAZU_V2_ZAMROZONE, PRZYPADKI_V2_ZAMROZONE),
 };
 // v3: te same zasady co v2, ale dwa obrazy. Nakładka z linią zasłaniała wąskie ścieżki,
 // o które pytamy (fałszywe „przerwany” na trawniku), więc nawierzchnię model ocenia na obrazie bez linii.
-PROMPTY[3] = PROMPTY[2].replace(
-  WSTEP,
-  `You get TWO images of the same place, an aerial orthophoto (north up, ${ORTO.rozmiarPx}x${ORTO.rozmiarPx} px).
+const WSTEP_DWA_OBRAZY = `You get TWO images of the same place, an aerial orthophoto (north up, ${ORTO.rozmiarPx}x${ORTO.rozmiarPx} px).
 IMAGE 1 is the raw orthophoto. IMAGE 2 is the same image with a pedestrian path segment from OpenStreetMap drawn as a dashed cyan line with a dark outline.
-Use IMAGE 2 ONLY to locate where the path runs. Judge the surface along that path in IMAGE 1: the drawn line in IMAGE 2 covers narrow paths, so never conclude "grass" or "no path" from IMAGE 2.`,
-);
+Use IMAGE 2 ONLY to locate where the path runs. Judge the surface along that path in IMAGE 1: the drawn line in IMAGE 2 covers narrow paths, so never conclude "grass" or "no path" from IMAGE 2.`;
+PROMPTY[3] = PROMPTY[2].replace(WSTEP, WSTEP_DWA_OBRAZY);
+// v4: dwa obrazy jak v3 i doprecyzowana zasada dla drzew i cienia (instrukcja z 2026-10-04).
+// Poprawiana tylko na zbiorze roboczym; zbiór testowy liczymy raz.
+PROMPTY[4] = promptZTabela(
+  KLASY_OBRAZU,
+  PRZYPADKI,
+  `
+Trees and shadow: if the walkable strip enters tree crowns or shadow and comes out on the other side along the same line, answer "ciagly". Answer "niewidoczny" only when you cannot see where the strip enters or leaves the hidden part, or most of the line is hidden with no visible strip at either end.`,
+).replace(WSTEP, WSTEP_DWA_OBRAZY);
 /** Od v3 model dostaje obraz surowy i obraz z przebiegiem. */
 const DWA_OBRAZY = WERSJA_PROMPTU >= 3;
 const PROMPT = PROMPTY[WERSJA_PROMPTU];

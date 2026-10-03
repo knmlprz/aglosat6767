@@ -26,7 +26,8 @@ export const KLASY_OBRAZU: { klasa: KlasaObrazu; klawisz: string; etykieta: stri
     klasa: "niewidoczny",
     klawisz: "3",
     etykieta: "niewidoczny",
-    definicja: "Większości linii nie widać (drzewa, cień, dach, auta) albo nie da się rozstrzygnąć. To pełnoprawna odpowiedź.",
+    definicja:
+      "Większości linii nie widać i nie da się jej dopowiedzieć (drzewa, cień, dach, auta), albo nie da się rozstrzygnąć. To pełnoprawna odpowiedź.",
   },
 ];
 
@@ -41,7 +42,11 @@ export const PRZYPADKI: { przypadek: string; klasa: KlasaObrazu | "zalezy"; dlac
   { przypadek: "Ścieżka gruntowa, wydeptana na całej długości", klasa: "ciagly", dlaczego: "rodzaj nawierzchni to osobna cecha" },
   { przypadek: "Dwa odcinki chodnika, a między nimi pas trawy", klasa: "przerwany", dlaczego: "trzeba zejść na trawnik" },
   { przypadek: "Chodnik kończy się w połowie linii", klasa: "przerwany", dlaczego: "" },
-  { przypadek: "Część linii pod drzewami, widoczne fragmenty ciągłe", klasa: "zalezy", dlaczego: "ciągły, jeśli zasłonięta mniejsza część; niewidoczny, jeśli większa" },
+  {
+    przypadek: "Pas wchodzi pod drzewa albo w cień i wychodzi po drugiej stronie w tej samej linii",
+    klasa: "ciagly",
+    dlaczego: "zasłonięty fragment da się dopowiedzieć; niewidoczny tylko, gdy nie widać, gdzie pas wchodzi albo wychodzi",
+  },
   { przypadek: "Widać przerwę, choć część linii jest zasłonięta", klasa: "przerwany", dlaczego: "widoczna przerwa wystarczy" },
   { przypadek: "Linia przesunięta o kilka metrów od widocznej ścieżki (np. przechylony dach)", klasa: "zalezy", dlaczego: "oceniamy ścieżkę biegnącą obok równolegle; jeśli jej nie widać: niewidoczny" },
   { przypadek: "Zieleń: nie wiadomo, czy to trawnik, czy korony drzew nad chodnikiem", klasa: "niewidoczny", dlaczego: "„nie wiem” to pełnoprawna odpowiedź" },
@@ -64,6 +69,23 @@ const ZAWSZE = [9, 12];
 export function przypadkiDlaTypu(typ: string): (typeof PRZYPADKI)[number][] {
   return [...new Set([...(PRZYPADKI_DLA_TYPU[typ] ?? []), ...ZAWSZE])].map((i) => PRZYPADKI[i]);
 }
+
+/**
+ * Instrukcja v2 w brzmieniu z 2026-10-03, zamrożona dla promptów v2 i v3 (powtarzalność przebiegów).
+ * 2026-10-04 doprecyzowaliśmy zasadę dla drzew i cienia: tak opisywał człowiek (ponowny przegląd 64 wycinków
+ * zmienił 5 etykiet), a dosłowna „większość linii pod drzewami” dawała większość rozbieżności z modelem.
+ * Etykiety zostają przy wersji 2: reguła opisuje praktykę, według której powstały.
+ */
+export const KLASY_OBRAZU_V2_ZAMROZONE = KLASY_OBRAZU.map((k) =>
+  k.klasa === "niewidoczny"
+    ? { ...k, definicja: "Większości linii nie widać (drzewa, cień, dach, auta) albo nie da się rozstrzygnąć. To pełnoprawna odpowiedź." }
+    : k,
+);
+export const PRZYPADKI_V2_ZAMROZONE = PRZYPADKI.map((p, i) =>
+  i === 9
+    ? { przypadek: "Część linii pod drzewami, widoczne fragmenty ciągłe", klasa: "zalezy" as const, dlaczego: "ciągły, jeśli zasłonięta mniejsza część; niewidoczny, jeśli większa" }
+    : p,
+);
 
 export type EtykietaReczna = {
   klasa: KlasaObrazu;

@@ -58,11 +58,16 @@ Obszar i parametry są w `scripts/aglosat/config.ts`. Nowe miasto to nowy obszar
 | --- | --- | --- |
 | prompt v1 | proste definicje klas | 37% |
 | prompt v2 | zasada ciągłości i tabela 13 przypadków spornych (droga, przejście, parking, auta, zieleń…) | 48% |
-| prompt v3 | dwa obrazy: bez linii i z linią; linia zasłaniała wąskie ścieżki, o które pytamy | 59% |
+| prompt v3 | dwa obrazy: bez linii i z linią; linia zasłaniała wąskie ścieżki, o które pytamy | 60% |
+| prompt v4 | doprecyzowana zasada dla drzew i cienia: pas wchodzi pod drzewa i wychodzi w tej samej linii → ciągły | 65% |
 
-**Które pomyłki są groźne.** Groźne jest tylko „ciągły” tam, gdzie człowiek widzi przerwę albo nic nie widzi: v3 robi ich 9 na 91. Pozostałe pomyłki to ostrożność („niewidoczny” pod drzewami i w cieniu); kosztują dodatkową kontrolę w terenie. Trafność trzech klas obniża głównie właśnie ta ostrożność, a część takich przypadków instrukcja v2 sama każe oznaczać jako „niewidoczny”.
+Groźne pomyłki (model „ciągły”, człowiek widzi przerwę albo nic) w kolejnych wersjach: 5, 6, 9, 11 na 91. Każda poprawka, po której model rzadziej mówi „nie widzę”, podnosi trafność i jednocześnie dokłada kilka groźnych pomyłek; dlatego pokazujemy obie liczby.
 
-Gdy model mówi „ciągły”, zwykle ma rację (81% na zbiorze testowym), a wycinki, na których człowiek nic nie widzi, model też oznacza jako „niewidoczny” (94%). **Model rzadko znajduje przerwy:** na zbiorze testowym wskazał 1 z 11 przerw widzianych przez człowieka. Dlatego w AgloSat model zawęża listę miejsc do sprawdzenia, a przerwy rozstrzyga człowiek w terenie. Zgodność z obrazem to nie to samo co stan w terenie.
+**Prompt v4.** Najwięcej rozbieżności dawały wycinki, gdzie ścieżka znika pod drzewami: człowiek dopowiadał zasłonięty fragment, model trzymał się dosłownie „większości linii nie widać”. Ponowny przegląd 64 wycinków zmienił tylko 5 etykiet, więc to była różnica definicji, nie pośpiech. Zasadę dopisaliśmy do instrukcji (`lib/aglosat/etykiety.ts`; brzmienie dla promptów v2 i v3 jest zamrożone) i do promptu v4. Prompt poprawialiśmy na zbiorze roboczym (62% → 72%), zbiór testowy policzyliśmy raz (60% → 65%).
+
+**Które pomyłki są groźne.** Groźne jest tylko „ciągły” tam, gdzie człowiek widzi przerwę albo nic nie widzi: v4 robi ich 11 na 91. Pozostałe pomyłki to ostrożność („niewidoczny” w głębokim cieniu i pod drzewami); kosztują dodatkową kontrolę w terenie.
+
+Gdy model mówi „ciągły”, zwykle ma rację (80% na zbiorze testowym, v4), a wycinki, na których człowiek nic nie widzi, model też oznacza jako „niewidoczny” (81%). **Model rzadko znajduje przerwy:** na zbiorze testowym wskazał 2 z 12 przerw widzianych przez człowieka. Dlatego w AgloSat model zawęża listę miejsc do sprawdzenia, a przerwy rozstrzyga człowiek w terenie. Zgodność z obrazem to nie to samo co stan w terenie.
 
 **Uwagi.**
 - Etykiety pochodzą od jednej osoby. Druga osoba opisująca te same wycinki da zgodność między ludźmi, czyli punkt odniesienia dla modelu (strona `/app/etykiety`).
