@@ -108,6 +108,17 @@ export function SzczegolyMiejsca({
         />
       )}
 
+      {strefa && (
+        <p className="rounded-lg border border-cyan-300 bg-cyan-50 p-2 text-xs text-cyan-900">
+          Odcinek leży w strefie sygnału możliwej zmiany (Sentinel-2): dane mogą być nieaktualne.{" "}
+          {strefa.ilustracja ? (
+            <span className="text-amber-700">Ilustracja, {ETYKIETA_PRZYKLADOWE}.</span>
+          ) : (
+            <span>{strefa.opis} Ortofotomapa jest starsza niż zmiana: rozstrzyga kontrola.</span>
+          )}
+        </p>
+      )}
+
       {wynik && (
         <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
           <h4 className="text-sm font-bold text-slate-800">Jeśli to miejsce okaże się nieprzejezdne</h4>
@@ -162,17 +173,6 @@ export function SzczegolyMiejsca({
         onDodaj={onDodaj}
         onCofnij={onCofnij}
       />
-
-      {strefa && (
-        <p className="rounded-lg border border-cyan-300 bg-cyan-50 p-2 text-xs text-cyan-900">
-          Odcinek leży w strefie sygnału możliwej zmiany (Sentinel-2): dane mogą być nieaktualne.{" "}
-          {strefa.ilustracja ? (
-            <span className="text-amber-700">Ilustracja, {ETYKIETA_PRZYKLADOWE}.</span>
-          ) : (
-            <span>{strefa.opis} Ortofotomapa jest starsza niż zmiana: rozstrzyga kontrola.</span>
-          )}
-        </p>
-      )}
 
       {odrzucone.length > 0 && (
         <div className="rounded-lg border border-slate-200 bg-slate-50 p-2.5">

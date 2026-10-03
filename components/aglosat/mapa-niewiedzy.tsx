@@ -191,7 +191,10 @@ function WarstwaWyboru({
   useEffect(() => {
     if (wybrane.length === 0) return;
     const geometrie = pilot.odcinki.filter((o) => wybrane.includes(o.id)).flatMap((o) => o.geometria);
-    map.flyToBounds(L.latLngBounds(geometrie).pad(4), { maxZoom: 18, duration: 0.6, animate: !ograniczRuch() });
+    // Kadr z zapasem ok. 1,6× długości miejsca, co najmniej 160 m: krótkie przejście i długi odcinek wyglądają podobnie.
+    const b = L.latLngBounds(geometrie);
+    const rozmiarM = Math.max(160, 1.6 * b.getNorthWest().distanceTo(b.getSouthEast()));
+    map.flyToBounds(b.getCenter().toBounds(rozmiarM), { maxZoom: 18, duration: 0.6, animate: !ograniczRuch() });
   }, [map, pilot, wybrane]);
 
   return null;
