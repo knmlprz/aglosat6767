@@ -2,7 +2,7 @@
 // dane pilota to jeden statyczny plik, a trasy liczą się w przeglądarce.
 // Offline zostaje bez zmian tylko to, czego nie mamy u siebie: podkład mapy spoza już obejrzanych kafelków.
 
-const WERSJA = "v1";
+const WERSJA = "v2"; // v2: dane pilota najpierw z sieci; podbicie usuwa stare kopie pilot.json
 const POWLOKA = `aglosat-powloka-${WERSJA}`; // dokumenty i zasoby Next.js
 const DANE = `aglosat-dane-${WERSJA}`; // pilot.json
 const KAFELKI = `aglosat-kafelki-${WERSJA}`; // podkład mapy (Esri)
@@ -48,7 +48,7 @@ self.addEventListener("fetch", (e) => {
 
   if (url.hostname === HOST_KAFELKOW) return e.respondWith(kafelek(req));
   if (url.origin !== self.location.origin) return;
-  if (url.pathname === PILOT) return e.respondWith(zapisaneISwiezeWTle(e));
+  if (url.pathname === PILOT) return e.respondWith(daneNajpierwSiec(req));
   if (req.mode === "navigate") return e.respondWith(dokument(req));
   if (url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/ikony/")) {
     return e.respondWith(najpierwCache(req));
@@ -66,18 +66,19 @@ async function najpierwCache(req) {
   return odp;
 }
 
-/** Dane pilota: od razu pokazujemy zapisane, a nowszą wersję bierzemy na następne otwarcie. */
-function zapisaneISwiezeWTle(e) {
-  const pobranie = caches
-    .open(DANE)
-    .then(async (c) => {
-      const odp = await fetch(e.request);
-      if (odp.ok) await c.put(e.request, odp.clone()).catch(() => {});
-      return odp;
-    })
-    .catch(() => null);
-  e.waitUntil(pobranie);
-  return caches.match(e.request).then(async (zapisane) => zapisane ?? (await pobranie) ?? Response.error());
+/**
+ * Dane pilota: najpierw sieć, żeby po wdrożeniu nowych danych aplikacja od razu pokazywała te same liczby
+ * co strona główna; bez sieci ostatnia zapisana kopia.
+ */
+async function daneNajpierwSiec(req) {
+  const c = await caches.open(DANE);
+  try {
+    const odp = await fetch(req);
+    if (odp.ok) await c.put(req, odp.clone()).catch(() => {});
+    return odp;
+  } catch {
+    return (await c.match(req)) ?? Response.error();
+  }
 }
 
 /** Nawigacja: świeża strona, gdy jest sieć; bez sieci ta sama albo widok mieszkańca. */

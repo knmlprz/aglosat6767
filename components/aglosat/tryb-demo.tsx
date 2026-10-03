@@ -8,6 +8,7 @@ import { useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import type { Pilot, Weryfikacja } from "@/lib/aglosat/types.ts";
 import { wpisKontroli } from "@/lib/aglosat/weryfikacja.ts";
+import { KATEGORIA_LABEL, nazwaModelu, odmiana } from "@/lib/aglosat/vocabulary.ts";
 import { useAglosat, type ZadanieDemo } from "@/components/aglosat/stan-aglosat";
 
 type Kontrole = "brak" | "obnizony" | "wysoki" | "obnizony_odrzucenie";
@@ -26,8 +27,10 @@ type Krok = {
 const K = {
   mieszkaniec: {
     tytul: "Mieszkaniec pyta: czy dojadę?",
-    mowimy:
-      "Osiedle Ogrodowe 10, przychodnia ProMed: 467 metrów pieszo. Preferencje: bez schodów, niski krawężnik. Nie pytamy o niepełnosprawność.",
+    mowimy: (p) => {
+      const { start, cel, k } = przypadek(p);
+      return `${start}, ${cel}: ${k?.pieszoM ?? "?"} metrów pieszo. Preferencje: bez schodów, niski krawężnik. Nie pytamy o niepełnosprawność.`;
+    },
     widok: "/app/mieszkaniec",
     wybierz: null,
     kontrole: "brak",
@@ -42,8 +45,10 @@ const K = {
   },
   miejsce1: {
     tytul: "To przejście jest pierwsze w rankingu",
-    mowimy:
-      "Od tego jednego przejścia zależą dojścia do 5 usług, w tym do przychodni z naszego przykładu. Ranking to analiza bazowa dla całego obszaru.",
+    mowimy: (p) => {
+      const n = p.ranking[0]?.uslugi.length ?? 0;
+      return `Od tego jednego przejścia zależą dojścia do ${n} ${odmiana(n, ["usługi", "usług", "usług"])}, w tym do przychodni z naszego przykładu. Ranking to analiza bazowa dla całego obszaru.`;
+    },
     widok: "/app/planista",
     wybierz: "miejsce1",
     kontrole: "brak",
@@ -66,7 +71,8 @@ const K = {
   },
   mieszkaniecPo: {
     tytul: "Mieszkaniec widzi zmianę",
-    mowimy: "Ta sama kontrola u mieszkańca: trasa udokumentowana 562 metry, ze źródłem i datą kontroli.",
+    mowimy: (p) =>
+      `Ta sama kontrola u mieszkańca: trasa udokumentowana ${przypadek(p).k?.weryfikacjiM ?? "?"} m, ze źródłem i datą kontroli.`,
     widok: "/app/mieszkaniec",
     wybierz: null,
     kontrole: "obnizony",
@@ -75,7 +81,7 @@ const K = {
     tytul: "Przypadek sprzeczny",
     mowimy: (p) => {
       const o = odcinekSprzeczny(p);
-      return `OpenStreetMap: ciąg pieszy jest. Model (${o?.model ?? "model wizyjny"}): przerwa, ocena ${o?.ocena.toFixed(2).replace(".", ",") ?? "?"}. Nie wybieramy za użytkownika: pokazujemy oba źródła z datami.`;
+      return `OpenStreetMap: ciąg pieszy jest. Model (${o?.model ? nazwaModelu(o.model) : "model wizyjny"}): przerwa, ocena ${o?.ocena.toFixed(2).replace(".", ",") ?? "?"}. Nie wybieramy za użytkownika: pokazujemy oba źródła z datami.`;
     },
     widok: "/app/planista",
     wybierz: "sprzeczne",
@@ -135,6 +141,14 @@ export const KROKI: Krok[] = [
   K.sentinel,
   K.wysoki,
 ];
+
+/** Główny przypadek demo: pierwszy kandydat z potoku (adres, cel, odległości). */
+function przypadek(p: Pilot) {
+  const k = p.kandydaci[0];
+  const b = k && p.budynki.find((x) => x.id === k.budynekId);
+  const u = k && p.uslugi.find((x) => x.id === k.uslugaId);
+  return { k, start: b?.adres ?? "Budynek mieszkalny", cel: u ? `${KATEGORIA_LABEL[u.kategoria]} ${u.nazwa.match(/"(.+)"/)?.[1] ?? u.nazwa}` : "usługa" };
+}
 
 /** Odcinek ze sprzecznymi źródłami do demo: wykrycie przerwy z najwyższą oceną. */
 function odcinekSprzeczny(pilot: Pilot) {
