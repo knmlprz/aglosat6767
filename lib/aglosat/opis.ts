@@ -4,7 +4,7 @@
 import type { Odcinek, Pilot } from "./types.ts";
 import { TYP_LABEL } from "./vocabulary.ts";
 
-function odlegloscM(a: [number, number], b: [number, number]): number {
+export function odlegloscM(a: [number, number], b: [number, number]): number {
   const kx = 111320 * Math.cos((a[0] * Math.PI) / 180);
   return Math.hypot((a[0] - b[0]) * 111320, (a[1] - b[1]) * kx);
 }

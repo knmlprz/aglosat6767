@@ -1,12 +1,6 @@
-"use client";
-
-import { AppShell } from "@/components/app-shell";
 import { MieszkaniecView } from "@/components/aglosat/mieszkaniec-view";
 
+// Bez powłoki z paskiem bocznym: ten widok jest aplikacją na telefon i ma własny, wąski chrom.
 export default function MieszkaniecPage() {
-  return (
-    <AppShell title="AgloSat — Mieszkaniec">
-      <MieszkaniecView />
-    </AppShell>
-  );
+  return <MieszkaniecView />;
 }

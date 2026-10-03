@@ -8,7 +8,7 @@ import L from "leaflet";
 import { MapContainer, TileLayer, ZoomControl, useMap } from "react-leaflet";
 import type { LatLon, Pilot } from "@/lib/aglosat/types.ts";
 import type { OcenaOdcinka } from "@/lib/aglosat/profile.ts";
-import { CECHA_LABEL, KATEGORIA_LABEL, TYP_LABEL } from "@/lib/aglosat/vocabulary.ts";
+import { CECHA_LABEL, KATEGORIA_LABEL, TYP_LABEL, opisIncline, opisWheelchair } from "@/lib/aglosat/vocabulary.ts";
 import { STYL_MAPY, kategoriaMapy, type KategoriaMapy } from "@/lib/aglosat/styl.ts";
 
 const ESRI_URL =
@@ -17,6 +17,9 @@ const ESRI_ATTR = "Podkład: Esri World Imagery; sieć piesza: © współtwórcy
 
 /** Użytkownik prosi o ograniczenie ruchu: mapa przeskakuje zamiast przelatywać. */
 const ograniczRuch = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/** Gdy na mapie leży trasa, cała sieć schodzi do tła: inaczej mgła i linie zagłuszają jej przebieg. */
+const PRZYGASZENIE = 0.3;
 
 type Wspolne = {
   pilot: Pilot;
@@ -55,13 +58,27 @@ export type TrasaNaMapie = {
  */
 type ZRendererem = { renderer: L.Canvas };
 
+/** Wiersz podpowiedzi z tagiem wheelchair z OSM (dla odcinka albo wejścia do usługi). */
+function wierszWheelchair(etykieta: string, w: string | null | undefined): string {
+  return `<br>${etykieta}: <b>${opisWheelchair(w)}</b>`;
+}
+
+function wierszIncline(i: string | null | undefined): string {
+  return `<br>nachylenie: <b>${opisIncline(i)}</b>`;
+}
+
+function podpowiedzUslugi(u: Pilot["uslugi"][number], przedrostek = ""): string {
+  return `${przedrostek}<b>${u.nazwa}</b><br>${KATEGORIA_LABEL[u.kategoria]}${wierszWheelchair("wejście", u.wejscie?.wheelchair)}`;
+}
+
 function WarstwaOdcinkow({
   pilot,
   oceny,
   widoczne,
   onWybierz,
+  przygasz,
   renderer,
-}: Pick<Wspolne, "pilot" | "oceny" | "widoczne" | "onWybierz"> & ZRendererem) {
+}: Pick<Wspolne, "pilot" | "oceny" | "widoczne" | "onWybierz"> & { przygasz: boolean } & ZRendererem) {
   const map = useMap();
   // Callback w refie: zmiana funkcji rodzica nie przebudowuje 4,7 tys. linii.
   const wybierz = useRef(onWybierz);
@@ -73,6 +90,7 @@ function WarstwaOdcinkow({
     const mgla = L.layerGroup();
     const linie = L.layerGroup();
     const inne = L.layerGroup();
+    const krycie = (o: number) => (przygasz ? o * PRZYGASZENIE : o);
 
     for (const odc of pilot.odcinki) {
       const ocena = oceny.get(odc.id);
@@ -81,13 +99,19 @@ function WarstwaOdcinkow({
       if (!widoczne.has(kat)) continue;
       const styl = STYL_MAPY[kat];
       if (styl.mgla) {
-        L.polyline(odc.geometria, { ...styl.mgla, renderer, interactive: false, lineCap: "round" }).addTo(mgla);
+        L.polyline(odc.geometria, {
+          ...styl.mgla,
+          opacity: krycie(styl.mgla.opacity),
+          renderer,
+          interactive: false,
+          lineCap: "round",
+        }).addTo(mgla);
       }
       const brak = ocena.nieznane.length ? `<br>brakuje: ${ocena.nieznane.map((c) => CECHA_LABEL[c]).join(", ")}` : "";
       const nie = ocena.niespelnione.length ? `<br>nie spełnia: ${ocena.niespelnione.map((c) => CECHA_LABEL[c]).join(", ")}` : "";
-      L.polyline(odc.geometria, { ...styl.linia, renderer })
+      L.polyline(odc.geometria, { ...styl.linia, opacity: krycie(styl.linia.opacity), renderer })
         .bindTooltip(
-          `<b>${TYP_LABEL[odc.typ] ?? odc.typ}</b>${odc.nazwa ? ` · ${odc.nazwa}` : ""}<br>${styl.etykieta}${brak}${nie}<br>${Math.round(odc.dlugoscM)} m`,
+          `<b>${TYP_LABEL[odc.typ] ?? odc.typ}</b>${odc.nazwa ? ` · ${odc.nazwa}` : ""}<br>${styl.etykieta}${brak}${nie}${wierszWheelchair("wózek", odc.osm?.wheelchair)}${wierszIncline(odc.osm?.incline)}<br>${Math.round(odc.dlugoscM)} m`,
           { sticky: true },
         )
         .on("click", () => wybierz.current(odc.id))
@@ -95,19 +119,27 @@ function WarstwaOdcinkow({
     }
 
     for (const s of pilot.strefyZmian) {
-      L.polygon(s.wielokat, { color: "#67e8f9", weight: 2, dashArray: "4 4", fillOpacity: 0.08, renderer, interactive: false })
-        .addTo(inne);
+      L.polygon(s.wielokat, {
+        color: "#67e8f9",
+        weight: 2,
+        opacity: krycie(1),
+        dashArray: "4 4",
+        fillOpacity: krycie(0.08),
+        renderer,
+        interactive: false,
+      }).addTo(inne);
     }
     for (const u of pilot.uslugi) {
       L.circleMarker([u.lat, u.lon], {
         radius: 6,
         color: "#0f172a",
         weight: 2,
+        opacity: krycie(1),
         fillColor: "#38bdf8",
-        fillOpacity: 1,
+        fillOpacity: krycie(1),
         renderer,
       })
-        .bindTooltip(`<b>${u.nazwa}</b><br>${KATEGORIA_LABEL[u.kategoria]}`)
+        .bindTooltip(podpowiedzUslugi(u))
         .addTo(inne);
     }
 
@@ -119,7 +151,7 @@ function WarstwaOdcinkow({
       linie.remove();
       inne.remove();
     };
-  }, [map, pilot, oceny, widoczne, renderer]);
+  }, [map, pilot, oceny, widoczne, przygasz, renderer]);
 
   return null;
 }
@@ -220,8 +252,11 @@ function WarstwaTrasy({ pilot, trasa, fokusTrasy, renderer }: Pick<Wspolne, "pil
     L.circleMarker(trasa.start, { radius: 8, color: "#0f172a", weight: 3, fillColor: "#ffffff", fillOpacity: 1, renderer })
       .bindTooltip("start: budynek mieszkalny")
       .addTo(grupa);
+    const usluga = pilot.uslugi.find(
+      (u) => Math.abs(u.lat - trasa.cel[0]) < 1e-6 && Math.abs(u.lon - trasa.cel[1]) < 1e-6,
+    );
     L.circleMarker(trasa.cel, { radius: 9, color: "#0f172a", weight: 3, fillColor: "#38bdf8", fillOpacity: 1, renderer })
-      .bindTooltip("cel: usługa")
+      .bindTooltip(usluga ? podpowiedzUslugi(usluga, "cel: ") : "cel: usługa")
       .addTo(grupa);
     grupa.addTo(map);
     return () => {
@@ -295,6 +330,17 @@ function WarstwaKontroli({
   return null;
 }
 
+/** Mapa zmienia rozmiar razem z panelem, bez zmiany rozmiaru okna; sam Leaflet tego nie zauważa. */
+function ObserwatorRozmiaru() {
+  const map = useMap();
+  useEffect(() => {
+    const obs = new ResizeObserver(() => map.invalidateSize({ animate: false }));
+    obs.observe(map.getContainer());
+    return () => obs.disconnect();
+  }, [map]);
+  return null;
+}
+
 export function MapaNiewiedzy(props: Wspolne) {
   const [s, w, n, e] = props.pilot.meta.obszar.bbox;
   const [renderer] = useState(() => L.canvas({ padding: 0.5, tolerance: 6 }));
@@ -312,12 +358,22 @@ export function MapaNiewiedzy(props: Wspolne) {
       style={{ height: "100%", width: "100%", background: "#0f172a" }}
     >
       <ZoomControl position="topleft" zoomInTitle="Przybliż mapę" zoomOutTitle="Oddal mapę" />
-      <TileLayer url={ESRI_URL} attribution={ESRI_ATTR} maxZoom={19} maxNativeZoom={19} className="agl-podklad" />
+      <ObserwatorRozmiaru />
+      {/* crossOrigin: kafelki pobrane po CORS może zapisać service worker, więc raz obejrzana mapa działa bez sieci */}
+      <TileLayer
+        url={ESRI_URL}
+        attribution={ESRI_ATTR}
+        maxZoom={19}
+        maxNativeZoom={19}
+        className="agl-podklad"
+        crossOrigin="anonymous"
+      />
       <WarstwaOdcinkow
         pilot={props.pilot}
         oceny={props.oceny}
         widoczne={props.widoczne}
         onWybierz={props.onWybierz}
+        przygasz={props.trasa !== null || props.kontrola != null}
         renderer={renderer}
       />
       <WarstwaTrasy pilot={props.pilot} trasa={props.trasa} fokusTrasy={props.fokusTrasy} renderer={renderer} />
