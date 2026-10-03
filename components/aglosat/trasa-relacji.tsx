@@ -3,12 +3,18 @@
 // Dojście budynek → usługa liczone na żywo: trasa piesza, udokumentowana i wymagająca weryfikacji.
 // Porównanie ze stanem wyjściowym pokazuje, co zmieniła kontrola w terenie.
 
-import type { Pilot } from "@/lib/aglosat/types.ts";
+import type { Odcinek, OsmDostepnosc, Pilot } from "@/lib/aglosat/types.ts";
 import type { TrasyRelacji } from "@/lib/aglosat/routing.ts";
-import { KATEGORIA_LABEL, TRASA_LABEL, odmiana } from "@/lib/aglosat/vocabulary.ts";
+import {
+  CECHA_LABEL,
+  KATEGORIA_LABEL,
+  OSM_DOSTEPNOSC_LABEL,
+  OSM_DOSTEPNOSC_POLA,
+  TRASA_LABEL,
+  odmiana,
+} from "@/lib/aglosat/vocabulary.ts";
 import { lokalizacja } from "@/lib/aglosat/opis.ts";
 import type { OcenaOdcinka } from "@/lib/aglosat/profile.ts";
-import { CECHA_LABEL } from "@/lib/aglosat/vocabulary.ts";
 
 export type Relacja = { budynekId: string; uslugaId: string };
 
@@ -169,7 +175,42 @@ export function TrasaRelacji({
         Start: {budynek.adres ?? "budynek mieszkalny"}. Cel: {usluga.nazwa}
         {usluga.wejscie?.wheelchair ? ` (wejście w OSM: wheelchair=${usluga.wejscie.wheelchair})` : " (brak danych o wejściu w OSM)"}.
       </p>
+      <PodsumowanieOsmTrasy
+        ids={(dok ?? wer ?? trasy.piesza)?.odcinki ?? []}
+        odcinki={odcinki}
+      />
     </section>
+  );
+}
+
+function PodsumowanieOsmTrasy({ ids, odcinki }: { ids: string[]; odcinki: Map<string, Odcinek> }) {
+  if (ids.length === 0) return null;
+  const zbiory = Object.fromEntries(OSM_DOSTEPNOSC_POLA.map((k) => [k, new Set<string>()])) as Record<
+    keyof OsmDostepnosc,
+    Set<string>
+  >;
+  for (const id of ids) {
+    const osm = odcinki.get(id)?.osm;
+    if (!osm) continue;
+    for (const k of OSM_DOSTEPNOSC_POLA) if (osm[k]) zbiory[k].add(osm[k]!);
+  }
+  const wiersze = OSM_DOSTEPNOSC_POLA.filter((k) => zbiory[k].size > 0).map(
+    (k) => `${OSM_DOSTEPNOSC_LABEL[k]}: ${[...zbiory[k]].join(", ")}`,
+  );
+  if (wiersze.length === 0) {
+    return <p className="mt-2 text-xs text-slate-600">Na tej trasie OSM nie ma tagów dostępności (wheelchair, surface, smoothness, …).</p>;
+  }
+  return (
+    <div className="mt-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
+      <h4 className="text-xs font-semibold uppercase text-slate-600">Dane OSM na trasie</h4>
+      <ul className="mt-1 flex flex-col gap-0.5">
+        {wiersze.map((w) => (
+          <li key={w} className="text-xs text-slate-800">
+            {w}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

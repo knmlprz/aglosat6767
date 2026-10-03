@@ -37,6 +37,7 @@ import {
   formatujWartosc,
   odmiana,
 } from "@/lib/aglosat/vocabulary.ts";
+import { DaneOsmOdcinka } from "@/components/aglosat/dane-osm-odcinka";
 
 const MapaNiewiedzy = dynamic(
   () => import("@/components/aglosat/mapa-niewiedzy").then((m) => m.MapaNiewiedzy),
@@ -559,6 +560,7 @@ function ListaOdcinkow({
               <p className="text-xs text-slate-700">
                 {mm.rodzaj === "utrudnienie" ? "utrudnienie" : mm.rodzaj === "sprzeczne" ? "sprzeczne źródła" : "brak informacji"}
               </p>
+              <DaneOsmOdcinka osm={mm.odcinek.osm} kompakt />
               <ul className="mt-1 flex flex-col gap-0.5">
                 {mm.cechy.map((c) => (
                   <li key={c} className="text-xs text-slate-800">

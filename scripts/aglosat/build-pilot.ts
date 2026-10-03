@@ -14,9 +14,11 @@ import { PROFIL_DOMYSLNY } from "../../lib/aglosat/profile.ts";
 import { ocenWszystkie } from "../../lib/aglosat/routing.ts";
 import { policzAnalize } from "../../lib/aglosat/impact.ts";
 import { OPIS_ISTNIENIA_W_OSM, OPIS_ZALOZENIA_KRAWEZNIKA, zwinPilot } from "../../lib/aglosat/data.ts";
+import { osmDostepnoscZTagow } from "../../lib/aglosat/osm.ts";
+import type { OsmDostepnosc } from "../../lib/aglosat/types.ts";
 
 type N = { id: number; lat: number; lon: number; tags?: Record<string, string> };
-type W = { id: number; nodes: number[]; tags: Record<string, string> };
+type W = { id: number; nodes: number[]; tags: Record<string, string> } & Partial<OsmDostepnosc>;
 const surowe = JSON.parse(readFileSync("data/aglosat/osm-extract.json", "utf8")) as {
   pobrano: string; nodes: N[]; ways: W[];
 };
@@ -239,6 +241,7 @@ for (const w of linie) {
       id: `s${w.id}_${odcinki.length}`, a, b, geometria, dlugoscM: Math.round(dl * 10) / 10, osmWayId: w.id, typ,
       ...(w.tags.name ? { nazwa: w.tags.name } : {}),
       dowody: dowodyOdcinka(w, ids, typ),
+      osm: osmDostepnoscZTagow(w.tags),
     });
   }
 }
