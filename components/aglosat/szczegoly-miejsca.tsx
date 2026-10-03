@@ -2,7 +2,8 @@
 
 // Szczegóły miejsca: dlaczego jest ważne, co sprawdzić w terenie, co wiadomo i skąd.
 
-import type { Cecha, Pilot, Profil, StanCechy, Status, WynikWplywu } from "@/lib/aglosat/types.ts";
+import type { Cecha, Pilot, Profil, StanCechy, Status, Weryfikacja, WynikWplywu } from "@/lib/aglosat/types.ts";
+import { FormularzKontroli } from "@/components/aglosat/formularz-kontroli";
 import type { OcenaOdcinka } from "@/lib/aglosat/profile.ts";
 import { stanOdcinka } from "@/lib/aglosat/status.ts";
 import { lokalizacja } from "@/lib/aglosat/opis.ts";
@@ -33,6 +34,9 @@ export function SzczegolyMiejsca({
   pozycja,
   ocena,
   profil,
+  weryfikacje,
+  onDodaj,
+  onCofnij,
   onZamknij,
 }: {
   pilot: Pilot;
@@ -41,10 +45,19 @@ export function SzczegolyMiejsca({
   pozycja: number | null;
   ocena: OcenaOdcinka;
   profil: Profil;
+  weryfikacje: Weryfikacja[];
+  onDodaj: (w: Weryfikacja[]) => void;
+  onCofnij: (idWpisu: string) => void;
   onZamknij: () => void;
 }) {
   const odc = pilot.odcinki.find((o) => o.id === odcinekId)!;
-  const stany = stanOdcinka(odc, pilot.obserwacje, []);
+  const stany = stanOdcinka(odc, pilot.obserwacje, weryfikacje);
+  // Odrzucone wykrycia nie liczą się do statusu, ale pokazujemy je: tak wygląda błąd modelu.
+  const naMiejscu = new Set(wynik?.odcinki ?? [odcinekId]);
+  const odrzucone = weryfikacje.flatMap((w) => {
+    const o = w.odrzucaObserwacje ? pilot.obserwacje.find((x) => x.id === w.odrzucaObserwacje) : undefined;
+    return o && naMiejscu.has(o.odcinekId) ? [{ o, w }] : [];
+  });
   const kat = STYL_MAPY[kategoriaMapy(ocena)];
   const liczbaOdcinkow = wynik?.odcinki.length ?? 1;
   const dlugosc = wynik
@@ -123,11 +136,38 @@ export function SzczegolyMiejsca({
         </div>
       )}
 
+      <FormularzKontroli
+        odcinki={wynik?.odcinki ?? [odcinekId]}
+        doSprawdzenia={ocena.nieznane}
+        obserwacje={pilot.obserwacje}
+        weryfikacje={weryfikacje}
+        onDodaj={onDodaj}
+        onCofnij={onCofnij}
+      />
+
       {odc.strefaZmian && (
         <p className="rounded-lg border border-cyan-300 bg-cyan-50 p-2 text-xs text-cyan-900">
           Odcinek leży w strefie sygnału możliwej zmiany (Sentinel-2): dane mogą być nieaktualne.{" "}
           <span className="text-amber-700">Ilustracja, {ETYKIETA_PRZYKLADOWE}.</span>
         </p>
+      )}
+
+      {odrzucone.length > 0 && (
+        <div className="rounded-lg border border-slate-200 bg-slate-50 p-2.5">
+          <h4 className="text-xs font-bold text-slate-700">Wykrycia modelu odrzucone w terenie</h4>
+          <ul className="mt-1 flex flex-col gap-0.5">
+            {odrzucone.map(({ o, w }) => (
+              <li key={o.id} className="text-xs text-slate-600">
+                <s>
+                  model wizyjny: {formatujWartosc("ciaglosc", o.klasa)} (ocena {o.ocena.toFixed(2)}, data obrazu {o.dataObrazu})
+                </s>{" "}
+                → kontrola {w.dataKontroli}: {formatujWartosc(w.cecha, w.wartosc)}
+                {w.notatka && <>, „{w.notatka}”</>}
+                {o.przykladowe && <span className="ml-1 rounded bg-amber-100 px-1 text-amber-800">{ETYKIETA_PRZYKLADOWE}</span>}
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
 
       <div>
@@ -170,7 +210,7 @@ function WierszCechy({ cecha, stan }: { cecha: Cecha; stan: StanCechy }) {
           {stan.dowody.map((d, i) => (
             <li key={i} className="text-xs text-slate-500">
               {ZRODLO_LABEL[d.zrodlo]}: {formatujWartosc(cecha, d.wartosc)} · {DATA_LABEL[d.rodzajDaty]} {d.data}
-              {d.ref && <> · <code className="text-[11px]">{d.ref}</code></>}
+              {d.ref && d.zrodlo !== "teren" && <> · <code className="text-[11px]">{d.ref}</code></>}
               {d.opis && <> · {d.opis}</>}
               {d.przykladowe && <span className="ml-1 rounded bg-amber-100 px-1 text-amber-800">{ETYKIETA_PRZYKLADOWE}</span>}
             </li>

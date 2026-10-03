@@ -1,16 +1,21 @@
 "use client";
 
-// Widok planisty: mianownik, mapa niewiedzy, ranking miejsc do kontroli i szczegóły miejsca.
+// Widok planisty: mianownik, dojście przeliczane na żywo, mapa niewiedzy, ranking miejsc
+// do kontroli i szczegóły miejsca z wpisem kontroli. Ranking i mianownik to analiza bazowa;
+// na żywo przeliczają się stan odcinków, mapa i trasy.
 // Legenda z liczbami jest jednocześnie tekstową alternatywą dla mapy.
 
 import { useCallback, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { usePilot } from "@/lib/aglosat/use-pilot.ts";
-import { ocenWszystkie } from "@/lib/aglosat/routing.ts";
+import { ocenWszystkie, trasyRelacji, zbudujGraf } from "@/lib/aglosat/routing.ts";
 import { PROFIL_DOMYSLNY } from "@/lib/aglosat/profile.ts";
 import { ETYKIETA_ANALIZA_BAZOWA, ETYKIETA_PRZYKLADOWE } from "@/lib/aglosat/vocabulary.ts";
 import { KOLEJNOSC_KATEGORII, STYL_MAPY, kategoriaMapy, type KategoriaMapy } from "@/lib/aglosat/styl.ts";
-import type { WynikWplywu } from "@/lib/aglosat/types.ts";
+import type { Weryfikacja, WynikWplywu } from "@/lib/aglosat/types.ts";
+import { idWpisu } from "@/lib/aglosat/weryfikacja.ts";
+import { lokalizacja } from "@/lib/aglosat/opis.ts";
+import { TrasaRelacji, type Relacja } from "@/components/aglosat/trasa-relacji";
 import { RankingLista } from "@/components/aglosat/ranking-lista";
 import { SzczegolyMiejsca } from "@/components/aglosat/szczegoly-miejsca";
 
@@ -32,11 +37,60 @@ export function PlanistaView() {
   const [widoczne, setWidoczne] = useState<Set<KategoriaMapy>>(() => new Set(KOLEJNOSC_KATEGORII));
   const [wybranyOdcinek, setWybranyOdcinek] = useState<string | null>(null);
   const wybierz = useCallback((id: string) => setWybranyOdcinek(id), []);
+  const [weryfikacje, setWeryfikacje] = useState<Weryfikacja[]>([]);
+  const [wybranaRelacja, setRelacja] = useState<Relacja | null>(null);
+  const [fokusTrasy, setFokusTrasy] = useState(0);
 
   const pilot = wczytanie.stan === "gotowe" ? wczytanie.pilot : null;
-  const oceny = useMemo(
+  const graf = useMemo(() => (pilot ? zbudujGraf(pilot.odcinki) : null), [pilot]);
+  const ocenyBazowe = useMemo(
     () => (pilot ? ocenWszystkie(pilot.odcinki, pilot.obserwacje, [], profil) : null),
     [pilot, profil],
+  );
+  // Stan po kontrolach z tej sesji: od niego zależą mapa, trasy i panel miejsca.
+  const oceny = useMemo(
+    () => (pilot ? (weryfikacje.length ? ocenWszystkie(pilot.odcinki, pilot.obserwacje, weryfikacje, profil) : ocenyBazowe) : null),
+    [pilot, weryfikacje, profil, ocenyBazowe],
+  );
+
+  // Domyślnie skrajny przypadek: pierwszy kandydat z analizy.
+  const relacja = useMemo<Relacja | null>(() => {
+    if (wybranaRelacja) return wybranaRelacja;
+    const k = pilot?.kandydaci[0];
+    return k ? { budynekId: k.budynekId, uslugaId: k.uslugaId } : null;
+  }, [wybranaRelacja, pilot]);
+  const punkty = useMemo(() => {
+    if (!pilot || !relacja) return null;
+    const b = pilot.budynki.find((x) => x.id === relacja.budynekId);
+    const u = pilot.uslugi.find((x) => x.id === relacja.uslugaId);
+    return b && u ? { b, u } : null;
+  }, [pilot, relacja]);
+  const trasy = useMemo(
+    () => (graf && oceny && punkty ? trasyRelacji(graf, oceny, punkty.b.wezel, punkty.u.wezel) : null),
+    [graf, oceny, punkty],
+  );
+  const trasyBazowe = useMemo(
+    () => (graf && ocenyBazowe && punkty ? trasyRelacji(graf, ocenyBazowe, punkty.b.wezel, punkty.u.wezel) : null),
+    [graf, ocenyBazowe, punkty],
+  );
+  const trasaNaMapie = useMemo(
+    () =>
+      trasy && punkty
+        ? {
+            piesza: trasy.piesza?.odcinki ?? null,
+            udokumentowana: trasy.udokumentowana?.odcinki ?? null,
+            weryfikacji: trasy.weryfikacji?.odcinki ?? null,
+            start: [punkty.b.lat, punkty.b.lon] as [number, number],
+            cel: [punkty.u.lat, punkty.u.lon] as [number, number],
+          }
+        : null,
+    [trasy, punkty],
+  );
+  const sprawdzone = useMemo(() => new Set(weryfikacje.map((w) => w.odcinekId)), [weryfikacje]);
+  const dodajKontrole = useCallback((w: Weryfikacja[]) => setWeryfikacje((prev) => [...prev, ...w]), []);
+  const cofnijKontrole = useCallback(
+    (id: string) => setWeryfikacje((prev) => prev.filter((w) => idWpisu(w) !== id)),
+    [],
   );
   const podsumowanie = useMemo(() => {
     if (!pilot || !oceny) return null;
@@ -68,6 +122,11 @@ export function PlanistaView() {
     [pilot],
   );
 
+  const sprzeczne = useMemo(
+    () => (pilot && oceny ? pilot.odcinki.filter((o) => oceny.get(o.id)!.sprzeczne.length > 0) : []),
+    [pilot, oceny],
+  );
+
   if (wczytanie.stan === "blad") {
     return (
       <div role="alert" className="mx-4 lg:mx-6 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">
@@ -75,7 +134,7 @@ export function PlanistaView() {
       </div>
     );
   }
-  if (!pilot || !oceny || !podsumowanie) {
+  if (!pilot || !oceny || !podsumowanie || !ocenyBazowe) {
     return (
       <div className="px-4 lg:px-6" aria-busy="true">
         <div className="h-24 animate-pulse rounded-xl bg-slate-100" />
@@ -127,6 +186,24 @@ export function PlanistaView() {
         </div>
       </section>
 
+      {relacja && trasy && trasyBazowe && (
+        <TrasaRelacji
+          pilot={pilot}
+          relacja={relacja}
+          trasy={trasy}
+          bazowe={trasyBazowe}
+          oceny={oceny}
+          liczbaKontroli={new Set(weryfikacje.map(idWpisu)).size}
+          onZmienRelacje={(r) => {
+            setRelacja(r);
+            setFokusTrasy((f) => f + 1);
+          }}
+          onWybierzOdcinek={wybierz}
+          onPokazNaMapie={() => setFokusTrasy((f) => f + 1)}
+          onPrzywroc={() => setWeryfikacje([])}
+        />
+      )}
+
       <section aria-labelledby="mapa-tytul" className="grid gap-4 lg:grid-cols-[1fr_380px]">
         <h3 id="mapa-tytul" className="sr-only">
           Mapa odcinków według stanu wiedzy
@@ -139,6 +216,8 @@ export function PlanistaView() {
             wybrane={wybrane}
             czolo={czolo}
             onWybierz={wybierz}
+            trasa={trasaNaMapie}
+            fokusTrasy={fokusTrasy}
           />
         </div>
 
@@ -151,10 +230,13 @@ export function PlanistaView() {
               pozycja={wybraneMiejsce?.pozycja ?? null}
               ocena={oceny.get(wybraneMiejsce?.wynik.odcinekId ?? wybranyOdcinek)!}
               profil={profil}
+              weryfikacje={weryfikacje}
+              onDodaj={dodajKontrole}
+              onCofnij={cofnijKontrole}
               onZamknij={() => setWybranyOdcinek(null)}
             />
           ) : (
-            <RankingLista pilot={pilot} wybrany={null} onWybierz={wybierz} />
+            <RankingLista pilot={pilot} wybrany={null} onWybierz={wybierz} sprawdzone={sprawdzone} />
           )}
         </div>
       </section>
@@ -212,6 +294,31 @@ export function PlanistaView() {
           </div>
         )}
       </fieldset>
+
+      {sprzeczne.length > 0 && (
+        <section aria-labelledby="sprzeczne-tytul" className="rounded-2xl border border-fuchsia-200 bg-fuchsia-50/50 p-4">
+          <h3 id="sprzeczne-tytul" className="text-sm font-bold text-slate-800">
+            Sprzeczne źródła: {sprzeczne.length}
+          </h3>
+          <p className="text-xs text-slate-600">
+            OpenStreetMap opisuje odcinek jako ciągły, a model wizyjny wskazuje przerwę. Pokazujemy oba źródła; rozstrzyga
+            kontrola w terenie. <span className="text-amber-700">Wykrycia modelu: {ETYKIETA_PRZYKLADOWE}.</span>
+          </p>
+          <ul className="mt-2 flex flex-wrap gap-2">
+            {sprzeczne.map((o) => (
+              <li key={o.id}>
+                <button
+                  type="button"
+                  onClick={() => wybierz(o.id)}
+                  className="rounded-lg border border-fuchsia-300 bg-white px-2.5 py-1 text-sm text-slate-800 hover:bg-fuchsia-50"
+                >
+                  {lokalizacja(o, pilot)}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   );
 }

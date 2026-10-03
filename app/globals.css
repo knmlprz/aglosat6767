@@ -165,3 +165,30 @@ body {
   font: 700 12px/1 var(--font-sans), sans-serif;
   box-shadow: 0 1px 4px rgb(0 0 0 / 0.5);
 }
+
+.agl-puls {
+  display: block;
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
+  border: 3px solid #22d3ee;
+  animation: agl-puls 1.6s ease-out infinite;
+}
+
+@keyframes agl-puls {
+  from {
+    transform: scale(0.4);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .agl-puls {
+    animation: none;
+    opacity: 0.9;
+  }
+}

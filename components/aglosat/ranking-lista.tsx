@@ -13,10 +13,13 @@ export function RankingLista({
   pilot,
   wybrany,
   onWybierz,
+  sprawdzone,
 }: {
   pilot: Pilot;
   wybrany: WynikWplywu | null;
   onWybierz: (odcinekId: string) => void;
+  /** Odcinki z kontrolą w tej sesji. */
+  sprawdzone: Set<string>;
 }) {
   const [wszystkie, setWszystkie] = useState(false);
   const odcinki = new Map(pilot.odcinki.map((o) => [o.id, o]));
@@ -29,7 +32,8 @@ export function RankingLista({
           Miejsca, których sprawdzenie najbardziej zmienia dostęp do usług
         </h3>
         <p className="mt-1 text-xs text-slate-500">
-          Priorytet weryfikacji: co się stanie z dojściami, jeśli miejsce okaże się nieprzejezdne. {ETYKIETA_ANALIZA_BAZOWA}.
+          Priorytet weryfikacji: co się stanie z dojściami, jeśli miejsce okaże się nieprzejezdne. {ETYKIETA_ANALIZA_BAZOWA}:
+          kontrole z tej sesji nie zmieniają kolejności.
         </p>
       </div>
       <ol className="flex flex-col gap-1.5">
@@ -56,6 +60,11 @@ export function RankingLista({
                 </span>
                 <span className="flex min-w-0 flex-col gap-1">
                   <span className="truncate text-sm font-semibold text-slate-900">{lokalizacja(odc, pilot)}</span>
+                  {r.odcinki.some((id) => sprawdzone.has(id)) && (
+                    <span className="w-fit rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-900">
+                      sprawdzone w tej sesji
+                    </span>
+                  )}
                   <span className="text-xs text-slate-600">
                     {r.utraconeRelacje > 0 && <>traci trasę: {r.utraconeRelacje} </>}
                     {r.utraconeRelacje > 0 && r.wydluzoneRelacje > 0 && "· "}

@@ -6,7 +6,7 @@
 import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import { MapContainer, TileLayer, useMap } from "react-leaflet";
-import type { Pilot } from "@/lib/aglosat/types.ts";
+import type { LatLon, Pilot } from "@/lib/aglosat/types.ts";
 import type { OcenaOdcinka } from "@/lib/aglosat/profile.ts";
 import { CECHA_LABEL, KATEGORIA_LABEL, TYP_LABEL } from "@/lib/aglosat/vocabulary.ts";
 import { STYL_MAPY, kategoriaMapy, type KategoriaMapy } from "@/lib/aglosat/styl.ts";
@@ -24,6 +24,17 @@ type Wspolne = {
   /** Pierwsze miejsca rankingu z numerami na mapie. */
   czolo: { odcinekId: string; pozycja: number }[];
   onWybierz: (odcinekId: string) => void;
+  /** Dojście pokazywane na mapie (odcinki tras) i licznik żądań „pokaż na mapie”. */
+  trasa: TrasaNaMapie | null;
+  fokusTrasy: number;
+};
+
+export type TrasaNaMapie = {
+  piesza: string[] | null;
+  udokumentowana: string[] | null;
+  weryfikacji: string[] | null;
+  start: LatLon;
+  cel: LatLon;
 };
 
 /**
@@ -32,7 +43,13 @@ type Wspolne = {
  */
 type ZRendererem = { renderer: L.Canvas };
 
-function WarstwaOdcinkow({ pilot, oceny, widoczne, onWybierz, renderer }: Omit<Wspolne, "wybrane" | "czolo"> & ZRendererem) {
+function WarstwaOdcinkow({
+  pilot,
+  oceny,
+  widoczne,
+  onWybierz,
+  renderer,
+}: Pick<Wspolne, "pilot" | "oceny" | "widoczne" | "onWybierz"> & ZRendererem) {
   const map = useMap();
   // Callback w refie: zmiana funkcji rodzica nie przebudowuje 4,7 tys. linii.
   const wybierz = useRef(onWybierz);
@@ -95,7 +112,14 @@ function WarstwaOdcinkow({ pilot, oceny, widoczne, onWybierz, renderer }: Omit<W
   return null;
 }
 
-function WarstwaWyboru({ pilot, wybrane, czolo, onWybierz, renderer }: Omit<Wspolne, "oceny" | "widoczne"> & ZRendererem) {
+function WarstwaWyboru({
+  pilot,
+  oceny,
+  wybrane,
+  czolo,
+  onWybierz,
+  renderer,
+}: Pick<Wspolne, "pilot" | "oceny" | "wybrane" | "czolo" | "onWybierz"> & ZRendererem) {
   const map = useMap();
   const wybierz = useRef(onWybierz);
   useEffect(() => {
@@ -128,7 +152,7 @@ function WarstwaWyboru({ pilot, wybrane, czolo, onWybierz, renderer }: Omit<Wspo
     };
   }, [map, pilot, czolo]);
 
-  // Podświetlenie wybranego miejsca i przybliżenie.
+  // Podświetlenie wybranego miejsca. Odrysowane po każdym przeliczeniu (oceny), żeby leżało nad siecią.
   useEffect(() => {
     if (wybrane.length === 0) return;
     const odcinki = pilot.odcinki.filter((o) => wybrane.includes(o.id));
@@ -137,13 +161,68 @@ function WarstwaWyboru({ pilot, wybrane, czolo, onWybierz, renderer }: Omit<Wspo
       L.polyline(o.geometria, { color: "#22d3ee", weight: 12, opacity: 0.55, lineCap: "round", interactive: false, renderer }).addTo(grupa);
       L.polyline(o.geometria, { color: "#ecfeff", weight: 3, opacity: 1, interactive: false, renderer }).addTo(grupa);
     }
+    const srodek = odcinki[0]?.geometria[Math.floor(odcinki[0].geometria.length / 2)];
+    if (srodek) {
+      L.marker(srodek, {
+        icon: L.divIcon({ className: "agl-pin-icon", html: '<span class="agl-puls"></span>', iconSize: [36, 36] }),
+        interactive: false,
+        keyboard: false,
+      }).addTo(grupa);
+    }
     grupa.addTo(map);
-    const granice = L.latLngBounds(odcinki.flatMap((o) => o.geometria));
-    map.flyToBounds(granice.pad(4), { maxZoom: 18, duration: 0.6 });
     return () => {
       grupa.remove();
     };
-  }, [map, pilot, wybrane, renderer]);
+  }, [map, pilot, oceny, wybrane, renderer]);
+
+  // Przybliżenie tylko przy zmianie wyboru.
+  useEffect(() => {
+    if (wybrane.length === 0) return;
+    const geometrie = pilot.odcinki.filter((o) => wybrane.includes(o.id)).flatMap((o) => o.geometria);
+    map.flyToBounds(L.latLngBounds(geometrie).pad(4), { maxZoom: 18, duration: 0.6 });
+  }, [map, pilot, wybrane]);
+
+  return null;
+}
+
+function WarstwaTrasy({ pilot, trasa, fokusTrasy, renderer }: Pick<Wspolne, "pilot" | "trasa" | "fokusTrasy"> & ZRendererem) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!trasa) return;
+    const odcinki = new Map(pilot.odcinki.map((o) => [o.id, o]));
+    const linie = (ids: string[] | null) => (ids ?? []).map((id) => odcinki.get(id)!.geometria);
+    const grupa = L.layerGroup();
+    const rysuj = (ids: string[] | null, kolor: string, waga: number, dash?: string) => {
+      for (const g of linie(ids)) {
+        L.polyline(g, { color: "#0f172a", weight: waga + 3, opacity: 0.9, interactive: false, renderer }).addTo(grupa);
+        L.polyline(g, { color: kolor, weight: waga, opacity: 1, dashArray: dash, interactive: false, renderer }).addTo(grupa);
+      }
+    };
+    rysuj(trasa.piesza, "#cbd5e1", 2, "2 5");
+    rysuj(trasa.weryfikacji, "#fbbf24", 5, "8 6");
+    rysuj(trasa.udokumentowana, "#4ade80", 6);
+    L.circleMarker(trasa.start, { radius: 8, color: "#0f172a", weight: 3, fillColor: "#ffffff", fillOpacity: 1, renderer })
+      .bindTooltip("start: budynek mieszkalny")
+      .addTo(grupa);
+    L.circleMarker(trasa.cel, { radius: 9, color: "#0f172a", weight: 3, fillColor: "#38bdf8", fillOpacity: 1, renderer })
+      .bindTooltip("cel: usługa")
+      .addTo(grupa);
+    grupa.addTo(map);
+    return () => {
+      grupa.remove();
+    };
+  }, [map, pilot, trasa, renderer]);
+
+  // Przybliżenie do dojścia tylko na żądanie, nie po każdym przeliczeniu.
+  useEffect(() => {
+    if (!fokusTrasy || !trasa) return;
+    const odcinki = new Map(pilot.odcinki.map((o) => [o.id, o]));
+    const ids = [...(trasa.piesza ?? []), ...(trasa.weryfikacji ?? []), ...(trasa.udokumentowana ?? [])];
+    const punkty = [trasa.start, trasa.cel, ...ids.flatMap((id) => odcinki.get(id)!.geometria)];
+    map.flyToBounds(L.latLngBounds(punkty).pad(0.15), { maxZoom: 18, duration: 0.6 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reagujemy tylko na nowe żądanie
+  }, [map, fokusTrasy]);
 
   return null;
 }
@@ -171,8 +250,10 @@ export function MapaNiewiedzy(props: Wspolne) {
         onWybierz={props.onWybierz}
         renderer={renderer}
       />
+      <WarstwaTrasy pilot={props.pilot} trasa={props.trasa} fokusTrasy={props.fokusTrasy} renderer={renderer} />
       <WarstwaWyboru
         pilot={props.pilot}
+        oceny={props.oceny}
         wybrane={props.wybrane}
         czolo={props.czolo}
         onWybierz={props.onWybierz}
