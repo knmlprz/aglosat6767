@@ -8,6 +8,7 @@ import { PROFIL_DOMYSLNY, ocenCeche } from "../../lib/aglosat/profile.ts";
 import { stanOdcinka, CECHY } from "../../lib/aglosat/status.ts";
 import { ocenWszystkie, trasyRelacji, zbudujGraf } from "../../lib/aglosat/routing.ts";
 import { policzAnalize } from "../../lib/aglosat/impact.ts";
+import { DOMYSLNE_PARAMETRY, ulozTraseKontroli } from "../../lib/aglosat/kontrola.ts";
 
 const p: Pilot = rozwinPilot(JSON.parse(readFileSync("public/aglosat/pilot.json", "utf8")) as PilotZapisany);
 let bledy = 0;
@@ -122,6 +123,22 @@ sprawdz(
   p.obserwacje.every((o) => o.wycinek && p.wycinki.some((w) => w.odcinekId === o.odcinekId && w.dataObrazu === o.dataObrazu)),
   "każda obserwacja modelu ma wycinek z tą samą datą obrazu",
 );
+
+// 8. Trasa kontroli: mieści się w czasie, jest ciągłym spacerem i od startu przy przypadku głównym obejmuje miejsce 1.
+if (k) {
+  const start = p.budynki.find((b) => b.id === k.budynekId)!;
+  const tk = ulozTraseKontroli(graf, p, start.wezel, DOMYSLNE_PARAMETRY);
+  const odc = new Map(p.odcinki.map((o) => [o.id, o]));
+  const ciagla = tk.odcinki.every((id, i) => {
+    if (i === 0) return [odc.get(id)!.a, odc.get(id)!.b].includes(start.wezel);
+    const a = odc.get(tk.odcinki[i - 1])!, c = odc.get(id)!;
+    return [a.a, a.b].some((w) => w === c.a || w === c.b);
+  });
+  sprawdz(
+    tk.razemMin <= DOMYSLNE_PARAMETRY.budzetMin && ciagla && tk.przystanki.some((x) => x.pozycjaWRankingu === 1),
+    `trasa kontroli ${DOMYSLNE_PARAMETRY.budzetMin} min: ${tk.przystanki.length} miejsc, ${tk.razemMin} min, ciągła, obejmuje miejsce 1`,
+  );
+}
 
 console.log(bledy === 0 ? "\nWszystkie reguły spełnione." : `\n${bledy} reguł nie spełniono.`);
 process.exit(bledy === 0 ? 0 : 1);

@@ -192,3 +192,9 @@ body {
     opacity: 0.9;
   }
 }
+
+.agl-numer-kontrola {
+  width: 30px;
+  border-radius: 8px;
+  background: #6d28d9;
+}

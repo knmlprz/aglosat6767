@@ -16,6 +16,9 @@ import { idWpisu } from "@/lib/aglosat/weryfikacja.ts";
 import { useAglosat } from "@/components/aglosat/stan-aglosat";
 import { lokalizacja } from "@/lib/aglosat/opis.ts";
 import { TrasaRelacji, type Relacja } from "@/components/aglosat/trasa-relacji";
+import { TrasaKontroliPanel, type UstawieniaKontroli } from "@/components/aglosat/trasa-kontroli";
+import type { KontrolaNaMapie } from "@/components/aglosat/mapa-niewiedzy";
+import { DOMYSLNE_PARAMETRY, ulozTraseKontroli } from "@/lib/aglosat/kontrola.ts";
 import { RankingLista } from "@/components/aglosat/ranking-lista";
 import { SzczegolyMiejsca } from "@/components/aglosat/szczegoly-miejsca";
 
@@ -39,6 +42,11 @@ export function PlanistaView() {
   const wybierz = useCallback((id: string) => setWybranyOdcinek(id), []);
   const [wybranaRelacja, setRelacja] = useState<Relacja | null>(null);
   const [fokusTrasy, setFokusTrasy] = useState(0);
+  const [zakladka, setZakladka] = useState<"ranking" | "kontrola">("ranking");
+  // Mapa pokazuje albo dojście, albo trasę kontroli, żeby linie się nie nakładały.
+  const [pokazKontrole, setPokazKontrole] = useState(false);
+  const [fokusKontroli, setFokusKontroli] = useState(0);
+  const [ustawieniaKontroli, setUstawieniaKontroli] = useState<UstawieniaKontroli | null>(null);
 
   const pilot = wczytanie.stan === "gotowe" ? wczytanie.pilot : null;
   const graf = useMemo(() => (pilot ? zbudujGraf(pilot.odcinki) : null), [pilot]);
@@ -86,6 +94,31 @@ export function PlanistaView() {
     [trasy, punkty],
   );
   const sprawdzone = useMemo(() => new Set(weryfikacje.map((w) => w.odcinekId)), [weryfikacje]);
+
+  // Trasa kontroli liczona tutaj, żeby przetrwała otwarcie szczegółów przystanku
+  // i przeliczała się po każdej kontroli (sprawdzone miejsca wypadają).
+  const ustawienia = useMemo<UstawieniaKontroli | null>(
+    () => ustawieniaKontroli ?? (relacja ? { startId: relacja.budynekId, ...DOMYSLNE_PARAMETRY } : null),
+    [ustawieniaKontroli, relacja],
+  );
+  const trasaKontroli = useMemo(() => {
+    if (!graf || !pilot || !ustawienia) return null;
+    const start = pilot.budynki.find((b) => b.id === ustawienia.startId);
+    return start ? ulozTraseKontroli(graf, pilot, start.wezel, { ...DOMYSLNE_PARAMETRY, ...ustawienia }, sprawdzone) : null;
+  }, [graf, pilot, ustawienia, sprawdzone]);
+  const kontrolaNaMapie = useMemo<KontrolaNaMapie | null>(() => {
+    if (!pokazKontrole || !trasaKontroli || !pilot || !ustawienia) return null;
+    const odc = new Map(pilot.odcinki.map((o) => [o.id, o]));
+    const start = pilot.budynki.find((b) => b.id === ustawienia.startId)!;
+    return {
+      odcinki: trasaKontroli.odcinki,
+      start: [start.lat, start.lon],
+      przystanki: trasaKontroli.przystanki.map((p) => {
+        const g = odc.get(p.odcinekId)!.geometria;
+        return { nr: p.nr, polozenie: g[Math.floor(g.length / 2)] };
+      }),
+    };
+  }, [pokazKontrole, trasaKontroli, pilot, ustawienia]);
 
   const podsumowanie = useMemo(() => {
     if (!pilot || !oceny) return null;
@@ -190,11 +223,15 @@ export function PlanistaView() {
           oceny={oceny}
           liczbaKontroli={new Set(weryfikacje.map(idWpisu)).size}
           onZmienRelacje={(r) => {
+            setPokazKontrole(false);
             setRelacja(r);
             setFokusTrasy((f) => f + 1);
           }}
           onWybierzOdcinek={wybierz}
-          onPokazNaMapie={() => setFokusTrasy((f) => f + 1)}
+          onPokazNaMapie={() => {
+            setPokazKontrole(false);
+            setFokusTrasy((f) => f + 1);
+          }}
           onPrzywroc={przywroc}
         />
       )}
@@ -211,8 +248,10 @@ export function PlanistaView() {
             wybrane={wybrane}
             czolo={czolo}
             onWybierz={wybierz}
-            trasa={trasaNaMapie}
+            trasa={kontrolaNaMapie ? null : trasaNaMapie}
             fokusTrasy={fokusTrasy}
+            kontrola={kontrolaNaMapie}
+            fokusKontroli={fokusKontroli}
           />
         </div>
 
@@ -231,7 +270,48 @@ export function PlanistaView() {
               onZamknij={() => setWybranyOdcinek(null)}
             />
           ) : (
-            <RankingLista pilot={pilot} wybrany={null} onWybierz={wybierz} sprawdzone={sprawdzone} />
+            <div className="flex flex-col gap-3">
+              <div role="tablist" aria-label="Widok listy" className="flex gap-1 rounded-lg bg-slate-100 p-1">
+                {(
+                  [
+                    ["ranking", "Ranking"],
+                    ["kontrola", "Trasa kontroli"],
+                  ] as const
+                ).map(([k, etykieta]) => (
+                  <button
+                    key={k}
+                    type="button"
+                    role="tab"
+                    aria-selected={zakladka === k}
+                    onClick={() => setZakladka(k)}
+                    className={`flex-1 rounded-md px-2 py-1.5 text-sm font-medium ${
+                      zakladka === k ? "bg-white text-slate-900 shadow-sm" : "text-slate-600"
+                    }`}
+                  >
+                    {etykieta}
+                  </button>
+                ))}
+              </div>
+              {zakladka === "ranking" ? (
+                <RankingLista pilot={pilot} wybrany={null} onWybierz={wybierz} sprawdzone={sprawdzone} />
+              ) : (
+                trasaKontroli &&
+                ustawienia && (
+                  <TrasaKontroliPanel
+                    pilot={pilot}
+                    trasa={trasaKontroli}
+                    ustawienia={ustawienia}
+                    onZmienUstawienia={setUstawieniaKontroli}
+                    naMapie={pokazKontrole}
+                    onWybierzOdcinek={wybierz}
+                    onPokazNaMapie={() => {
+                      setPokazKontrole(true);
+                      setFokusKontroli((f) => f + 1);
+                    }}
+                  />
+                )
+              )}
+            </div>
           )}
         </div>
       </section>

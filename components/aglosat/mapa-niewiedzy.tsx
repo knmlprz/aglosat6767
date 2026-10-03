@@ -27,6 +27,15 @@ type Wspolne = {
   /** Dojście pokazywane na mapie (odcinki tras) i licznik żądań „pokaż na mapie”. */
   trasa: TrasaNaMapie | null;
   fokusTrasy: number;
+  /** Trasa kontroli (spacer planisty) i licznik żądań „pokaż na mapie”. */
+  kontrola?: KontrolaNaMapie | null;
+  fokusKontroli?: number;
+};
+
+export type KontrolaNaMapie = {
+  odcinki: string[];
+  przystanki: { nr: number; polozenie: LatLon }[];
+  start: LatLon;
 };
 
 export type TrasaNaMapie = {
@@ -227,6 +236,59 @@ function WarstwaTrasy({ pilot, trasa, fokusTrasy, renderer }: Pick<Wspolne, "pil
   return null;
 }
 
+function WarstwaKontroli({
+  pilot,
+  oceny,
+  kontrola,
+  fokusKontroli,
+  renderer,
+}: { pilot: Pilot; oceny: Map<string, OcenaOdcinka>; kontrola: KontrolaNaMapie | null; fokusKontroli: number } & ZRendererem) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!kontrola) return;
+    const odcinki = new Map(pilot.odcinki.map((o) => [o.id, o]));
+    const grupa = L.layerGroup();
+    for (const id of kontrola.odcinki) {
+      const g = odcinki.get(id)?.geometria;
+      if (!g) continue;
+      L.polyline(g, { color: "#0f172a", weight: 8, opacity: 0.85, interactive: false, renderer }).addTo(grupa);
+      L.polyline(g, { color: "#a78bfa", weight: 5, opacity: 1, interactive: false, renderer }).addTo(grupa);
+    }
+    L.circleMarker(kontrola.start, { radius: 8, color: "#0f172a", weight: 3, fillColor: "#ffffff", fillOpacity: 1, renderer })
+      .bindTooltip("start i powrót kontroli")
+      .addTo(grupa);
+    for (const p of kontrola.przystanki) {
+      L.marker(p.polozenie, {
+        icon: L.divIcon({
+          className: "agl-pin-icon",
+          html: `<span class="agl-numer agl-numer-kontrola">K${p.nr}</span>`,
+          iconSize: [30, 24],
+          iconAnchor: [15, 30],
+        }),
+        title: `Przystanek kontroli ${p.nr}`,
+        keyboard: false,
+        interactive: false,
+      }).addTo(grupa);
+    }
+    grupa.addTo(map);
+    return () => {
+      grupa.remove();
+    };
+    // oceny: odrysowanie po przeliczeniu sieci, żeby spacer leżał nad nią
+  }, [map, pilot, oceny, kontrola, renderer]);
+
+  useEffect(() => {
+    if (!fokusKontroli || !kontrola) return;
+    const odcinki = new Map(pilot.odcinki.map((o) => [o.id, o]));
+    const punkty = [kontrola.start, ...kontrola.odcinki.flatMap((id) => odcinki.get(id)?.geometria ?? [])];
+    map.flyToBounds(L.latLngBounds(punkty).pad(0.1), { maxZoom: 18, duration: 0.6 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reagujemy tylko na nowe żądanie
+  }, [map, fokusKontroli]);
+
+  return null;
+}
+
 export function MapaNiewiedzy(props: Wspolne) {
   const [s, w, n, e] = props.pilot.meta.obszar.bbox;
   const [renderer] = useState(() => L.canvas({ padding: 0.5, tolerance: 6 }));
@@ -251,6 +313,13 @@ export function MapaNiewiedzy(props: Wspolne) {
         renderer={renderer}
       />
       <WarstwaTrasy pilot={props.pilot} trasa={props.trasa} fokusTrasy={props.fokusTrasy} renderer={renderer} />
+      <WarstwaKontroli
+        pilot={props.pilot}
+        oceny={props.oceny}
+        kontrola={props.kontrola ?? null}
+        fokusKontroli={props.fokusKontroli ?? 0}
+        renderer={renderer}
+      />
       <WarstwaWyboru
         pilot={props.pilot}
         oceny={props.oceny}
