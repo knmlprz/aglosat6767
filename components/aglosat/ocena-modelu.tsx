@@ -32,8 +32,8 @@ export function OcenaModeluKarta({
           {porownanie.length > 1 &&
             porownanie.filter((p) => p.zbior === ocena.zbior).map((p) => (
               <li key={p.wersjaPromptu}>
-                prompt v{p.wersjaPromptu}: trafność <strong>{procent(p.trafnosc)}</strong>, precyzja „przerwany”{" "}
-                {procent(p.precyzjaPrzerwany)}
+                prompt v{p.wersjaPromptu}: trafność <strong>{procent(p.trafnosc)}</strong>
+                {p.grozne !== undefined && `, groźne pomyłki ${p.grozne} z ${p.n}`}
               </li>
             ))}
           {ocena.zgodnoscLudzi && ocena.zgodnoscLudzi.n > 0 && (
@@ -48,11 +48,25 @@ export function OcenaModeluKarta({
       ) : (
         <>
           <dl className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-            <Liczba nazwa="trafność" wartosc={procent(ocena.trafnosc)} />
-            <Liczba nazwa="precyzja „przerwany”" wartosc={procent(ocena.precyzjaPrzerwany)} opis="ile wskazań przerwy było trafnych" />
-            <Liczba nazwa="czułość „przerwany”" wartosc={procent(ocena.czuloscPrzerwany)} opis="ile przerw model zauważył" />
+            {ocena.grozne !== undefined && (
+              <Liczba
+                nazwa="groźne pomyłki"
+                wartosc={`${ocena.grozne} z ${ocena.n}`}
+                opis="model: „ciągły”, człowiek: przerwa albo nic nie widać"
+                wyroznij
+              />
+            )}
+            {ocena.precyzjaCiagly !== undefined && (
+              <Liczba nazwa="gdy model mówi „ciągły”" wartosc={procent(ocena.precyzjaCiagly)} opis="tyle razy człowiek się zgadza" />
+            )}
             <Liczba nazwa="poprawne „niewidoczny”" wartosc={procent(ocena.poprawneNiewidoczny)} opis="czy model wie, czego nie widać" />
+            <Liczba nazwa="trafność, trzy klasy" wartosc={procent(ocena.trafnosc)} opis="obniża ją głównie „niewidoczny” pod drzewami" />
           </dl>
+          <p className="mt-2 text-xs text-slate-600">
+            Pozostałe pomyłki to ostrożność: „niewidoczny” albo „przerwany” tam, gdzie człowiek widzi ciągły pas. Kosztują
+            dodatkową kontrolę; groźne jest tylko fałszywe „ciągły”. Przerw w próbce jest mało, więc ich wykrywanie podajemy orientacyjnie:
+            precyzja {procent(ocena.precyzjaPrzerwany)}, czułość {procent(ocena.czuloscPrzerwany)}.
+          </p>
           <table className="mt-3 w-full text-left text-xs">
             <caption className="mb-1 text-left text-xs text-slate-600">Macierz pomyłek: wiersze to człowiek, kolumny to model</caption>
             <thead>
@@ -86,9 +100,9 @@ export function OcenaModeluKarta({
   );
 }
 
-function Liczba({ nazwa, wartosc, opis }: { nazwa: string; wartosc: string; opis?: string }) {
+function Liczba({ nazwa, wartosc, opis, wyroznij }: { nazwa: string; wartosc: string; opis?: string; wyroznij?: boolean }) {
   return (
-    <div className="rounded-lg bg-slate-50 p-2">
+    <div className={`rounded-lg p-2 ${wyroznij ? "bg-emerald-50 ring-1 ring-emerald-200" : "bg-slate-50"}`}>
       <dt className="text-xs text-slate-600">{nazwa}</dt>
       <dd className="text-lg font-black text-slate-900">{wartosc}</dd>
       {opis && <dd className="text-[11px] text-slate-600">{opis}</dd>}

@@ -60,7 +60,9 @@ Obszar i parametry są w `scripts/aglosat/config.ts`. Nowe miasto to nowy obszar
 | prompt v2 | zasada ciągłości i tabela 13 przypadków spornych (droga, przejście, parking, auta, zieleń…) | 48% |
 | prompt v3 | dwa obrazy: bez linii i z linią; linia zasłaniała wąskie ścieżki, o które pytamy | 59% |
 
-Gdy model mówi „ciągły”, zwykle ma rację, a wycinki, na których człowiek nic nie widzi, model też oznacza jako „niewidoczny” (94%). **Model rzadko znajduje przerwy:** na zbiorze testowym wskazał 1 z 11 przerw widzianych przez człowieka. Dlatego w AgloSat model zawęża listę miejsc do sprawdzenia, a przerwy rozstrzyga człowiek w terenie. Zgodność z obrazem to nie to samo co stan w terenie.
+**Które pomyłki są groźne.** Groźne jest tylko „ciągły” tam, gdzie człowiek widzi przerwę albo nic nie widzi: v3 robi ich 9 na 91. Pozostałe pomyłki to ostrożność („niewidoczny” pod drzewami i w cieniu); kosztują dodatkową kontrolę w terenie. Trafność trzech klas obniża głównie właśnie ta ostrożność, a część takich przypadków instrukcja v2 sama każe oznaczać jako „niewidoczny”.
+
+Gdy model mówi „ciągły”, zwykle ma rację (81% na zbiorze testowym), a wycinki, na których człowiek nic nie widzi, model też oznacza jako „niewidoczny” (94%). **Model rzadko znajduje przerwy:** na zbiorze testowym wskazał 1 z 11 przerw widzianych przez człowieka. Dlatego w AgloSat model zawęża listę miejsc do sprawdzenia, a przerwy rozstrzyga człowiek w terenie. Zgodność z obrazem to nie to samo co stan w terenie.
 
 **Uwagi.**
 - Etykiety pochodzą od jednej osoby. Druga osoba opisująca te same wycinki da zgodność między ludźmi, czyli punkt odniesienia dla modelu (strona `/app/etykiety`).
