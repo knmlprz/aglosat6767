@@ -53,7 +53,7 @@ const subskrybujZgloszenia = (cb: () => void) => {
  */
 export type ZadanieDemo = {
   wybierz: string | null;
-  zakladka: "ranking" | "kontrola";
+  zakladka: "ranking" | "kontrola" | "zgloszenia";
   pokazKontrole: boolean;
 };
 
@@ -67,6 +67,7 @@ type StanAglosat = {
   /** Zgłoszenia mieszkańców z tej sesji; widok planisty je rozpatruje. */
   zgloszenia: Zgloszenie[];
   dodajZgloszenia: (z: Zgloszenie[]) => void;
+  ustawZgloszenia: (z: Zgloszenie[]) => void;
   rozpatrzZgloszenie: (id: string, stan: StanZgloszenia, uzasadnienie?: string) => void;
   zadanie: ZadanieDemo | null;
   ustawZadanie: (z: ZadanieDemo | null, przemontuj: boolean) => void;
@@ -87,6 +88,7 @@ export function AglosatProvider({ children }: { children: React.ReactNode }) {
     [],
   );
   const dodajZgloszenia = useCallback((z: Zgloszenie[]) => zapiszZgloszenia([...z, ...odczytZgloszen()]), []);
+  const ustawZgloszenia = useCallback((z: Zgloszenie[]) => zapiszZgloszenia(z), []);
   const rozpatrzZgloszenie = useCallback(
     (id: string, stan: StanZgloszenia, uzasadnienie?: string) =>
       zapiszZgloszenia(odczytZgloszen().map((z) => (z.id === id ? rozpatrzone(z, stan, uzasadnienie) : z))),
@@ -110,6 +112,7 @@ export function AglosatProvider({ children }: { children: React.ReactNode }) {
       ustawKontrole: setWeryfikacje,
       zgloszenia,
       dodajZgloszenia,
+      ustawZgloszenia,
       rozpatrzZgloszenie,
       zadanie,
       ustawZadanie,
@@ -123,6 +126,7 @@ export function AglosatProvider({ children }: { children: React.ReactNode }) {
       przywroc,
       zgloszenia,
       dodajZgloszenia,
+      ustawZgloszenia,
       rozpatrzZgloszenie,
       zadanie,
       ustawZadanie,

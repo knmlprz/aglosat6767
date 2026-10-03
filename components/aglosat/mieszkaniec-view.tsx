@@ -162,7 +162,11 @@ export function MieszkaniecView() {
   const ostatniaKontrola = weryfikacje.length
     ? [...weryfikacje].sort((a, b) => b.dataKontroli.localeCompare(a.dataKontroli))[0].dataKontroli
     : null;
-  const opis = opisTrasy(pilot, start, cel, trasy, oceny, ostatniaKontrola);
+  const przyjeteZgloszenia = zgloszenia.filter((z) => z.stan === "przyjete");
+  const ostatniePrzyjete = przyjeteZgloszenia.length
+    ? [...przyjeteZgloszenia].sort((a, b) => b.dataZgloszenia.localeCompare(a.dataZgloszenia))[0].dataZgloszenia
+    : null;
+  const opis = opisTrasy(pilot, start, cel, trasy, oceny, ostatniaKontrola, ostatniePrzyjete);
   const pokazana = wyborTrasy && trasy[wyborTrasy] ? wyborTrasy : trasy.udokumentowana ? "udokumentowana" : "weryfikacji";
   const wybrana: Trasa | null = pokazana === "udokumentowana" ? trasy.udokumentowana : trasy.weryfikacji;
   const miejscaWeryfikacji = trasy.weryfikacji ? miejscaNaTrasie(trasy.weryfikacji, pilot, oceny) : [];
@@ -418,6 +422,38 @@ export function MieszkaniecView() {
         </div>
       </details>
 
+      {zgloszenia.length > 0 && (
+        <details open className="group mt-2 overflow-hidden rounded-2xl border border-slate-300 bg-white">
+          <summary className="flex min-h-14 cursor-pointer list-none items-center gap-3 px-4 py-3 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-slate-900 [&::-webkit-details-marker]:hidden">
+            <span className="flex-1 text-base font-bold text-slate-900">
+              Twoje zgłoszenia ({zgloszenia.length})
+            </span>
+            <ChevronDownIcon
+              className="size-5 shrink-0 text-slate-600 transition-transform group-open:rotate-180 motion-reduce:transition-none"
+              aria-hidden
+            />
+          </summary>
+          <ul className="flex flex-col gap-2 border-t border-slate-200 p-4">
+            {zgloszenia.map((z) => {
+              const odc = pilot.odcinki.find((o) => o.id === z.odcinekId);
+              return (
+                <li key={z.id} className="rounded-xl border border-slate-300 bg-slate-50 p-3">
+                  <p className="text-base font-semibold text-slate-900">
+                    {odc ? lokalizacja(odc, pilot) : z.odcinekId}
+                  </p>
+                  <p className="text-sm text-slate-800">
+                    {CECHA_LABEL[z.cecha]}: <strong>{formatujWartosc(z.cecha, z.wartosc)}</strong>
+                    {z.zdjecie && " · ze zdjęciem"}
+                  </p>
+                  <p className="text-xs text-slate-700">{ETYKIETA_STANU[z.stan]}</p>
+                  {z.uzasadnienie && <p className="mt-1 text-sm text-slate-700">Urząd: „{z.uzasadnienie}”</p>}
+                </li>
+              );
+            })}
+          </ul>
+        </details>
+      )}
+
       <details className="group mt-2 overflow-hidden rounded-2xl border border-slate-300 bg-white">
         <summary className="flex min-h-14 cursor-pointer list-none items-center gap-3 px-4 py-3 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-slate-900 [&::-webkit-details-marker]:hidden">
           <span className="flex-1 text-base font-bold text-slate-900">Skąd to wiemy</span>
@@ -431,8 +467,10 @@ export function MieszkaniecView() {
           <li>Sieć piesza, nawierzchnie i usługi: OpenStreetMap, dane pobrane {pilot.meta.pobranoOsm}.</li>
           <li>Kontrole w terenie: {ostatniaKontrola ? `ostatnia ${ostatniaKontrola}` : "brak w tej sesji"}.</li>
           <li>
-            Zgłoszenia mieszkańców liczą się jako źródło dopiero wtedy, gdy urząd je obejrzy i przyjmie. Do tego czasu
-            są widoczne przy miejscu, ale trasy zostają bez zmian.
+            Zgłoszenia:{" "}
+            {zgloszenia.length === 0
+              ? "brak w tej sesji. Liczą się jako źródło dopiero po decyzji urzędu."
+              : `${zgloszenia.filter((z) => z.stan === "oczekuje").length} czeka, ${przyjeteZgloszenia.length} przyjęte, ${zgloszenia.filter((z) => z.stan === "odrzucone").length} odrzucone.`}
           </li>
           <li>Brak danych nigdy nie staje się „przejezdne”: nieopisana cecha zostaje niewiadomą.</li>
           <li>© współtwórcy OpenStreetMap (ODbL), podkład mapy: Esri World Imagery.</li>

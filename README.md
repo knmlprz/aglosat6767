@@ -6,7 +6,7 @@ Pilot: Nowa Huta, osiedla Wandy, Młodości i Na Skarpie (Kraków).
 
 1. **Obraz z góry znajduje kandydatów.** Wycinki ortofotomapy pokazują miejsca, gdzie ciąg pieszy może być przerwany.
 2. **Graf sieci pieszej nadaje im wagę.** Dla każdej niewiadomej liczymy, ile dojść z budynków mieszkalnych do przychodni, aptek, sklepów, poczty i bibliotek od niej zależy.
-3. **Człowiek rozstrzyga w terenie.** Wynik kontroli zmienia status cechy, a trasy przeliczają się od razu.
+3. **Człowiek rozstrzyga.** Mieszkaniec zgłasza, jak jest na miejscu (ze zdjęciem); urząd przyjmuje albo odrzuca. Kontrola w terenie nadal ma pierwszeństwo. Trasy przeliczają się od razu po decyzji.
 
 ## Uruchomienie
 
@@ -43,13 +43,15 @@ Obszar i parametry są w `scripts/aglosat/config.ts`. Nowe miasto to nowy obszar
 | Klasy zwracane przez model wizyjny dla wycinków | **dane przykładowe**, oznaczone w interfejsie |
 | Strefa zmian Sentinel-2 | **ilustracja**, jedna para scen, oznaczona w interfejsie |
 | Kontrole w terenie | wpisywane w sesji; trwały zapis to krok po hackathonie |
+| Zgłoszenia mieszkańców | w tej samej karcie przeglądarki (`sessionStorage`); przyjęcie liczy je jak źródło, samo zgłoszenie nie |
 
 **Model wizyjny.** Prototyp nie uruchamia modelu i nie potrzebuje klucza API. Graf, trasy, ranking i trasa kontroli działają bez żadnego modelu. Wycinki w `public/aglosat/wycinki/` są gotowym wejściem dla modelu: wynik klasyfikacji („ciągły / przerwany / niewidoczny” z oceną) wystarczy zapisać w obserwacjach w `pilot.json`.
 
 ## Reguły modelu danych
 
 - Brak danych nigdy nie staje się „przejezdne”. Status cechy wynika z dowodów, a nie jest wpisywany.
-- Data pobrania, data obrazu i data kontroli to osobne pola.
+- Data pobrania, data obrazu, data kontroli i data zgłoszenia to osobne pola.
+- Zgłoszenie mieszkańca nie rozstrzyga cechy, dopóki urząd go nie przyjmie. Odrzucone znika z dowodów.
 - Dwa sprzeczne źródła dają status „sprzeczne” i pokazują oba.
 - Trasa udokumentowana używa tylko odcinków, których każda cecha wymagana przez profil ma źródło i spełnia profil. Trasa wymagająca weryfikacji dopuszcza niewiadome i je wymienia.
 
