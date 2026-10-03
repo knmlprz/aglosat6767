@@ -27,9 +27,9 @@ import {
 
 const data = {
   user: {
-    name: "Aglometer Admin",
-    email: "admin@aglometer.pl",
-    avatar: "/avatars/shadcn.jpg",
+    name: "Planista (demo)",
+    email: "konto demonstracyjne",
+    avatar: "",
   },
   navMain: [
     { title: "Panel główny", url: "/app", icon: <HomeIcon /> },
@@ -58,7 +58,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <div className="flex bg-blue-600 text-white rounded-md items-center justify-center p-1">
                 <MapIcon className="size-4" />
               </div>
-              <span className="text-base font-bold tracking-tight">Aglometer</span>
+              <span className="text-base font-bold tracking-tight">AgloSat</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

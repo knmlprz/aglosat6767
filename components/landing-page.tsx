@@ -61,7 +61,7 @@ export function LandingPage() {
           <div className="mx-auto max-w-7xl">
             <header className="flex items-center justify-between pt-12 sm:pt-16">
               <Link href="/" className="text-lg font-semibold tracking-tight">
-                Aglometer
+                AgloSat
               </Link>
 
               <nav className="hidden items-center gap-1 lg:flex">
@@ -252,7 +252,7 @@ export function LandingPage() {
             <ArrowRight className="size-4" />
           </Link>
           <p className="mt-16 text-sm text-gray-500">
-            © {new Date().getFullYear()} Aglometer. Wszystkie prawa zastrzeżone.
+            © {new Date().getFullYear()} AgloSat. Wszystkie prawa zastrzeżone.
           </p>
         </div>
       </footer>

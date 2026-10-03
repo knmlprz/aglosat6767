@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils";
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
-  title: "Aglometer",
-  description: "Landing page — szablon do dalszej edycji",
+  title: "AgloSat",
+  description: "AgloSat wskazuje miastu, które niewiadome o chodnikach sprawdzić najpierw, bo od nich zależy najwięcej dojść do usług.",
 };
 
 export default function RootLayout({

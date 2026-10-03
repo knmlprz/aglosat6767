@@ -20,7 +20,7 @@ export function FullDashboard() {
       {/* Sticky mini-nav dla mentorów */}
       <div className="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-slate-200 px-4 lg:px-6 py-2">
         <div className="flex flex-wrap items-center gap-2 text-sm">
-          <span className="font-bold text-slate-800 mr-2">Aglometer</span>
+          <span className="font-bold text-slate-800 mr-2">AgloSat</span>
           {NAV.map((n) => (
             <a
               key={n.href}

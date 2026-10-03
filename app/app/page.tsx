@@ -6,7 +6,7 @@ import { FullDashboard } from "@/components/dashboard/full-dashboard";
 
 export default function DashboardPage() {
   return (
-    <AppShell title="Aglometer — Panel">
+    <AppShell title="AgloSat — Panel">
       <Suspense>
         <FullDashboard />
       </Suspense>

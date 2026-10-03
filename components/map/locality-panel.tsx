@@ -25,7 +25,7 @@ export function LocalityPanel({ selectedSlug, onClose }: Props) {
   return (
     <div className="absolute top-4 right-4 z-[400] w-full max-w-sm bg-white/95 backdrop-blur-md border border-gray-200/50 rounded-2xl shadow-2xl flex flex-col overflow-hidden max-h-[calc(100%-2rem)]">
       <div className="bg-slate-900/90 backdrop-blur text-white p-4">
-        <h2 className="text-xl font-bold">Aglometer</h2>
+        <h2 className="text-xl font-bold">AgloSat</h2>
         <p className="text-slate-300 text-xs mt-1">
           Analiza transportation deserts — powiat stalowowolski
         </p>
