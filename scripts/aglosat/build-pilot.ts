@@ -529,7 +529,6 @@ for (const w of wycinki) {
 
 const PLIK_ETYKIET = "data/aglosat/etykiety-reczne.json";
 const etykiety = existsSync(PLIK_ETYKIET) ? wczytajEtykiety(JSON.parse(readFileSync(PLIK_ETYKIET, "utf8"))) : null;
-const ludzie = etykiety ? zgodnoscLudzi(etykiety) : undefined;
 // Wszystkie wersje promptu oceniane na tej samej próbce (etykiety według bieżącej instrukcji).
 const zbiorWycinka = new Map(wycinki.map((w) => [w.id, w.zbior]));
 const ZBIORY = ["wszystkie", "roboczy", "testowy"] as const;
@@ -542,7 +541,8 @@ const porownaniePromptow = etykiety
         ),
         wersjaPromptu: w.wersja,
         zbior,
-        zgodnoscLudzi: ludzie,
+        // Zgodność ludzi na tym samym zbiorze co model: punkt odniesienia dla trafności.
+        zgodnoscLudzi: zgodnoscLudzi(etykiety, undefined, (id) => zbior === "wszystkie" || zbiorWycinka.get(id) === zbior),
       })),
     )
   : [];
@@ -586,7 +586,9 @@ console.log(`wycinki: ${wycinki.length} (ranking ${wycinki.filter((w) => w.proba
 for (const o of porownaniePromptow) {
   console.log(`ocena modelu ${o.model} prompt v${o.wersjaPromptu} [${o.zbior}]: n=${o.n}, trafność ${o.trafnosc}, precyzja „przerwany” ${o.precyzjaPrzerwany}, czułość ${o.czuloscPrzerwany}, poprawne „niewidoczny” ${o.poprawneNiewidoczny}`);
 }
-if (ludzie) console.log(`zgodność ludzi: ${ludzie.zgodnosc} na ${ludzie.n} wycinkach`);
+for (const o of porownaniePromptow.filter((x) => x.wersjaPromptu === 1 && x.zgodnoscLudzi?.n)) {
+  console.log(`zgodność ludzi [${o.zbior}]: ${o.zgodnoscLudzi!.zgodnosc} na ${o.zgodnoscLudzi!.n} wycinkach`);
+}
 console.log(`dane pilota: obserwacje z ${klasyfikacje ? `promptu v${klasyfikacje.wersjaPromptu}` : "danych przykładowych"}`);
 console.log(`obserwacje: ${obserwacje.length} (${klasyfikacje ? `model ${klasyfikacje.model}` : "przykładowe"}), strefy zmian: ${strefyZmian.length}, odcinki w strefie: ${odcinki.filter((o) => o.strefaZmian).length}`);
 console.log(`ranking: ${analiza.ranking.length} miejsc do kontroli z wpływem, kandydaci: ${analiza.kandydaci.length}, analiza ${Date.now() - t0} ms`);

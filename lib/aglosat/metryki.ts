@@ -12,8 +12,10 @@ export type OcenaModelu = {
   zbior?: "wszystkie" | "roboczy" | "testowy";
   /** Zgodność między ludźmi na wycinkach opisanych przez co najmniej dwie osoby: punkt odniesienia dla modelu. */
   zgodnoscLudzi?: { n: number; zgodnosc: number | null };
-  /** Liczba wycinków z etykietą człowieka i wynikiem modelu. */
+  /** Liczba par człowiek–model (wycinek opisany przez dwie osoby daje dwie pary). */
   n: number;
+  /** Ile osób opisało wycinki w tej ocenie. */
+  osoby?: number;
   /** macierz[człowiek][model] */
   macierz: Record<KlasaObrazu, Record<KlasaObrazu, number>>;
   trafnosc: number | null;
@@ -34,7 +36,7 @@ export type OcenaModelu = {
 
 const iloraz = (a: number, b: number) => (b > 0 ? Math.round((1000 * a) / b) / 1000 : null);
 
-export function policzOcene(model: string, pary: { czlowiek: KlasaObrazu; model: KlasaObrazu }[]): OcenaModelu {
+export function policzOcene(model: string, pary: { czlowiek: KlasaObrazu; model: KlasaObrazu; kto?: string }[]): OcenaModelu {
   const macierz = Object.fromEntries(KLASY.map((c) => [c, Object.fromEntries(KLASY.map((m) => [m, 0]))])) as OcenaModelu["macierz"];
   for (const p of pary) macierz[p.czlowiek][p.model]++;
   const trafne = KLASY.reduce((s, k) => s + macierz[k][k], 0);
@@ -44,6 +46,7 @@ export function policzOcene(model: string, pary: { czlowiek: KlasaObrazu; model:
   return {
     model,
     n: pary.length,
+    osoby: new Set(pary.map((p) => p.kto ?? "")).size,
     macierz,
     trafnosc: iloraz(trafne, pary.length),
     precyzjaPrzerwany: iloraz(macierz.przerwany.przerwany, modelPrzerwany),

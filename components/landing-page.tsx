@@ -26,6 +26,19 @@ export type LiczbyStrony = {
   model: string | null;
   /** Strefy zmian policzone z prawdziwych scen Sentinel-2 (nie ilustracja). */
   sentinel: { strefy: number; pary: string } | null;
+  /** Ocena modelu na zbiorze testowym, gdy są etykiety ludzi. */
+  ocena: {
+    model: string;
+    wersjaPromptu: number;
+    wycinki: number;
+    osoby: number;
+    trafnosc: number;
+    zgodnoscLudzi: number | null;
+    precyzjaCiagly: number | null;
+    grozne: number;
+    pary: number;
+    trafnoscV1: number | null;
+  } | null;
 };
 
 const ROLE = [
@@ -53,6 +66,13 @@ const DZIALA = [
   "wycinki ortofotomapy GUGiK jako dowód obrazowy",
   "trasa kontroli na zadany czas",
   "widok mieszkańca z opisem tekstowym trasy",
+];
+/** Gdy wszystkie warstwy są z prawdziwych danych: zamiast pustej listy „przykładowych” mówimy, czego prototyp nie rozstrzyga. */
+const OGRANICZENIA = [
+  "próbkę do oceny modelu opisały osoby z zespołu, nie audytorzy dostępności",
+  "kontrole w terenie zapisują się w przeglądarce, na czas sesji",
+  "waga budynku to powierzchnia zabudowy × kondygnacje, przybliżenie liczby mieszkańców",
+  "Sentinel-2 daje sygnał zmiany terenu, nie wykrywa chodników",
 ];
 const ZAPROJEKTOWANE = [
   "trwały zapis kontroli i wielu użytkowników",
@@ -153,6 +173,38 @@ export function LandingPage({ liczby }: { liczby: LiczbyStrony }) {
           </p>
         </section>
 
+        {liczby.ocena && (
+          <section aria-labelledby="model" className="border-t border-slate-200 bg-slate-50">
+            <div className="mx-auto max-w-6xl px-4 py-12 lg:px-6">
+              <h2 id="model" className="text-sm font-semibold uppercase tracking-wide text-slate-600">
+                Model wizyjny, sprawdzony na próbce testowej
+              </h2>
+              <p className="mt-2 max-w-3xl text-2xl font-bold leading-snug">
+                Model ocenia ciągłość chodnika na zdjęciu prawie tak zgodnie z człowiekiem, jak dwie osoby ze sobą.
+              </p>
+              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                <Liczba wartosc={proc1(liczby.ocena.trafnosc)} opis="zgodność modelu z człowiekiem" />
+                <Liczba
+                  wartosc={liczby.ocena.zgodnoscLudzi === null ? "brak danych" : proc1(liczby.ocena.zgodnoscLudzi)}
+                  opis={`zgodność ${liczby.ocena.osoby === 2 ? "dwóch osób" : `${liczby.ocena.osoby} osób`} między sobą: punkt odniesienia`}
+                />
+                <Liczba
+                  wartosc={liczby.ocena.precyzjaCiagly === null ? "brak danych" : proc1(liczby.ocena.precyzjaCiagly)}
+                  opis="gdy model mówi „ciągły”, człowiek się zgadza"
+                />
+              </div>
+              <p className="mt-3 max-w-4xl text-xs text-slate-600">
+                {liczby.ocena.model}, prompt v{liczby.ocena.wersjaPromptu}
+                {liczby.ocena.trafnoscV1 !== null ? ` (pierwsza wersja: ${proc1(liczby.ocena.trafnoscV1)})` : ""};{" "}
+                {liczby.ocena.wycinki} wycinków ortofotomapy GUGiK nieużywanych przy poprawianiu promptu, opisanych niezależnie przez{" "}
+                {liczby.ocena.osoby === 2 ? "dwie osoby" : `${liczby.ocena.osoby} osoby`} z zespołu. Groźne pomyłki (model „ciągły”, człowiek widzi przerwę albo nic):{" "}
+                {liczby.ocena.grozne} z {liczby.ocena.pary}. Model wskazuje, gdzie spojrzeć; o stanie chodnika rozstrzyga kontrola
+                w terenie.
+              </p>
+            </div>
+          </section>
+        )}
+
         <section aria-labelledby="role" className="border-t border-slate-200">
           <div className="mx-auto max-w-6xl px-4 py-12 lg:px-6">
             <h2 id="role" className="text-sm font-semibold uppercase tracking-wide text-slate-600">
@@ -187,17 +239,17 @@ export function LandingPage({ liczby }: { liczby: LiczbyStrony }) {
                   ...(liczby.sentinel ? [`strefy zmian z Sentinel-2: ${liczby.sentinel.strefy}, pary scen ${liczby.sentinel.pary}`] : []),
                 ]}
               />
-              <Lista
-                tytul="Dane przykładowe, oznaczone w interfejsie"
-                elementy={
-                  liczby.model && liczby.sentinel
-                    ? ["brak: warstwy pochodzą z prawdziwych danych; próbkę do oceny modelu opisała na razie jedna osoba"]
-                    : [
-                        ...(liczby.model ? [] : ["klasy zwracane przez model wizyjny dla wycinków"]),
-                        ...(liczby.sentinel ? [] : ["strefa zmian Sentinel-2 (jedna para scen)"]),
-                      ]
-                }
-              />
+              {liczby.model && liczby.sentinel ? (
+                <Lista tytul="Ograniczenia, mówimy wprost" elementy={OGRANICZENIA} />
+              ) : (
+                <Lista
+                  tytul="Dane przykładowe, oznaczone w interfejsie"
+                  elementy={[
+                    ...(liczby.model ? [] : ["klasy zwracane przez model wizyjny dla wycinków"]),
+                    ...(liczby.sentinel ? [] : ["strefa zmian Sentinel-2 (jedna para scen)"]),
+                  ]}
+                />
+              )}
               <Lista tytul="Zaprojektowane, poza prototypem" elementy={ZAPROJEKTOWANE} />
             </div>
           </div>
@@ -214,6 +266,9 @@ export function LandingPage({ liczby }: { liczby: LiczbyStrony }) {
     </div>
   );
 }
+
+/** Ułamek 0–1 jako procent. */
+const proc1 = (x: number) => `${Math.round(100 * x)}%`;
 
 function Liczba({ wartosc, opis }: { wartosc: string; opis: string }) {
   return (

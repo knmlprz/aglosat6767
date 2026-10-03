@@ -44,7 +44,7 @@ Obszar i parametry są w `scripts/aglosat/config.ts`. Nowe miasto to nowy obszar
 | Trasy dla profilu, przeliczanie po kontroli, trasa kontroli | liczone w przeglądarce, na żywo |
 | Wycinki ortofotomapy | GUGiK (Geoportal), nalot 2025-04-28, piksel 5 cm |
 | Klasy dla wycinków | model Claude Sonnet 5.5 (przez OpenRouter), wyniki zapisane w repo |
-| Próbka referencyjna | 203 wycinki opisane ręcznie według instrukcji v2 (jedna osoba); 91 z nich to zbiór testowy |
+| Próbka referencyjna | 203 wycinki opisane ręcznie według instrukcji v2, niezależnie przez dwie osoby; 91 z nich to zbiór testowy |
 | Strefy zmian | Sentinel-2 L2A, dwie pary scen rok do roku (sierpień i wrzesień 2025 → 2026) |
 | Kontrole w terenie | wpisywane w sesji; trwały zapis to krok po hackathonie |
 
@@ -52,20 +52,27 @@ Obszar i parametry są w `scripts/aglosat/config.ts`. Nowe miasto to nowy obszar
 
 **Zadanie.** Model dostaje wycinek ortofotomapy z naniesionym przebiegiem odcinka z OSM i odpowiada jedną klasą: ciągły, przerwany albo niewidoczny, z oceną i jednym zdaniem uzasadnienia. Zasady są wspólne dla ludzi i modelu (`lib/aglosat/etykiety.ts`): ciągłość to pytanie, czy wzdłuż linii biegnie jeden nieprzerwany pas, po którym da się przejść; nawierzchnia, krawężniki, schody i auta to osobne cechy.
 
-**Wyniki** (Claude Sonnet 5.5, zbiór testowy: 91 wycinków nieużywanych przy poprawianiu promptu, etykiety jednej osoby):
+**Wyniki** (Claude Sonnet 5.5, zbiór testowy: 91 wycinków nieużywanych przy poprawianiu promptu, każdy opisany niezależnie przez dwie osoby; trafność liczona na 182 parach człowiek–model):
 
 | Wersja | Co zmieniliśmy | Trafność |
 | --- | --- | --- |
-| prompt v1 | proste definicje klas | 37% |
-| prompt v2 | zasada ciągłości i tabela 13 przypadków spornych (droga, przejście, parking, auta, zieleń…) | 48% |
-| prompt v3 | dwa obrazy: bez linii i z linią; linia zasłaniała wąskie ścieżki, o które pytamy | 59% |
+| prompt v1 | proste definicje klas | 45% |
+| prompt v2 | zasada ciągłości i tabela 13 przypadków spornych (droga, przejście, parking, auta, zieleń…) | 56% |
+| prompt v3 | dwa obrazy: bez linii i z linią; linia zasłaniała wąskie ścieżki, o które pytamy | 67% |
+| prompt v4 | doprecyzowana zasada dla drzew i cienia: pas wchodzi pod drzewa i wychodzi w tej samej linii → ciągły | 70% |
 
-**Które pomyłki są groźne.** Groźne jest tylko „ciągły” tam, gdzie człowiek widzi przerwę albo nic nie widzi: v3 robi ich 9 na 91. Pozostałe pomyłki to ostrożność („niewidoczny” pod drzewami i w cieniu); kosztują dodatkową kontrolę w terenie. Trafność trzech klas obniża głównie właśnie ta ostrożność, a część takich przypadków instrukcja v2 sama każe oznaczać jako „niewidoczny”.
+**Punkt odniesienia: dwie osoby zgadzają się ze sobą na 75% wycinków testowych.** Model v4 zgadza się z jedną z nich na 65%, z drugą na 75%, czyli mniej więcej tak, jak ludzie między sobą.
 
-Gdy model mówi „ciągły”, zwykle ma rację (81% na zbiorze testowym), a wycinki, na których człowiek nic nie widzi, model też oznacza jako „niewidoczny” (94%). **Model rzadko znajduje przerwy:** na zbiorze testowym wskazał 1 z 11 przerw widzianych przez człowieka. Dlatego w AgloSat model zawęża listę miejsc do sprawdzenia, a przerwy rozstrzyga człowiek w terenie. Zgodność z obrazem to nie to samo co stan w terenie.
+Groźne pomyłki (model „ciągły”, człowiek widzi przerwę albo nic) w kolejnych wersjach: 7, 9, 15, 20 na 182 pary. Każda poprawka, po której model rzadziej mówi „nie widzę”, podnosi trafność i jednocześnie dokłada kilka groźnych pomyłek; dlatego pokazujemy obie liczby.
+
+**Prompt v4.** Najwięcej rozbieżności dawały wycinki, gdzie ścieżka znika pod drzewami: człowiek dopowiadał zasłonięty fragment, model trzymał się dosłownie „większości linii nie widać”. Ponowny przegląd 64 wycinków zmienił tylko 5 etykiet, więc to była różnica definicji, nie pośpiech. Zasadę dopisaliśmy do instrukcji (`lib/aglosat/etykiety.ts`; brzmienie dla promptów v2 i v3 jest zamrożone) i do promptu v4. Prompt poprawialiśmy na zbiorze roboczym (62% → 72%), zbiór testowy policzyliśmy raz (etykiety pierwszej osoby: 60% → 65%; obu osób: 67% → 70%).
+
+**Które pomyłki są groźne.** Groźne jest tylko „ciągły” tam, gdzie człowiek widzi przerwę albo nic nie widzi: v4 robi ich 20 na 182 pary (11%). Pozostałe pomyłki to ostrożność („niewidoczny” w głębokim cieniu i pod drzewami); kosztują dodatkową kontrolę w terenie.
+
+Gdy model mówi „ciągły”, zwykle ma rację (82% na zbiorze testowym, v4), a wycinki, na których człowiek nic nie widzi, model też oznacza jako „niewidoczny” (81%). **Model rzadko znajduje przerwy:** na zbiorze testowym wskazał 3 z 18 przerw zaznaczonych przez ludzi. Dlatego w AgloSat model zawęża listę miejsc do sprawdzenia, a przerwy rozstrzyga człowiek w terenie. Zgodność z obrazem to nie to samo co stan w terenie.
 
 **Uwagi.**
-- Etykiety pochodzą od jednej osoby. Druga osoba opisująca te same wycinki da zgodność między ludźmi, czyli punkt odniesienia dla modelu (strona `/app/etykiety`).
+- Etykiety pochodzą od dwóch osób z zespołu, opisujących niezależnie, bez wglądu w odpowiedzi modelu (strona `/app/etykiety`). Opisywali szybko (mediana około 1–1,5 s na wycinek), więc liczby traktujemy jako orientacyjne.
 - Dane w aplikacji pochodzą z promptu v2 (`KLASYFIKACJA` w `scripts/aglosat/config.ts`), bo zawierają przypadek sprzeczny pokazywany w demo: przerwę, którą model zgłosił, bo ścieżkę zasłoniła nasza linia. Prompt v3 ten błąd naprawia.
 - Podział na zbiór roboczy (112) i testowy (91) jest zamrożony w `data/aglosat/proba-oceny.json`; prompt poprawialiśmy, patrząc na zbiór roboczy. Przy tej liczbie wycinków liczby są orientacyjne.
 - Prototyp działa bez klucza API: wyniki modelu są w `data/aglosat/klasyfikacje/`. Klucz jest potrzebny tylko do ponownej klasyfikacji. Pierwszy przebieg (Qwen przez Groq, prompt v1, 56 wycinków) jest zachowany w historii.
