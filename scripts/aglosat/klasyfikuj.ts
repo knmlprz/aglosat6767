@@ -1,30 +1,41 @@
-// Klasyfikacja wycinków ortofotomapy modelem wizyjnym przez Groq (API zgodne z OpenAI).
-// Uruchomienie: npm run aglosat:klasyfikuj            (pomija już sklasyfikowane)
-//               npm run aglosat:klasyfikuj -- --modele   (lista modeli dostępnych dla klucza)
-//               npm run aglosat:klasyfikuj -- --od-nowa  (klasyfikuje wszystko jeszcze raz)
-//               npm run aglosat:klasyfikuj -- --podglad  (zapisuje wejście modelu dla 3 wycinków, bez API)
-//               npm run aglosat:klasyfikuj -- --limit 5  (tylko pierwsze N, do próby modelu)
-// Model: zmienna GROQ_MODEL (domyślnie poniżej).
-// Klucz: zmienna GROQ_API_KEY albo plik .env.local (nie trafia do repo).
-// Wyniki: data/aglosat/klasyfikacje-modelu.json; demo działa bez klucza.
+// Klasyfikacja wycinków ortofotomapy modelem wizyjnym (Groq albo OpenRouter, API zgodne z OpenAI).
+// Uruchomienie: npm run aglosat:klasyfikuj -- [--dostawca groq|openrouter] [--model ID] [--prompt 1|2]
+//   --modele    lista modeli z obsługą obrazów dla klucza
+//   --podglad   zapisuje wejście modelu dla 3 wycinków, bez API
+//   --limit N   tylko pierwsze N wycinków (próba modelu)
+//   --od-nowa   klasyfikuje wszystko jeszcze raz
+// Klucze: GROQ_API_KEY / OPENROUTER_API_KEY w zmiennej środowiskowej albo w .env.local (nie trafia do repo).
+// Wyniki: data/aglosat/klasyfikacje/<dostawca>__<model>__v<prompt>.json; demo działa bez klucza.
 
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import sharp from "sharp";
 import { ORTO } from "./config.ts";
 import { KLASY_OBRAZU, PRZYPADKI, ZASADA } from "../../lib/aglosat/etykiety.ts";
 import type { PilotZapisany } from "../../lib/aglosat/data.ts";
 import type { KlasaObrazu, LatLon, Wycinek } from "../../lib/aglosat/types.ts";
 
-const API = "https://api.groq.com/openai/v1";
-const MODEL = process.env.GROQ_MODEL ?? "qwen/qwen3.8-27b";
-/** Wersja promptu: GROQ_PROMPT=1 odtwarza pierwszy przebieg. Każda wersja ma własny plik wyników. */
-const WERSJA_PROMPTU = Number(process.env.GROQ_PROMPT ?? 2);
-export const plikWersji = (v: number) => `data/aglosat/klasyfikacje-modelu-v${v}.json`;
-const PLIK = plikWersji(WERSJA_PROMPTU);
-const PRZERWA_MS = 2500;
+const DOSTAWCY = {
+  groq: { api: "https://api.groq.com/openai/v1", klucz: "GROQ_API_KEY", model: "qwen/qwen3.8-27b", przerwaMs: 2500, rownolegle: 1 },
+  openrouter: { api: "https://openrouter.ai/api/v1", klucz: "OPENROUTER_API_KEY", model: "", przerwaMs: 0, rownolegle: 4 },
+} as const;
+type Dostawca = keyof typeof DOSTAWCY;
+
+const arg = (nazwa: string) => {
+  const i = process.argv.indexOf(nazwa);
+  return i >= 0 ? process.argv[i + 1] : undefined;
+};
+const DOSTAWCA = (arg("--dostawca") ?? "groq") as Dostawca;
+if (!DOSTAWCY[DOSTAWCA]) throw new Error(`Nieznany dostawca: ${DOSTAWCA}`);
+const D = DOSTAWCY[DOSTAWCA];
+const MODEL = arg("--model") ?? D.model;
+const WERSJA_PROMPTU = Number(arg("--prompt") ?? 2);
+export const KATALOG = "data/aglosat/klasyfikacje";
+export const plikWynikow = (dostawca: string, model: string, wersja: number) =>
+  `${KATALOG}/${dostawca}__${model.replace(/[^\w.-]+/g, "-")}__v${wersja}.json`;
 
 export type WynikModelu = { klasa: KlasaObrazu; ocena: number; uzasadnienie: string };
 export type PlikKlasyfikacji = {
+  dostawca?: string;
   model: string;
   wersjaPromptu: number;
   data: string;
@@ -32,18 +43,23 @@ export type PlikKlasyfikacji = {
 };
 
 function klucz(): string {
-  if (process.env.GROQ_API_KEY) return process.env.GROQ_API_KEY;
+  const nazwa = D.klucz;
+  if (process.env[nazwa]) return process.env[nazwa]!;
   if (existsSync(".env.local")) {
-    const m = readFileSync(".env.local", "utf8").match(/^GROQ_API_KEY\s*=\s*"?([^"\n]+)"?/m);
+    const m = readFileSync(".env.local", "utf8").match(new RegExp(`^${nazwa}\\s*=\\s*"?([^"\\n]+)"?`, "m"));
     if (m) return m[1].trim();
   }
-  throw new Error("Brak GROQ_API_KEY (zmienna środowiskowa albo .env.local).");
+  throw new Error(`Brak ${nazwa} (zmienna środowiskowa albo .env.local).`);
 }
 
 async function zapytaj(sciezka: string, body?: unknown): Promise<Response> {
-  return fetch(`${API}${sciezka}`, {
+  return fetch(`${D.api}${sciezka}`, {
     method: body ? "POST" : "GET",
-    headers: { Authorization: `Bearer ${klucz()}`, "Content-Type": "application/json" },
+    headers: {
+      Authorization: `Bearer ${klucz()}`,
+      "Content-Type": "application/json",
+      ...(DOSTAWCA === "openrouter" ? { "X-Title": "AgloSat (hackathon)" } : {}),
+    },
     body: body ? JSON.stringify(body) : undefined,
   });
 }
@@ -100,25 +116,37 @@ function sprawdzOdpowiedz(tekst: string): WynikModelu {
   return { klasa: j.klasa!, ocena: Math.round(ocena * 100) / 100, uzasadnienie: String(j.uzasadnienie ?? "").slice(0, 300) };
 }
 
+let trybJson = true;
+
 async function klasyfikuj(obraz: string): Promise<WynikModelu> {
   for (let proba = 1; proba <= 4; proba++) {
     const res = await zapytaj("/chat/completions", {
       model: MODEL,
       temperature: 0,
-      max_completion_tokens: 300,
-      response_format: { type: "json_object" },
+      // Modele z rozumowaniem zużywają część limitu na myślenie, więc zapas jest większy.
+      max_tokens: DOSTAWCA === "openrouter" ? 2000 : 300,
+      ...(trybJson ? { response_format: { type: "json_object" } } : {}),
       messages: [{ role: "user", content: [{ type: "text", text: PROMPT }, { type: "image_url", image_url: { url: obraz } }] }],
     });
+    if (res.status === 400 && trybJson) {
+      // Nie każdy model obsługuje tryb JSON; odpowiedź i tak sprawdzamy sami.
+      trybJson = false;
+      continue;
+    }
     if (res.status === 429) {
       const czekaj = Number(res.headers.get("retry-after") ?? 10) * 1000;
       console.warn(`  limit zapytań, czekam ${Math.round(czekaj / 1000)} s`);
       await new Promise((r) => setTimeout(r, czekaj));
       continue;
     }
-    if (!res.ok) throw new Error(`Groq HTTP ${res.status}: ${(await res.text()).slice(0, 300)}`);
-    const dane = (await res.json()) as { choices: { message: { content: string } }[] };
+    if (!res.ok) throw new Error(`${DOSTAWCA} HTTP ${res.status}: ${(await res.text()).slice(0, 300)}`);
+    const dane = (await res.json()) as { choices?: { message: { content: string | null } }[]; error?: { message: string } };
+    if (!dane.choices?.[0]?.message.content) {
+      console.warn(`  pusta odpowiedź (${dane.error?.message ?? "brak treści"}), próba ${proba}`);
+      continue;
+    }
     try {
-      return sprawdzOdpowiedz(dane.choices[0].message.content);
+      return sprawdzOdpowiedz(dane.choices[0].message.content!);
     } catch (e) {
       console.warn(`  niepoprawna odpowiedź (${String(e)}), próba ${proba}`);
     }
@@ -128,25 +156,32 @@ async function klasyfikuj(obraz: string): Promise<WynikModelu> {
 
 if (process.argv.includes("--modele")) {
   const res = await zapytaj("/models");
-  if (!res.ok) throw new Error(`Groq HTTP ${res.status}: ${await res.text()}`);
-  const { data } = (await res.json()) as { data: { id: string; owned_by: string }[] };
-  console.log(data.map((m) => `${m.id}  (${m.owned_by})`).sort().join("\n"));
+  if (!res.ok) throw new Error(`${DOSTAWCA} HTTP ${res.status}: ${await res.text()}`);
+  const { data } = (await res.json()) as {
+    data: { id: string; owned_by?: string; architecture?: { input_modalities?: string[] }; pricing?: { prompt?: string; completion?: string } }[];
+  };
+  // OpenRouter podaje modalności i ceny; Groq tylko identyfikatory.
+  const obrazowe = DOSTAWCA === "openrouter" ? data.filter((m) => m.architecture?.input_modalities?.includes("image")) : data;
+  const cena = (x?: string) => (x ? `$${(Number(x) * 1e6).toFixed(2)}/1M` : "");
+  console.log(
+    obrazowe
+      .map((m) => `${m.id}  ${m.owned_by ?? ""} ${cena(m.pricing?.prompt)} ${cena(m.pricing?.completion)}`.trim())
+      .sort()
+      .join("\n"),
+  );
+  console.log(`(${obrazowe.length} modeli${DOSTAWCA === "openrouter" ? " z wejściem obrazowym" : ""})`);
   process.exit(0);
 }
 
 const pilot = JSON.parse(readFileSync("public/aglosat/pilot.json", "utf8")) as PilotZapisany;
 const odcinki = new Map(pilot.odcinki.map((o) => [o.id, o]));
 const miejsca = new Map(pilot.ranking.map((r) => [r.odcinekId, r.odcinki]));
+if (!MODEL && !process.argv.includes("--podglad")) throw new Error(`Podaj --model dla dostawcy ${DOSTAWCA} (lista: --modele).`);
+const PLIK = plikWynikow(DOSTAWCA, MODEL, WERSJA_PROMPTU);
 const plik: PlikKlasyfikacji =
   existsSync(PLIK) && !process.argv.includes("--od-nowa")
     ? (JSON.parse(readFileSync(PLIK, "utf8")) as PlikKlasyfikacji)
-    : { model: MODEL, wersjaPromptu: WERSJA_PROMPTU, data: "", wyniki: {} };
-if (plik.model !== MODEL || plik.wersjaPromptu !== WERSJA_PROMPTU) {
-  console.log(`Zmiana modelu lub promptu (${plik.model} v${plik.wersjaPromptu} → ${MODEL} v${WERSJA_PROMPTU}): klasyfikuję od nowa.`);
-  plik.wyniki = {};
-}
-plik.model = MODEL;
-plik.wersjaPromptu = WERSJA_PROMPTU;
+    : { dostawca: DOSTAWCA, model: MODEL, wersjaPromptu: WERSJA_PROMPTU, data: "", wyniki: {} };
 
 if (process.argv.includes("--podglad")) {
   for (const w of pilot.wycinki.slice(0, 3)) {
@@ -160,25 +195,33 @@ if (process.argv.includes("--podglad")) {
   process.exit(0);
 }
 
-const limit = Number(process.argv[process.argv.indexOf("--limit") + 1]);
-const doZrobienia = pilot.wycinki
-  .filter((w) => !plik.wyniki[w.id])
-  .slice(0, process.argv.includes("--limit") && limit > 0 ? limit : undefined);
-console.log(`model: ${MODEL}; wycinki: ${pilot.wycinki.length}, do klasyfikacji: ${doZrobienia.length}`);
-for (const [i, w] of doZrobienia.entries()) {
-  const przebiegi = (miejsca.get(w.odcinekId) ?? [w.odcinekId]).map((id) => odcinki.get(id)!.geometria);
-  try {
-    plik.wyniki[w.id] = await klasyfikuj(await obrazZPrzebiegiem(w, przebiegi));
-    const r = plik.wyniki[w.id];
-    console.log(`  ${i + 1}/${doZrobienia.length} ${w.id}: ${r.klasa} (${r.ocena}) ${r.uzasadnienie}`);
-  } catch (e) {
-    console.error(`  ${w.id}: ${String(e)}`);
-  }
+const limit = Number(arg("--limit"));
+const doZrobienia = pilot.wycinki.filter((w) => !plik.wyniki[w.id]).slice(0, limit > 0 ? limit : undefined);
+console.log(`${DOSTAWCA} / ${MODEL} / prompt v${WERSJA_PROMPTU}; wycinki: ${pilot.wycinki.length}, do klasyfikacji: ${doZrobienia.length}`);
+mkdirSync(KATALOG, { recursive: true });
+const zapisz = () => {
   // Zapis po każdym wycinku: przerwane uruchomienie nie traci wyników.
   plik.data = new Date().toISOString().slice(0, 10);
   plik.wyniki = Object.fromEntries(Object.entries(plik.wyniki).sort(([a], [b]) => a.localeCompare(b)));
   writeFileSync(PLIK, JSON.stringify(plik, null, 2) + "\n");
-  await new Promise((r) => setTimeout(r, PRZERWA_MS));
-}
+};
+const kolejka = [...doZrobienia];
+let gotowe = 0;
+await Promise.all(
+  Array.from({ length: D.rownolegle }, async () => {
+    for (let w = kolejka.shift(); w; w = kolejka.shift()) {
+      const przebiegi = (miejsca.get(w.odcinekId) ?? [w.odcinekId]).map((id) => odcinki.get(id)!.geometria);
+      try {
+        const r = await klasyfikuj(await obrazZPrzebiegiem(w, przebiegi));
+        plik.wyniki[w.id] = r;
+        console.log(`  ${++gotowe}/${doZrobienia.length} ${w.id}: ${r.klasa} (${r.ocena}) ${r.uzasadnienie}`);
+      } catch (e) {
+        console.error(`  ${w.id}: ${String(e)}`);
+      }
+      zapisz();
+      if (D.przerwaMs) await new Promise((r) => setTimeout(r, D.przerwaMs));
+    }
+  }),
+);
 const liczby = Object.values(plik.wyniki).reduce<Record<string, number>>((a, r) => ({ ...a, [r.klasa]: (a[r.klasa] ?? 0) + 1 }), {});
 console.log(`gotowe: ${Object.keys(plik.wyniki).length}/${pilot.wycinki.length}`, liczby);

@@ -35,3 +35,9 @@ export const PRZYKLADOWE = {
   scenaPrzed: "2025-08-10",
   scenaPo: "2026-09-14",
 };
+
+/**
+ * Model, którego wyniki trafiają do danych pilota (plik w data/aglosat/klasyfikacje/).
+ * Porównujemy tylko wersje promptu tego samego modelu; bez wpisu: model z najnowszego kompletnego pliku.
+ */
+export const KLASYFIKACJA: { dostawca: string; model: string } | null = null;

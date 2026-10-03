@@ -6,7 +6,7 @@
 // Co jest przykładowe (oznaczone polem przykladowe): obserwacje z obrazu, strefa zmian Sentinel-2.
 
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
-import { OBSZAR, ORTO, PRZYKLADOWE } from "./config.ts";
+import { KLASYFIKACJA, OBSZAR, ORTO, PRZYKLADOWE } from "./config.ts";
 import type {
   Budynek, Dowod, KategoriaUslugi, LatLon, Obserwacja, Odcinek, Pilot, StrefaZmian, TypOdcinka, Usluga, Wycinek,
 } from "../../lib/aglosat/types.ts";
@@ -272,15 +272,31 @@ const uslugi: Usluga[] = uslugiSurowe
 
 // --- obserwacje z obrazu: wyniki modelu, a bez nich dane przykładowe -------------------------
 
-// Wyniki każdej wersji promptu w osobnym pliku (klasyfikacje-modelu-vN.json; plik bez numeru to v1).
-const wersjeModelu = readdirSync("data/aglosat")
-  .map((f) => f.match(/^klasyfikacje-modelu(?:-v(\d+))?\.json$/))
-  .filter((m): m is RegExpMatchArray => !!m)
-  .map((m) => ({ wersja: Number(m[1] ?? 1), plik: JSON.parse(readFileSync(`data/aglosat/${m[0]}`, "utf8")) as PlikKlasyfikacji }))
-  .sort((a, b2) => a.wersja - b2.wersja);
-// Do danych pilota bierzemy najnowszą wersję, ale tylko kompletną (wszystkie wycinki); inaczej poprzednią.
-const kompletne = wersjeModelu.filter((w) => Object.keys(w.plik.wyniki).length >= 80);
-const klasyfikacje = (kompletne.at(-1) ?? wersjeModelu.at(-1))?.plik ?? null;
+// Wyniki modeli: data/aglosat/klasyfikacje/*.json (plik na model i wersję promptu).
+// Stary plik data/aglosat/klasyfikacje-modelu.json to pierwszy przebieg: Groq, prompt v1.
+const KATALOG_KLASYFIKACJI = "data/aglosat/klasyfikacje";
+const wszystkieWyniki: PlikKlasyfikacji[] = [
+  ...(existsSync("data/aglosat/klasyfikacje-modelu.json")
+    ? [{ dostawca: "groq", ...(JSON.parse(readFileSync("data/aglosat/klasyfikacje-modelu.json", "utf8")) as PlikKlasyfikacji) }]
+    : []),
+  ...(existsSync(KATALOG_KLASYFIKACJI)
+    ? readdirSync(KATALOG_KLASYFIKACJI)
+        .filter((f) => f.endsWith(".json"))
+        .map((f) => JSON.parse(readFileSync(`${KATALOG_KLASYFIKACJI}/${f}`, "utf8")) as PlikKlasyfikacji)
+    : []),
+];
+const kompletny = (p: PlikKlasyfikacji) => Object.keys(p.wyniki).length >= 80;
+// Wybrany model (config) albo model z najnowszego kompletnego pliku.
+const wybranyModel =
+  KLASYFIKACJA ?? [...wszystkieWyniki].filter(kompletny).sort((x, y) => x.data.localeCompare(y.data)).at(-1) ?? null;
+// Tylko wersje promptu tego modelu; do danych pilota najwyższa kompletna wersja.
+const wersjeModelu = wybranyModel
+  ? wszystkieWyniki
+      .filter((p) => p.model === wybranyModel.model && (p.dostawca ?? "groq") === (wybranyModel.dostawca ?? "groq"))
+      .sort((x, y) => x.wersjaPromptu - y.wersjaPromptu)
+      .map((plik) => ({ wersja: plik.wersjaPromptu, plik }))
+  : [];
+const klasyfikacje = wersjeModelu.filter((w) => kompletny(w.plik)).at(-1)?.plik ?? null;
 const istniejace = new Set(odcinki.map((o) => o.id));
 const obserwacje: Obserwacja[] = [];
 
