@@ -1,15 +1,20 @@
 "use client";
 
-// Widok planisty, etap 1: mapa niewiedzy dla obszaru pilota z mianownikiem i legendą.
+// Widok planisty: mianownik, mapa niewiedzy, ranking miejsc do kontroli i szczegóły miejsca.
 // Legenda z liczbami jest jednocześnie tekstową alternatywą dla mapy.
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { usePilot } from "@/lib/aglosat/use-pilot.ts";
 import { ocenWszystkie } from "@/lib/aglosat/routing.ts";
 import { PROFIL_DOMYSLNY } from "@/lib/aglosat/profile.ts";
 import { ETYKIETA_ANALIZA_BAZOWA, ETYKIETA_PRZYKLADOWE } from "@/lib/aglosat/vocabulary.ts";
 import { KOLEJNOSC_KATEGORII, STYL_MAPY, kategoriaMapy, type KategoriaMapy } from "@/lib/aglosat/styl.ts";
+import type { WynikWplywu } from "@/lib/aglosat/types.ts";
+import { RankingLista } from "@/components/aglosat/ranking-lista";
+import { SzczegolyMiejsca } from "@/components/aglosat/szczegoly-miejsca";
+
+const CZOLO_NA_MAPIE = 10;
 
 const MapaNiewiedzy = dynamic(
   () => import("@/components/aglosat/mapa-niewiedzy").then((m) => m.MapaNiewiedzy),
@@ -25,6 +30,8 @@ export function PlanistaView() {
   const wczytanie = usePilot();
   const profil = PROFIL_DOMYSLNY;
   const [widoczne, setWidoczne] = useState<Set<KategoriaMapy>>(() => new Set(KOLEJNOSC_KATEGORII));
+  const [wybranyOdcinek, setWybranyOdcinek] = useState<string | null>(null);
+  const wybierz = useCallback((id: string) => setWybranyOdcinek(id), []);
 
   const pilot = wczytanie.stan === "gotowe" ? wczytanie.pilot : null;
   const oceny = useMemo(
@@ -44,6 +51,22 @@ export function PlanistaView() {
     }
     return wynik;
   }, [pilot, oceny]);
+
+  // Odcinek → miejsce w rankingu, do którego należy (kliknięcie w mapę wybiera całe miejsce).
+  const wgOdcinka = useMemo(() => {
+    const m = new Map<string, { wynik: WynikWplywu; pozycja: number }>();
+    pilot?.ranking.forEach((wynik, i) => wynik.odcinki.forEach((id) => m.set(id, { wynik, pozycja: i + 1 })));
+    return m;
+  }, [pilot]);
+  const wybraneMiejsce = wybranyOdcinek ? (wgOdcinka.get(wybranyOdcinek) ?? null) : null;
+  const wybrane = useMemo(
+    () => (wybranyOdcinek ? (wybraneMiejsce?.wynik.odcinki ?? [wybranyOdcinek]) : []),
+    [wybranyOdcinek, wybraneMiejsce],
+  );
+  const czolo = useMemo(
+    () => (pilot?.ranking ?? []).slice(0, CZOLO_NA_MAPIE).map((r, i) => ({ odcinekId: r.odcinekId, pozycja: i + 1 })),
+    [pilot],
+  );
 
   if (wczytanie.stan === "blad") {
     return (
@@ -104,61 +127,91 @@ export function PlanistaView() {
         </div>
       </section>
 
-      <section aria-labelledby="mapa-tytul" className="grid gap-4 lg:grid-cols-[1fr_300px]">
+      <section aria-labelledby="mapa-tytul" className="grid gap-4 lg:grid-cols-[1fr_380px]">
         <h3 id="mapa-tytul" className="sr-only">
           Mapa odcinków według stanu wiedzy
         </h3>
-        <div className="h-[560px] overflow-hidden rounded-2xl border border-slate-200 shadow-sm lg:h-[680px]">
-          <MapaNiewiedzy pilot={pilot} oceny={oceny} widoczne={widoczne} />
+        <div className="h-[520px] overflow-hidden rounded-2xl border border-slate-200 shadow-sm lg:h-[680px]">
+          <MapaNiewiedzy
+            pilot={pilot}
+            oceny={oceny}
+            widoczne={widoczne}
+            wybrane={wybrane}
+            czolo={czolo}
+            onWybierz={wybierz}
+          />
         </div>
 
-        <fieldset className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-4">
-          <legend className="px-1 text-sm font-bold text-slate-800">Odcinki sieci pieszej</legend>
-          <p className="text-xs text-slate-500">
-            {pilot.odcinki.length} odcinków. Odznacz kategorię, aby ukryć ją na mapie.
-          </p>
-          {KOLEJNOSC_KATEGORII.map((k) => {
-            const s = STYL_MAPY[k];
-            return (
-              <label key={k} className="flex cursor-pointer items-start gap-3 rounded-lg p-2 hover:bg-slate-50">
-                <input
-                  type="checkbox"
-                  className="mt-1 size-4 accent-slate-800"
-                  checked={widoczne.has(k)}
-                  onChange={() => przelacz(k)}
-                />
-                <svg width="28" height="14" className="mt-1 shrink-0 rounded bg-slate-800" aria-hidden>
-                  {s.mgla && <line x1="4" y1="7" x2="24" y2="7" stroke={s.mgla.color} strokeOpacity={s.mgla.opacity} strokeWidth={10} strokeLinecap="round" />}
-                  <line x1="2" y1="7" x2="26" y2="7" stroke={s.linia.color} strokeWidth={s.linia.weight} strokeDasharray={s.linia.dashArray} />
-                </svg>
-                <span className="flex flex-col text-sm">
-                  <span className="font-medium text-slate-800">
-                    {s.etykieta}: {podsumowanie[k].liczba}
-                    <span className="font-normal text-slate-500"> ({(podsumowanie[k].metry / 1000).toFixed(1)} km)</span>
-                  </span>
-                  <span className="text-xs text-slate-500">{s.opis}</span>
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 lg:h-[680px] lg:overflow-y-auto" aria-live="polite">
+          {wybranyOdcinek ? (
+            <SzczegolyMiejsca
+              pilot={pilot}
+              odcinekId={wybraneMiejsce?.wynik.odcinekId ?? wybranyOdcinek}
+              wynik={wybraneMiejsce?.wynik ?? null}
+              pozycja={wybraneMiejsce?.pozycja ?? null}
+              ocena={oceny.get(wybraneMiejsce?.wynik.odcinekId ?? wybranyOdcinek)!}
+              profil={profil}
+              onZamknij={() => setWybranyOdcinek(null)}
+            />
+          ) : (
+            <RankingLista pilot={pilot} wybrany={null} onWybierz={wybierz} />
+          )}
+        </div>
+      </section>
+
+      <fieldset className="grid gap-1 rounded-2xl border border-slate-200 bg-white p-4 sm:grid-cols-2 xl:grid-cols-4">
+        <legend className="px-1 text-sm font-bold text-slate-800">
+          Odcinki sieci pieszej: {pilot.odcinki.length}{" "}
+          <span className="font-normal text-slate-500">(odznacz kategorię, aby ukryć ją na mapie)</span>
+        </legend>
+        {KOLEJNOSC_KATEGORII.map((k) => {
+          const st = STYL_MAPY[k];
+          return (
+            <label key={k} className="flex cursor-pointer items-start gap-3 rounded-lg p-2 hover:bg-slate-50">
+              <input
+                type="checkbox"
+                className="mt-1 size-4 accent-slate-800"
+                checked={widoczne.has(k)}
+                onChange={() => przelacz(k)}
+              />
+              <svg width="28" height="14" className="mt-1 shrink-0 rounded bg-slate-800" aria-hidden>
+                {st.mgla && <line x1="4" y1="7" x2="24" y2="7" stroke={st.mgla.color} strokeOpacity={st.mgla.opacity} strokeWidth={10} strokeLinecap="round" />}
+                <line x1="2" y1="7" x2="26" y2="7" stroke={st.linia.color} strokeWidth={st.linia.weight} strokeDasharray={st.linia.dashArray} />
+              </svg>
+              <span className="flex flex-col text-sm">
+                <span className="font-medium text-slate-800">
+                  {st.etykieta}: {podsumowanie[k].liczba}
+                  <span className="font-normal text-slate-500"> ({(podsumowanie[k].metry / 1000).toFixed(1)} km)</span>
                 </span>
-              </label>
-            );
-          })}
-          <div className="mt-2 flex items-start gap-3 border-t border-slate-100 p-2 pt-3 text-sm">
-            <span className="mt-1 size-3.5 shrink-0 rounded-full border-2 border-slate-900 bg-sky-400" aria-hidden />
+                <span className="text-xs text-slate-500">{st.opis}</span>
+              </span>
+            </label>
+          );
+        })}
+        <div className="flex items-start gap-3 p-2 text-sm">
+          <span className="mt-1 size-3.5 shrink-0 rounded-full border-2 border-slate-900 bg-sky-400" aria-hidden />
+          <span>
+            <span className="font-medium text-slate-800">usługi: {pilot.uslugi.length}</span>
+            <span className="block text-xs text-slate-500">przychodnie, apteki, sklepy, poczta, biblioteki</span>
+          </span>
+        </div>
+        <div className="flex items-start gap-3 p-2 text-sm">
+          <span className="agl-numer mt-0.5 shrink-0 scale-75" aria-hidden>1</span>
+          <span>
+            <span className="font-medium text-slate-800">pierwsze {CZOLO_NA_MAPIE} miejsc rankingu</span>
+            <span className="block text-xs text-slate-500">kliknij numer albo odcinek, aby zobaczyć szczegóły</span>
+          </span>
+        </div>
+        {pilot.strefyZmian.length > 0 && (
+          <div className="flex items-start gap-3 p-2 text-sm">
+            <span className="mt-1 size-3.5 shrink-0 border-2 border-dashed border-cyan-400" aria-hidden />
             <span>
-              <span className="font-medium text-slate-800">usługi: {pilot.uslugi.length}</span>
-              <span className="block text-xs text-slate-500">przychodnie, apteki, sklepy, poczta, biblioteki</span>
+              <span className="font-medium text-slate-800">sygnał możliwej zmiany (Sentinel-2)</span>
+              <span className="block text-xs text-amber-700">ilustracja, {ETYKIETA_PRZYKLADOWE}</span>
             </span>
           </div>
-          {pilot.strefyZmian.length > 0 && (
-            <div className="flex items-start gap-3 p-2 text-sm">
-              <span className="mt-1 size-3.5 shrink-0 border-2 border-dashed border-cyan-400" aria-hidden />
-              <span>
-                <span className="font-medium text-slate-800">sygnał możliwej zmiany (Sentinel-2)</span>
-                <span className="block text-xs text-amber-700">ilustracja, {ETYKIETA_PRZYKLADOWE}</span>
-              </span>
-            </div>
-          )}
-        </fieldset>
-      </section>
+        )}
+      </fieldset>
     </div>
   );
 }
