@@ -135,11 +135,15 @@ export function paryDoOceny(
 }
 
 /** Zgodność między ludźmi: odsetek wycinków opisanych przez co najmniej dwie osoby, gdzie wszystkie się zgadzają. */
-export function zgodnoscLudzi(plik: PlikEtykiet, wersja = WERSJA_INSTRUKCJI): { n: number; zgodnosc: number | null } {
+export function zgodnoscLudzi(
+  plik: PlikEtykiet,
+  wersja = WERSJA_INSTRUKCJI,
+  filtr: (wycinekId: string) => boolean = () => true,
+): { n: number; zgodnosc: number | null } {
   const wgWycinka = new Map<string, KlasaObrazu[]>();
   for (const etykiety of Object.values(plik.osoby)) {
     for (const [id, e] of Object.entries(etykiety)) {
-      if (e.wersjaInstrukcji === wersja) wgWycinka.set(id, [...(wgWycinka.get(id) ?? []), e.klasa]);
+      if (e.wersjaInstrukcji === wersja && filtr(id)) wgWycinka.set(id, [...(wgWycinka.get(id) ?? []), e.klasa]);
     }
   }
   const wspolne = [...wgWycinka.values()].filter((k) => k.length >= 2);

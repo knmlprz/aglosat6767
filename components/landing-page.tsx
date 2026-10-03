@@ -191,7 +191,7 @@ export function LandingPage({ liczby }: { liczby: LiczbyStrony }) {
                 tytul="Dane przykładowe, oznaczone w interfejsie"
                 elementy={
                   liczby.model && liczby.sentinel
-                    ? ["brak: warstwy pochodzą z prawdziwych danych; próbkę do oceny modelu opisała na razie jedna osoba"]
+                    ? ["brak: warstwy pochodzą z prawdziwych danych; próbkę do oceny modelu opisały dwie osoby z zespołu"]
                     : [
                         ...(liczby.model ? [] : ["klasy zwracane przez model wizyjny dla wycinków"]),
                         ...(liczby.sentinel ? [] : ["strefa zmian Sentinel-2 (jedna para scen)"]),

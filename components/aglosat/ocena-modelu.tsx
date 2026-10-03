@@ -3,7 +3,7 @@
 // Jak często model się myli: macierz pomyłek i trzy liczby z koncepcji.
 
 import { KLASY, procent, type OcenaModelu } from "@/lib/aglosat/metryki.ts";
-import { formatujWartosc } from "@/lib/aglosat/vocabulary.ts";
+import { formatujWartosc, odmiana } from "@/lib/aglosat/vocabulary.ts";
 
 export function OcenaModeluKarta({
   ocena,
@@ -22,8 +22,11 @@ export function OcenaModeluKarta({
       </h3>
       <p className="mt-1 text-xs text-slate-600">
         Model {ocena.model}
-        {ocena.wersjaPromptu ? ` (prompt v${ocena.wersjaPromptu})` : ""} kontra człowiek na {ocena.n} {ocena.n === 1 ? "wycinku" : "wycinkach"}
-        {naZywo ? " (liczone na żywo z bieżących etykiet)" : " opisanych ręcznie"}
+        {ocena.wersjaPromptu ? ` (prompt v${ocena.wersjaPromptu})` : ""}{" "}
+        {ocena.osoby && ocena.osoby > 1
+          ? `kontra ${ocena.osoby} osoby: ${ocena.n} ${odmiana(ocena.n, ["ocena", "oceny", "ocen"])} (${Math.round(ocena.n / ocena.osoby)} wycinków, każdy opisany przez każdą osobę osobno)`
+          : `kontra człowiek na ${ocena.n} ${ocena.n === 1 ? "wycinku" : "wycinkach"}`}
+        {naZywo ? " (liczone na żywo z bieżących etykiet)" : ", opis ręczny"}
         {ocena.zbior === "testowy" ? ", zbiór testowy: nie używany przy poprawianiu promptu" : ""}. Zgodność z obrazem to nie to samo co stan w
         terenie: rozstrzyga kontrola.
       </p>
@@ -38,7 +41,8 @@ export function OcenaModeluKarta({
             ))}
           {ocena.zgodnoscLudzi && ocena.zgodnoscLudzi.n > 0 && (
             <li>
-              zgodność dwóch osób: <strong>{procent(ocena.zgodnoscLudzi.zgodnosc)}</strong> na {ocena.zgodnoscLudzi.n} wycinkach
+              zgodność ludzi między sobą: <strong>{procent(ocena.zgodnoscLudzi.zgodnosc)}</strong> na {ocena.zgodnoscLudzi.n} wycinkach
+              (punkt odniesienia dla trafności modelu)
             </li>
           )}
         </ul>
