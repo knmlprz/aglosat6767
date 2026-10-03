@@ -292,6 +292,17 @@ function WarstwaKontroli({
   return null;
 }
 
+/** Mapa zmienia rozmiar razem z panelem, bez zmiany rozmiaru okna; sam Leaflet tego nie zauważa. */
+function ObserwatorRozmiaru() {
+  const map = useMap();
+  useEffect(() => {
+    const obs = new ResizeObserver(() => map.invalidateSize({ animate: false }));
+    obs.observe(map.getContainer());
+    return () => obs.disconnect();
+  }, [map]);
+  return null;
+}
+
 export function MapaNiewiedzy(props: Wspolne) {
   const [s, w, n, e] = props.pilot.meta.obszar.bbox;
   const [renderer] = useState(() => L.canvas({ padding: 0.5, tolerance: 6 }));
@@ -309,7 +320,16 @@ export function MapaNiewiedzy(props: Wspolne) {
       style={{ height: "100%", width: "100%", background: "#0f172a" }}
     >
       <ZoomControl position="topleft" zoomInTitle="Przybliż mapę" zoomOutTitle="Oddal mapę" />
-      <TileLayer url={ESRI_URL} attribution={ESRI_ATTR} maxZoom={19} maxNativeZoom={19} className="agl-podklad" />
+      <ObserwatorRozmiaru />
+      {/* crossOrigin: kafelki pobrane po CORS może zapisać service worker, więc raz obejrzana mapa działa bez sieci */}
+      <TileLayer
+        url={ESRI_URL}
+        attribution={ESRI_ATTR}
+        maxZoom={19}
+        maxNativeZoom={19}
+        className="agl-podklad"
+        crossOrigin="anonymous"
+      />
       <WarstwaOdcinkow
         pilot={props.pilot}
         oceny={props.oceny}
