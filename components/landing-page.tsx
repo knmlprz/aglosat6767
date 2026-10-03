@@ -1,261 +1,218 @@
 import Link from "next/link";
-import {
-  ArrowRight,
-  BarChart3,
-  ChevronRight,
-  Layers,
-  MapPin,
-  Menu,
-  Sparkles,
-  Users,
-} from "lucide-react";
+import { ArrowRight, Eye, Network, UserCheck } from "lucide-react";
 
-const NAV = [
-  { label: "Produkt", href: "#produkt" },
-  { label: "Planista", href: "/app/planista" },
-  { label: "O nas", href: "#o-nas" },
-  { label: "Kontakt", href: "#kontakt" },
-];
+// Strona główna: teza, trzy role, skrajny przypadek, mianownik i stan prototypu.
+// Liczby przychodzą z pilot.json (czytane przy budowaniu), nie są wpisane ręcznie.
 
-const LOGOS = ["Partner A", "Partner B", "Partner C", "Partner D", "Partner E"];
+export type LiczbyStrony = {
+  obszar: string;
+  pobranoOsm: string;
+  relacje: number;
+  bezUdokumentowanej: number;
+  niewiadome: number;
+  sprzeczne: number;
+  odcinki: number;
+  miejsceUslugi: number;
+  miejscDoKontroli: number;
+  przypadek: {
+    start: string;
+    cel: string;
+    pieszoM: number;
+    weryfikacjiM: number;
+    cecha: string;
+  } | null;
+  dataNalotu: string | null;
+};
 
-const FEATURES = [
+const ROLE = [
   {
-    icon: MapPin,
-    eyebrow: "Obszar",
-    title: "Mapa aglomeracji",
-    description:
-      "Placeholder pod sekcję z mapą i granicami administracyjnymi. Podmień tekst i podlinkuj /map.",
+    ikona: Eye,
+    tytul: "Obraz z góry znajduje kandydatów",
+    opis: "Ortofotomapa pokazuje miejsca, gdzie ciąg pieszy może być przerwany. Sentinel-2 daje sygnał możliwej zmiany między dwiema datami.",
   },
   {
-    icon: BarChart3,
-    eyebrow: "Dane",
-    title: "Metryki i wskaźniki",
-    description:
-      "Miejsce na wykresy, KPI i porównania. Wstaw tu własne komponenty analityczne.",
+    ikona: Network,
+    tytul: "Graf sieci pieszej nadaje im wagę",
+    opis: "Dla każdej niewiadomej liczymy, ile dojść z budynków mieszkalnych do przychodni, aptek i sklepów zależy od tego jednego miejsca.",
   },
   {
-    icon: Users,
-    eyebrow: "Społeczność",
-    title: "Profile użytkowników",
-    description:
-      "Krótki opis segmentów, grup docelowych albo partnerów lokalnych.",
-  },
-  {
-    icon: Layers,
-    eyebrow: "Warstwy",
-    title: "Wiele perspektyw",
-    description:
-      "Stub karty pod dodatkowe widoki — np. transport, usługi, demografia.",
+    ikona: UserCheck,
+    tytul: "Człowiek rozstrzyga w terenie",
+    opis: "Planista dostaje trasę kontroli. Wynik z terenu zmienia status cechy, a trasy mieszkańców przeliczają się od razu.",
   },
 ];
 
-export function LandingPage() {
+const DZIALA = [
+  "graf sieci pieszej z OpenStreetMap, każda cecha ze źródłem, datą i statusem",
+  "ranking miejsc do kontroli według wpływu na dojścia do usług",
+  "trasy dla profilu przeliczane na żywo po kontroli w terenie",
+  "wycinki ortofotomapy GUGiK jako dowód obrazowy",
+  "trasa kontroli na zadany czas",
+  "widok mieszkańca z opisem tekstowym trasy",
+];
+const PRZYKLADOWE = ["klasy zwracane przez model wizyjny dla wycinków", "strefa zmian Sentinel-2 (jedna para scen)"];
+const ZAPROJEKTOWANE = [
+  "trwały zapis kontroli i wielu użytkowników",
+  "zgłoszenia od mieszkańców",
+  "kolejne miasta: nowy obszar w konfiguracji potoku",
+];
+
+const proc = (a: number, b: number) => `${Math.round((100 * a) / Math.max(b, 1))}%`;
+
+export function LandingPage({ liczby }: { liczby: LiczbyStrony }) {
   return (
-    <div className="overflow-hidden text-gray-950">
-      {/* Hero */}
-      <div className="relative">
-        <div className="absolute inset-2 bottom-0 rounded-[2rem] bg-gradient-to-br from-[#fff1be] from-30% via-[#ee87cb] via-70% to-[#b060ff] ring-1 ring-black/5 ring-inset" />
-
-        <div className="relative px-6 lg:px-8">
-          <div className="mx-auto max-w-7xl">
-            <header className="flex items-center justify-between pt-12 sm:pt-16">
-              <Link href="/" className="text-lg font-semibold tracking-tight">
-                AgloSat
-              </Link>
-
-              <nav className="hidden items-center gap-1 lg:flex">
-                {NAV.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="rounded-lg px-4 py-2 text-sm font-medium text-gray-950 transition hover:bg-black/5"
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-              </nav>
-
-              <button
-                type="button"
-                className="flex size-11 items-center justify-center rounded-lg hover:bg-black/5 lg:hidden"
-                aria-label="Menu"
-              >
-                <Menu className="size-5" />
-              </button>
-            </header>
-
-            <div className="pb-24 pt-16 sm:pb-32 sm:pt-24 md:pb-48 md:pt-32">
-              <h1 className="max-w-4xl text-5xl font-medium tracking-tight text-balance sm:text-7xl md:text-8xl">
-                Twój nagłówek tutaj.
-              </h1>
-              <p className="mt-8 max-w-lg text-lg font-medium text-gray-950/75 sm:text-xl">
-                Krótki opis produktu albo aglomeracji. Ten landing to pusty
-                szablon — podmień copy, obrazki i sekcje kiedy będziesz gotowy.
-              </p>
-              <div className="mt-12 flex flex-col gap-4 sm:flex-row sm:gap-6">
-                <Link
-                  href="#kontakt"
-                  className="inline-flex items-center justify-center rounded-full bg-gray-950 px-5 py-2.5 text-sm font-medium text-white shadow-md transition hover:bg-gray-800"
-                >
-                  Zacznij
-                </Link>
-                <Link
-                  href="/app"
-                  className="inline-flex items-center justify-center gap-1 rounded-full bg-white/60 px-5 py-2.5 text-sm font-medium text-gray-950 shadow-md ring-1 ring-black/10 backdrop-blur transition hover:bg-white/80"
-                >
-                  Zobacz mapę
-                  <ChevronRight className="size-4" />
-                </Link>
-              </div>
-            </div>
-          </div>
+    <div className="bg-white text-slate-950">
+      <header className="border-b border-slate-200">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 lg:px-6">
+          <Link href="/" className="text-lg font-black tracking-tight">
+            AgloSat
+          </Link>
+          <nav aria-label="Główna" className="flex gap-1 text-sm font-medium">
+            <Link href="/app/planista" className="rounded-lg px-3 py-2 hover:bg-slate-100">
+              Planista
+            </Link>
+            <Link href="/app/mieszkaniec" className="rounded-lg px-3 py-2 hover:bg-slate-100">
+              Mieszkaniec
+            </Link>
+          </nav>
         </div>
-      </div>
-
-      {/* Logo cloud */}
-      <div className="mt-10 px-6 lg:px-8">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-10 gap-y-6">
-          {LOGOS.map((name) => (
-            <span
-              key={name}
-              className="text-sm font-semibold tracking-wide text-gray-400 uppercase"
-            >
-              {name}
-            </span>
-          ))}
-        </div>
-      </div>
+      </header>
 
       <main>
-        {/* Screenshot / preview */}
-        <section
-          id="produkt"
-          className="bg-gradient-to-b from-white from-50% to-gray-100 py-24 sm:py-32"
-        >
-          <div className="px-6 lg:px-8">
-            <div className="mx-auto max-w-7xl">
-              <h2 className="max-w-3xl text-3xl font-medium tracking-tight text-balance sm:text-5xl">
-                Sekcja pod główny podgląd produktu.
-              </h2>
-              <div className="relative mt-16 aspect-[16/10] overflow-hidden rounded-2xl bg-gray-200 shadow-2xl ring-1 ring-black/10">
-                <div className="flex h-full items-center justify-center text-gray-500">
-                  <div className="text-center">
-                    <Sparkles className="mx-auto size-10 opacity-40" />
-                    <p className="mt-3 text-sm">Placeholder — wstaw screenshot</p>
-                  </div>
-                </div>
+        <section className="mx-auto max-w-6xl px-4 pb-12 pt-14 lg:px-6 lg:pt-20">
+          <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">Pilot: {liczby.obszar}</p>
+          <h1 className="mt-3 max-w-4xl text-4xl font-black leading-tight tracking-tight sm:text-6xl">
+            Przeszkody, których miasto nie ma na mapie
+          </h1>
+          <p className="mt-5 max-w-3xl text-lg text-slate-700">
+            AgloSat wskazuje miastu, które niewiadome o chodnikach sprawdzić najpierw, bo od nich zależy najwięcej dojść
+            do usług.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link
+              href="/app/planista"
+              className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-800"
+            >
+              Panel planisty <ArrowRight className="size-4" aria-hidden />
+            </Link>
+            <Link
+              href="/app/mieszkaniec"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold hover:bg-slate-50"
+            >
+              Czy dojadę? Widok mieszkańca
+            </Link>
+          </div>
+        </section>
+
+        {liczby.przypadek && (
+          <section aria-labelledby="przypadek" className="border-y border-slate-200 bg-slate-50">
+            <div className="mx-auto grid max-w-6xl gap-6 px-4 py-12 lg:grid-cols-[1fr_1.2fr] lg:px-6">
+              <div>
+                <h2 id="przypadek" className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+                  Jeden przypadek
+                </h2>
+                <p className="mt-2 text-2xl font-bold leading-snug">
+                  Z adresu {liczby.przypadek.start} do przychodni {liczby.przypadek.cel} jest {liczby.przypadek.pieszoM} m
+                  pieszo. Dla wózka nie da się potwierdzić żadnej trasy.
+                </p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <Liczba wartosc={`${liczby.przypadek.pieszoM} m`} opis="pieszo, bez profilu" />
+                <Liczba wartosc={`${liczby.przypadek.weryfikacjiM} m`} opis="trasa wymagająca weryfikacji" />
+                <Liczba wartosc="1" opis={`miejsce bez informacji: ${liczby.przypadek.cecha}`} />
+                <p className="text-sm text-slate-600 sm:col-span-3">
+                  Od tego jednego przejścia zależą dojścia do {liczby.miejsceUslugi} usług. Obniżony krawężnik daje trasę
+                  udokumentowaną; wysoki odbiera przejście całkowicie. Rozstrzyga kontrola w terenie.
+                </p>
               </div>
             </div>
+          </section>
+        )}
+
+        <section aria-labelledby="mianownik" className="mx-auto max-w-6xl px-4 py-12 lg:px-6">
+          <h2 id="mianownik" className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+            To nie wyjątek
+          </h2>
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            <Liczba
+              wartosc={proc(liczby.bezUdokumentowanej, liczby.relacje)}
+              opis={`z ${liczby.relacje} relacji budynek–usługa nie ma trasy udokumentowanej dla wózka`}
+            />
+            <Liczba
+              wartosc={String(liczby.niewiadome)}
+              opis={`z ${liczby.odcinki} odcinków sieci pieszej nie ma rozstrzygnięcia dla profilu (w tym ${liczby.sprzeczne} ze sprzecznymi źródłami)`}
+            />
+            <Liczba wartosc={String(liczby.miejscDoKontroli)} opis="miejsc do kontroli, uporządkowanych według wpływu na dojścia" />
           </div>
+          <p className="mt-3 text-xs text-slate-500">
+            OpenStreetMap, dane pobrane {liczby.pobranoOsm}. Profil: bez schodów, krawężnik do 3 cm, utwardzona nawierzchnia.
+            Brak informacji to nie bariera: nie wiemy, czy przejście jest.
+          </p>
         </section>
 
-        {/* Feature grid */}
-        <section className="px-6 py-24 lg:px-8">
-          <div className="mx-auto max-w-7xl">
-            <p className="font-mono text-xs font-semibold tracking-widest text-gray-500 uppercase">
-              Funkcje
-            </p>
-            <h2 className="mt-2 max-w-3xl text-3xl font-medium tracking-tight sm:text-5xl">
-              Miejsce na opis tego, co robisz.
+        <section aria-labelledby="role" className="border-t border-slate-200">
+          <div className="mx-auto max-w-6xl px-4 py-12 lg:px-6">
+            <h2 id="role" className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+              Trzy role, zawsze w tej kolejności
             </h2>
-
-            <div className="mt-10 grid grid-cols-1 gap-4 sm:mt-16 lg:grid-cols-6 lg:grid-rows-2">
-              {FEATURES.map((feature, i) => {
-                const Icon = feature.icon;
-                const span =
-                  i === 0
-                    ? "lg:col-span-3 lg:rounded-tl-[2rem]"
-                    : i === 1
-                      ? "lg:col-span-3 lg:rounded-tr-[2rem]"
-                      : i === 2
-                        ? "lg:col-span-2 lg:rounded-bl-[2rem]"
-                        : "lg:col-span-4 lg:rounded-br-[2rem]";
-
-                return (
-                  <article
-                    key={feature.title}
-                    className={`flex flex-col overflow-hidden rounded-2xl bg-white p-8 shadow-sm ring-1 ring-black/5 ${span}`}
-                  >
-                    <div className="mb-6 flex size-10 items-center justify-center rounded-xl bg-gray-100">
-                      <Icon className="size-5 text-gray-700" />
-                    </div>
-                    <p className="font-mono text-xs font-semibold tracking-widest text-gray-500 uppercase">
-                      {feature.eyebrow}
-                    </p>
-                    <h3 className="mt-2 text-xl font-medium tracking-tight">
-                      {feature.title}
-                    </h3>
-                    <p className="mt-2 text-sm leading-6 text-gray-600">
-                      {feature.description}
-                    </p>
-                  </article>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* Dark band */}
-        <section
-          id="o-nas"
-          className="mx-2 mt-2 rounded-[2rem] bg-gray-900 px-6 py-24 text-white lg:px-8"
-        >
-          <div className="mx-auto max-w-7xl">
-            <p className="font-mono text-xs font-semibold tracking-widest text-gray-400 uppercase">
-              Więcej
-            </p>
-            <h2 className="mt-2 max-w-3xl text-3xl font-medium tracking-tight sm:text-5xl">
-              Ciemna sekcja — np. case study albo CTA pośrodku strony.
-            </h2>
-            <div className="mt-10 grid gap-4 sm:grid-cols-2">
-              {[1, 2].map((n) => (
-                <div
-                  key={n}
-                  className="rounded-2xl bg-white/5 p-8 ring-1 ring-white/10"
-                >
-                  <p className="font-mono text-xs font-semibold tracking-widest text-gray-400 uppercase">
-                    Karta {n}
-                  </p>
-                  <p className="mt-2 text-lg font-medium">
-                    Tytuł do uzupełnienia
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-gray-400">
-                    Krótki opis. Możesz tu dać testimonial, statystykę albo
-                    link do bloga.
-                  </p>
-                </div>
+            <ol className="mt-4 grid gap-4 md:grid-cols-3">
+              {ROLE.map((r, i) => (
+                <li key={r.tytul} className="rounded-2xl border border-slate-200 p-5">
+                  <div className="flex items-center gap-2 text-slate-500">
+                    <r.ikona className="size-5" aria-hidden />
+                    <span className="text-sm font-semibold">{i + 1}.</span>
+                  </div>
+                  <h3 className="mt-2 text-lg font-bold">{r.tytul}</h3>
+                  <p className="mt-1 text-sm text-slate-600">{r.opis}</p>
+                </li>
               ))}
+            </ol>
+          </div>
+        </section>
+
+        <section aria-labelledby="stan" className="border-t border-slate-200 bg-slate-50">
+          <div className="mx-auto max-w-6xl px-4 py-12 lg:px-6">
+            <h2 id="stan" className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+              Stan prototypu
+            </h2>
+            <div className="mt-4 grid gap-4 md:grid-cols-3">
+              <Lista tytul="Działa" elementy={DZIALA} />
+              <Lista tytul="Dane przykładowe, oznaczone w interfejsie" elementy={PRZYKLADOWE} />
+              <Lista tytul="Zaprojektowane, poza prototypem" elementy={ZAPROJEKTOWANE} />
             </div>
           </div>
         </section>
       </main>
 
-      {/* Footer CTA */}
-      <footer id="kontakt" className="relative mt-2 px-6 py-20 lg:px-8">
-        <div className="absolute inset-2 rounded-[2rem] bg-white/80 ring-1 ring-black/5" />
-        <div className="relative mx-auto max-w-7xl text-center">
-          <p className="font-mono text-xs font-semibold tracking-widest text-gray-500 uppercase">
-            Kontakt
-          </p>
-          <h2 className="mt-6 text-3xl font-medium tracking-tight sm:text-5xl">
-            Gotowy, żeby coś tu postawić?
-          </h2>
-          <p className="mx-auto mt-4 max-w-md text-sm text-gray-500">
-            Placeholder pod formularz, e-mail albo przycisk do aplikacji.
-          </p>
-          <Link
-            href="mailto:hello@example.com"
-            className="mt-8 inline-flex items-center gap-2 rounded-full bg-gray-950 px-5 py-2.5 text-sm font-medium text-white shadow-md transition hover:bg-gray-800"
-          >
-            Napisz do nas
-            <ArrowRight className="size-4" />
-          </Link>
-          <p className="mt-16 text-sm text-gray-500">
-            © {new Date().getFullYear()} AgloSat. Wszystkie prawa zastrzeżone.
-          </p>
+      <footer className="border-t border-slate-200">
+        <div className="mx-auto max-w-6xl px-4 py-6 text-xs text-slate-500 lg:px-6">
+          Dane: © współtwórcy OpenStreetMap (ODbL)
+          {liczby.dataNalotu && <>; ortofotomapa GUGiK (Geoportal), nalot {liczby.dataNalotu}</>}; podkład mapy: Esri World
+          Imagery.
         </div>
       </footer>
+    </div>
+  );
+}
+
+function Liczba({ wartosc, opis }: { wartosc: string; opis: string }) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-4">
+      <div className="text-3xl font-black">{wartosc}</div>
+      <div className="mt-1 text-sm text-slate-600">{opis}</div>
+    </div>
+  );
+}
+
+function Lista({ tytul, elementy }: { tytul: string; elementy: string[] }) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-5">
+      <h3 className="font-bold">{tytul}</h3>
+      <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-700">
+        {elementy.map((e) => (
+          <li key={e}>{e}</li>
+        ))}
+      </ul>
     </div>
   );
 }
