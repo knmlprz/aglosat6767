@@ -23,6 +23,13 @@ export type OcenaModelu = {
   czuloscPrzerwany: number | null;
   /** Ile wycinków „niewidoczny” według człowieka model też uznał za niewidoczne. */
   poprawneNiewidoczny: number | null;
+  /** Ile wskazań „ciągły” modelu człowiek potwierdził: jedyna odpowiedź, która może uspokoić planistę. */
+  precyzjaCiagly?: number | null;
+  /**
+   * Groźne pomyłki: model mówi „ciągły”, a człowiek widzi przerwę albo nic nie widzi.
+   * Pozostałe pomyłki („przerwany” albo „niewidoczny” zamiast „ciągły”) kosztują tylko dodatkową kontrolę.
+   */
+  grozne?: number;
 };
 
 const iloraz = (a: number, b: number) => (b > 0 ? Math.round((1000 * a) / b) / 1000 : null);
@@ -42,6 +49,8 @@ export function policzOcene(model: string, pary: { czlowiek: KlasaObrazu; model:
     precyzjaPrzerwany: iloraz(macierz.przerwany.przerwany, modelPrzerwany),
     czuloscPrzerwany: iloraz(macierz.przerwany.przerwany, czlowiekPrzerwany),
     poprawneNiewidoczny: iloraz(macierz.niewidoczny.niewidoczny, czlowiekNiewidoczny),
+    precyzjaCiagly: iloraz(macierz.ciagly.ciagly, KLASY.reduce((s, c) => s + macierz[c].ciagly, 0)),
+    grozne: macierz.przerwany.ciagly + macierz.niewidoczny.ciagly,
   };
 }
 

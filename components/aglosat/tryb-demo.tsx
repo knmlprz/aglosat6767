@@ -90,7 +90,10 @@ const K = {
       const zbior = wersje.some((w) => w.zbior === "testowy" && w.n > 0) ? "testowy" : "wszystkie";
       const v2 = wersje.find((w) => w.wersjaPromptu === 2 && w.zbior === zbior);
       const v3 = wersje.find((w) => w.wersjaPromptu === 3 && w.zbior === zbior);
-      const liczby = v2 && v3 ? ` Poprawiliśmy wejście (obraz bez linii i z linią): trafność na próbce z ${proc(v2.trafnosc)} do ${proc(v3.trafnosc)}.` : "";
+      const liczby =
+        v2 && v3
+          ? ` Poprawiliśmy wejście (obraz bez linii i z linią): trafność na próbce z ${proc(v2.trafnosc)} do ${proc(v3.trafnosc)}; gdy model mówi „ciągły”, człowiek zgadza się w ${proc(v3.precyzjaCiagly)}.`
+          : "";
       return `Na zdjęciu bez nakładki ścieżka przez trawnik jest. Modelowi zasłoniła ją nasza własna linia z OSM.${liczby} Model wskazuje, gdzie spojrzeć; decyduje człowiek.`;
     },
     widok: "/app/planista",
