@@ -23,8 +23,18 @@ import type { KontrolaNaMapie } from "@/components/aglosat/mapa-niewiedzy";
 import { DOMYSLNE_PARAMETRY, ulozTraseKontroli } from "@/lib/aglosat/kontrola.ts";
 import { RankingLista } from "@/components/aglosat/ranking-lista";
 import { SzczegolyMiejsca } from "@/components/aglosat/szczegoly-miejsca";
+import { ZgloszeniaLista } from "@/components/aglosat/zgloszenia-lista";
 
 const CZOLO_NA_MAPIE = 10;
+
+type Zakladka = "ranking" | "kontrola" | "zgloszenia";
+
+/** Po zamknięciu szczegółów fokus wraca na nagłówek listy, która znów jest widoczna. */
+const NAGLOWEK_LISTY: Record<Zakladka, string> = {
+  ranking: "ranking-tytul",
+  kontrola: "kontrola-tytul",
+  zgloszenia: "zgloszenia-tytul",
+};
 
 const MapaNiewiedzy = dynamic(
   () => import("@/components/aglosat/mapa-niewiedzy").then((m) => m.MapaNiewiedzy),
@@ -37,7 +47,8 @@ const MapaNiewiedzy = dynamic(
 const procent = (a: number, b: number) => `${Math.round((100 * a) / Math.max(b, 1))}%`;
 
 export function PlanistaView() {
-  const { wczytanie, weryfikacje, dodajKontrole, cofnijKontrole, przywroc, zadanie } = useAglosat();
+  const { wczytanie, weryfikacje, zgloszenia, rozpatrzZgloszenie, dodajKontrole, cofnijKontrole, przywroc, zadanie } =
+    useAglosat();
   const profil = PROFIL_DOMYSLNY;
   const [widoczne, setWidoczne] = useState<Set<KategoriaMapy>>(() => new Set(KOLEJNOSC_KATEGORII));
   // Stan początkowy może narzucić tryb demo (czytany tylko przy montowaniu).
@@ -45,7 +56,7 @@ export function PlanistaView() {
   const wybierz = useCallback((id: string) => setWybranyOdcinek(id), []);
   const [wybranaRelacja, setRelacja] = useState<Relacja | null>(null);
   const [fokusTrasy, setFokusTrasy] = useState(0);
-  const [zakladka, setZakladka] = useState<"ranking" | "kontrola">(() => zadanie?.zakladka ?? "ranking");
+  const [zakladka, setZakladka] = useState<Zakladka>(() => zadanie?.zakladka ?? "ranking");
   // Mapa pokazuje albo dojście, albo trasę kontroli, żeby linie się nie nakładały.
   const [pokazKontrole, setPokazKontrole] = useState(() => zadanie?.pokazKontrole ?? false);
   const [fokusKontroli, setFokusKontroli] = useState(() => (zadanie?.pokazKontrole ? 1 : 0));
@@ -59,8 +70,13 @@ export function PlanistaView() {
   );
   // Stan po kontrolach z tej sesji: od niego zależą mapa, trasy i panel miejsca.
   const oceny = useMemo(
-    () => (pilot ? (weryfikacje.length ? ocenWszystkie(pilot.odcinki, pilot.obserwacje, weryfikacje, profil) : ocenyBazowe) : null),
-    [pilot, weryfikacje, profil, ocenyBazowe],
+    () =>
+      pilot
+        ? weryfikacje.length || zgloszenia.length
+          ? ocenWszystkie(pilot.odcinki, pilot.obserwacje, weryfikacje, profil, zgloszenia)
+          : ocenyBazowe
+        : null,
+    [pilot, weryfikacje, zgloszenia, profil, ocenyBazowe],
   );
 
   // Domyślnie skrajny przypadek: pierwszy kandydat z analizy.
@@ -97,6 +113,7 @@ export function PlanistaView() {
     [trasy, punkty],
   );
   const sprawdzone = useMemo(() => new Set(weryfikacje.map((w) => w.odcinekId)), [weryfikacje]);
+  const doDecyzji = zgloszenia.filter((z) => z.stan === "oczekuje").length;
 
   // Trasa kontroli liczona tutaj, żeby przetrwała otwarcie szczegółów przystanku
   // i przeliczała się po każdej kontroli (sprawdzone miejsca wypadają).
@@ -288,13 +305,13 @@ export function PlanistaView() {
               ocena={oceny.get(wybraneMiejsce?.wynik.odcinekId ?? wybranyOdcinek)!}
               profil={profil}
               weryfikacje={weryfikacje}
+              zgloszenia={zgloszenia}
               onDodaj={dodajKontrole}
               onCofnij={cofnijKontrole}
               onZamknij={() => {
                 setWybranyOdcinek(null);
-                // Po powrocie fokus na nagłówek widocznej listy (ranking albo trasa kontroli).
                 requestAnimationFrame(() =>
-                  document.getElementById(zakladka === "ranking" ? "ranking-tytul" : "kontrola-tytul")?.focus({ preventScroll: true }),
+                  document.getElementById(NAGLOWEK_LISTY[zakladka])?.focus({ preventScroll: true }),
                 );
               }}
             />
@@ -305,6 +322,7 @@ export function PlanistaView() {
                   [
                     ["ranking", "Ranking"],
                     ["kontrola", "Trasa kontroli"],
+                    ["zgloszenia", "Zgłoszenia"],
                   ] as const
                 ).map(([k, etykieta]) => (
                   <button
@@ -317,11 +335,24 @@ export function PlanistaView() {
                     }`}
                   >
                     {etykieta}
+                    {k === "zgloszenia" && doDecyzji > 0 && (
+                      <span className="ml-1 rounded-full bg-violet-600 px-1.5 text-xs font-bold text-white">
+                        {doDecyzji}
+                        <span className="sr-only"> do decyzji</span>
+                      </span>
+                    )}
                   </button>
                 ))}
               </div>
               {zakladka === "ranking" ? (
                 <RankingLista pilot={pilot} wybrany={null} onWybierz={wybierz} sprawdzone={sprawdzone} />
+              ) : zakladka === "zgloszenia" ? (
+                <ZgloszeniaLista
+                  pilot={pilot}
+                  zgloszenia={zgloszenia}
+                  onRozpatrz={rozpatrzZgloszenie}
+                  onWybierzOdcinek={wybierz}
+                />
               ) : (
                 trasaKontroli &&
                 ustawienia && (

@@ -6,11 +6,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import type { Pilot, Weryfikacja } from "@/lib/aglosat/types.ts";
-import { wpisKontroli } from "@/lib/aglosat/weryfikacja.ts";
+import type { Pilot, Weryfikacja, Zgloszenie } from "@/lib/aglosat/types.ts";
+import { dzisiaj, wpisKontroli } from "@/lib/aglosat/weryfikacja.ts";
 import { useAglosat, type ZadanieDemo } from "@/components/aglosat/stan-aglosat";
 
 type Kontrole = "brak" | "obnizony" | "wysoki" | "obnizony_odrzucenie";
+type StanDemoZgloszen = "brak" | "oczekuje" | "przyjete";
 
 type Krok = {
   tytul: string;
@@ -18,9 +19,10 @@ type Krok = {
   mowimy: string | ((pilot: Pilot) => string);
   widok: "/app/planista" | "/app/mieszkaniec";
   wybierz: "miejsce1" | "sprzeczne" | "sentinel" | null;
-  zakladka?: "ranking" | "kontrola";
+  zakladka?: "ranking" | "kontrola" | "zgloszenia";
   pokazKontrole?: boolean;
   kontrole: Kontrole;
+  zgloszenia?: StanDemoZgloszen;
 };
 
 const K = {
@@ -39,6 +41,34 @@ const K = {
     widok: "/app/mieszkaniec",
     wybierz: null,
     kontrole: "brak",
+  },
+  zgloszenie: {
+    tytul: "Mieszkaniec zgłasza, jak tu jest",
+    mowimy:
+      "Przy przejściu bez krawężnika w danych: „obniżony”. Zgłoszenie czeka na urząd — trasa się jeszcze nie zmienia.",
+    widok: "/app/mieszkaniec",
+    wybierz: null,
+    kontrole: "brak",
+    zgloszenia: "oczekuje",
+  },
+  decyzja: {
+    tytul: "Urząd ogląda zdjęcie i decyduje",
+    mowimy:
+      "Kolejka zgłoszeń: miejsce, deklarowana wartość, komentarz. Przyjęcie liczy zgłoszenie jak źródło i od razu przelicza trasy.",
+    widok: "/app/planista",
+    wybierz: null,
+    zakladka: "zgloszenia",
+    kontrole: "brak",
+    zgloszenia: "oczekuje",
+  },
+  przyjete: {
+    tytul: "Po decyzji trasa jest udokumentowana",
+    mowimy:
+      "Urząd przyjął zgłoszenie. U mieszkańca ta sama relacja: 562 metry, źródło „zgłoszenie przyjęte przez urząd”, nie kontrola w terenie.",
+    widok: "/app/mieszkaniec",
+    wybierz: null,
+    kontrole: "brak",
+    zgloszenia: "przyjete",
   },
   miejsce1: {
     tytul: "To przejście jest pierwsze w rankingu",
@@ -122,10 +152,13 @@ const K = {
   },
 } satisfies Record<string, Krok>;
 
-/** Jeden scenariusz: od pytania mieszkańca, przez dowód z obrazu, do kontroli, która zmienia trasę. */
+/** Jeden scenariusz: od pytania mieszkańca, przez zgłoszenie i decyzję urzędu, do kontroli w terenie. */
 export const KROKI: Krok[] = [
   K.mieszkaniec,
   K.brakInformacji,
+  K.zgloszenie,
+  K.decyzja,
+  K.przyjete,
   K.miejsce1,
   K.dowod,
   K.kontrola,
@@ -150,6 +183,23 @@ function odcinekSentinel(pilot: Pilot) {
   return { odcinekId: odcinek?.id ?? null, strefa, obserwacja };
 }
 
+function zgloszeniaKroku(stan: StanDemoZgloszen, pilot: Pilot): Zgloszenie[] {
+  const odcinekId = pilot.ranking[0]?.odcinekId;
+  if (!odcinekId || stan === "brak") return [];
+  const z: Zgloszenie = {
+    id: "demo-zgloszenie",
+    odcinekId,
+    cecha: "kraweznik",
+    wartosc: "obnizony",
+    zdjecie: null,
+    opis: "krawężnik obniżony po obu stronach (zgłoszenie demo)",
+    dataZgloszenia: dzisiaj(),
+    stan: stan === "przyjete" ? "przyjete" : "oczekuje",
+  };
+  if (stan === "przyjete") z.uzasadnienie = "opis zgadza się z miejscem; przyjęte jako źródło";
+  return [z];
+}
+
 function kontroleKroku(k: Kontrole, pilot: Pilot): Weryfikacja[] {
   const miejsce = pilot.ranking[0]?.odcinki ?? [];
   const krawedz = (w: string) => wpisKontroli(miejsce, "kraweznik", w, { notatka: "kontrola w terenie (demo)" });
@@ -167,7 +217,7 @@ function kontroleKroku(k: Kontrole, pilot: Pilot): Weryfikacja[] {
 }
 
 export function TrybDemo() {
-  const { wczytanie, ustawKontrole, ustawZadanie } = useAglosat();
+  const { wczytanie, ustawKontrole, ustawZgloszenia, ustawZadanie } = useAglosat();
   const pilot = wczytanie.stan === "gotowe" ? wczytanie.pilot : null;
   const router = useRouter();
   const sciezka = usePathname();
@@ -188,11 +238,12 @@ export function TrybDemo() {
         (przed.zakladka ?? "ranking") === (k.zakladka ?? "ranking") &&
         !!przed.pokazKontrole === !!k.pokazKontrole;
       ustawKontrole(kontroleKroku(k.kontrole, pilot));
+      ustawZgloszenia(zgloszeniaKroku(k.zgloszenia ?? "brak", pilot));
       ustawZadanie(zadanie, !tenSamWidok);
       if (sciezka !== k.widok) router.push(k.widok);
       setPoprzedni(k);
     },
-    [pilot, ustawKontrole, ustawZadanie, router, sciezka],
+    [pilot, ustawKontrole, ustawZgloszenia, ustawZadanie, router, sciezka],
   );
 
   const idz = useCallback(
@@ -280,6 +331,7 @@ export function TrybDemo() {
             onClick={() => {
               setAktywny(false);
               ustawKontrole([]);
+              ustawZgloszenia([]);
               ustawZadanie(null, true);
               setPoprzedni(null);
             }}
