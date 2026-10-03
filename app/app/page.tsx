@@ -1,15 +1,6 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import { Suspense } from "react";
-import { AppShell } from "@/components/app-shell";
-import { FullDashboard } from "@/components/dashboard/full-dashboard";
-
-export default function DashboardPage() {
-  return (
-    <AppShell title="AgloSat — Panel">
-      <Suspense>
-        <FullDashboard />
-      </Suspense>
-    </AppShell>
-  );
+// /app prowadzi do widoku głównego: planisty.
+export default function AppIndex() {
+  redirect("/app/planista");
 }

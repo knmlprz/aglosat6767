@@ -3,9 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 
-import { NavDocuments } from "@/components/nav-documents"
 import { NavMain } from "@/components/nav-main"
-import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
 import {
   Sidebar,
@@ -16,38 +14,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import {
-  HomeIcon,
-  MapIcon,
-  DatabaseIcon,
-  FileTextIcon,
-  Settings2Icon,
-  CircleHelpIcon,
-  ListChecksIcon,
-  RouteIcon,
-} from "lucide-react"
+import { ListChecksIcon, RouteIcon, SatelliteIcon } from "lucide-react"
 
-const data = {
-  user: {
-    name: "Planista (demo)",
-    email: "konto demonstracyjne",
-    avatar: "",
-  },
-  navMain: [
-    { title: "Planista", url: "/app/planista", icon: <ListChecksIcon /> },
-    { title: "Mieszkaniec", url: "/app/mieszkaniec", icon: <RouteIcon /> },
-    { title: "Panel główny", url: "/app", icon: <HomeIcon /> },
-    { title: "Mapa", url: "/app#mapa", icon: <MapIcon /> },
-  ],
-  navSecondary: [
-    { title: "Ustawienia", url: "#", icon: <Settings2Icon /> },
-    { title: "Pomoc", url: "#", icon: <CircleHelpIcon /> },
-  ],
-  documents: [
-    { name: "Baza Danych (OSM)", url: "#", icon: <DatabaseIcon /> },
-    { name: "Zapisane Raporty", url: "#", icon: <FileTextIcon /> },
-  ],
-}
+const navMain = [
+  { title: "Planista", url: "/app/planista", icon: <ListChecksIcon /> },
+  { title: "Mieszkaniec", url: "/app/mieszkaniec", icon: <RouteIcon /> },
+]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -57,10 +29,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton
               className="data-[slot=sidebar-menu-button]:p-1.5!"
-              render={<Link href="/app" />}
+              render={<Link href="/" />}
             >
-              <div className="flex bg-blue-600 text-white rounded-md items-center justify-center p-1">
-                <MapIcon className="size-4" />
+              <div className="flex bg-slate-900 text-white rounded-md items-center justify-center p-1">
+                <SatelliteIcon className="size-4" />
               </div>
               <span className="text-base font-bold tracking-tight">AgloSat</span>
             </SidebarMenuButton>
@@ -68,12 +40,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavMain items={navMain} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser name="Planista (demo)" opis="konto demonstracyjne, bez logowania" />
       </SidebarFooter>
     </Sidebar>
   )

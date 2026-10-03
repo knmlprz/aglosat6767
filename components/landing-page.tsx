@@ -12,7 +12,7 @@ import {
 
 const NAV = [
   { label: "Produkt", href: "#produkt" },
-  { label: "Mapa", href: "/app/mapa" },
+  { label: "Planista", href: "/app/planista" },
   { label: "O nas", href: "#o-nas" },
   { label: "Kontakt", href: "#kontakt" },
 ];
