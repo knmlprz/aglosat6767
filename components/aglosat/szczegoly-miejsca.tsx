@@ -53,6 +53,7 @@ export function SzczegolyMiejsca({
   onZamknij: () => void;
 }) {
   const odc = pilot.odcinki.find((o) => o.id === odcinekId)!;
+  const strefa = odc.strefaZmian ? pilot.strefyZmian.find((s) => s.id === odc.strefaZmian) : undefined;
   // Kliknięty przycisk listy znika, więc fokus przenosimy na nagłówek panelu (klawiatura, czytnik ekranu).
   const naglowek = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
@@ -162,10 +163,14 @@ export function SzczegolyMiejsca({
         onCofnij={onCofnij}
       />
 
-      {odc.strefaZmian && (
+      {strefa && (
         <p className="rounded-lg border border-cyan-300 bg-cyan-50 p-2 text-xs text-cyan-900">
           Odcinek leży w strefie sygnału możliwej zmiany (Sentinel-2): dane mogą być nieaktualne.{" "}
-          <span className="text-amber-700">Ilustracja, {ETYKIETA_PRZYKLADOWE}.</span>
+          {strefa.ilustracja ? (
+            <span className="text-amber-700">Ilustracja, {ETYKIETA_PRZYKLADOWE}.</span>
+          ) : (
+            <span>{strefa.opis} Ortofotomapa jest starsza niż zmiana: rozstrzyga kontrola.</span>
+          )}
         </p>
       )}
 

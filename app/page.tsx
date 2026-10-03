@@ -37,6 +37,10 @@ function policzLiczby(): LiczbyStrony {
         : null,
     dataNalotu: p.wycinki[0]?.dataObrazu ?? null,
     model: p.obserwacje.find((o) => !o.przykladowe && o.model)?.model ?? null,
+    sentinel:
+      p.strefyZmian.length > 0 && p.strefyZmian.every((s) => !s.ilustracja)
+        ? { strefy: p.strefyZmian.length, pary: `${p.strefyZmian[0].scenaPrzed.slice(0, 4)}→${p.strefyZmian[0].scenaPo.slice(0, 4)}` }
+        : null,
   };
 }
 

@@ -24,6 +24,8 @@ export type LiczbyStrony = {
   dataNalotu: string | null;
   /** Nazwa modelu, jeśli klasy dla wycinków pochodzą z prawdziwego modelu. */
   model: string | null;
+  /** Strefy zmian policzone z prawdziwych scen Sentinel-2 (nie ilustracja). */
+  sentinel: { strefy: number; pary: string } | null;
 };
 
 const ROLE = [
@@ -52,7 +54,6 @@ const DZIALA = [
   "trasa kontroli na zadany czas",
   "widok mieszkańca z opisem tekstowym trasy",
 ];
-const PRZYKLADOWE_ZAWSZE = ["strefa zmian Sentinel-2 (jedna para scen)"];
 const ZAPROJEKTOWANE = [
   "trwały zapis kontroli i wielu użytkowników",
   "zgłoszenia od mieszkańców",
@@ -180,11 +181,22 @@ export function LandingPage({ liczby }: { liczby: LiczbyStrony }) {
             <div className="mt-4 grid gap-4 md:grid-cols-3">
               <Lista
                 tytul="Działa"
-                elementy={liczby.model ? [...DZIALA, `klasyfikacja wycinków modelem wizyjnym (${liczby.model})`] : DZIALA}
+                elementy={[
+                  ...DZIALA,
+                  ...(liczby.model ? [`klasyfikacja wycinków modelem wizyjnym (${liczby.model})`] : []),
+                  ...(liczby.sentinel ? [`strefy zmian z Sentinel-2: ${liczby.sentinel.strefy}, pary scen ${liczby.sentinel.pary}`] : []),
+                ]}
               />
               <Lista
                 tytul="Dane przykładowe, oznaczone w interfejsie"
-                elementy={liczby.model ? PRZYKLADOWE_ZAWSZE : ["klasy zwracane przez model wizyjny dla wycinków", ...PRZYKLADOWE_ZAWSZE]}
+                elementy={
+                  liczby.model && liczby.sentinel
+                    ? ["brak: warstwy pochodzą z prawdziwych danych; próbkę do oceny modelu opisała na razie jedna osoba"]
+                    : [
+                        ...(liczby.model ? [] : ["klasy zwracane przez model wizyjny dla wycinków"]),
+                        ...(liczby.sentinel ? [] : ["strefa zmian Sentinel-2 (jedna para scen)"]),
+                      ]
+                }
               />
               <Lista tytul="Zaprojektowane, poza prototypem" elementy={ZAPROJEKTOWANE} />
             </div>

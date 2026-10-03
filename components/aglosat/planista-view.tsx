@@ -175,6 +175,10 @@ export function PlanistaView() {
   }
 
   const m = pilot.mianownik;
+  const przykladowe = [
+    ...(pilot.obserwacje.some((o) => o.przykladowe) ? ["obserwacje z obrazu"] : []),
+    ...(pilot.strefyZmian.some((s) => s.ilustracja) ? ["strefa Sentinel-2"] : []),
+  ];
   const przelacz = (k: KategoriaMapy) =>
     setWidoczne((prev) => {
       const nowe = new Set(prev);
@@ -201,9 +205,16 @@ export function PlanistaView() {
               obserwacje z obrazu: model {pilot.obserwacje[0].model}
             </span>
           )}
-          <span className="rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-amber-800">
-            {ETYKIETA_PRZYKLADOWE}: {pilot.obserwacje.some((o) => o.przykladowe) ? "obserwacje z obrazu, " : ""}strefa Sentinel-2
-          </span>
+          {pilot.strefyZmian.length > 0 && !pilot.strefyZmian.some((s) => s.ilustracja) && (
+            <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-600">
+              strefy zmian: Sentinel-2, sceny {pilot.strefyZmian[0].scenaPrzed} → {pilot.strefyZmian[0].scenaPo}
+            </span>
+          )}
+          {przykladowe.length > 0 && (
+            <span className="rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-amber-800">
+              {ETYKIETA_PRZYKLADOWE}: {przykladowe.join(", ")}
+            </span>
+          )}
         </div>
       </header>
 
@@ -381,7 +392,11 @@ export function PlanistaView() {
             <span className="mt-1 size-3.5 shrink-0 border-2 border-dashed border-cyan-400" aria-hidden />
             <span>
               <span className="font-medium text-slate-800">sygnał możliwej zmiany (Sentinel-2)</span>
-              <span className="block text-xs text-amber-700">ilustracja, {ETYKIETA_PRZYKLADOWE}</span>
+              {pilot.strefyZmian.some((s) => s.ilustracja) ? (
+                <span className="block text-xs text-amber-700">ilustracja, {ETYKIETA_PRZYKLADOWE}</span>
+              ) : (
+                <span className="block text-xs text-slate-600">ubytek roślinności w dwóch parach scen rok do roku; nie wykrywa chodników</span>
+              )}
             </span>
           </div>
         )}

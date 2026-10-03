@@ -3,7 +3,7 @@
 //
 // Co jest prawdziwe: geometria sieci pieszej, tagi OSM (nawierzchnia, schody, krawężniki,
 // szerokość, nachylenie), budynki, usługi, ranking i mianownik policzone na tym grafie.
-// Co jest przykładowe (oznaczone polem przykladowe): obserwacje z obrazu, strefa zmian Sentinel-2.
+// Co jest przykładowe (oznaczone polem przykladowe): obserwacje z obrazu bez wyników modelu, strefa zmian bez wyniku Sentinel-2.
 
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { KLASYFIKACJA, OBSZAR, ORTO, PRZYKLADOWE } from "./config.ts";
@@ -342,20 +342,67 @@ if (klasyfikacje) {
   }
 }
 
-// --- dane przykładowe: strefa zmian Sentinel-2 wokół budowy z OSM ----------------------------
+// --- strefy zmian Sentinel-2 ----------------------------------------------------------------
+// Prawdziwe strefy z npm run aglosat:sentinel; bez pliku: ilustracja wokół budowy z OSM.
+
+type PlikSentinel = {
+  pary: { przed: string; po: string }[];
+  metoda: { prog: number };
+  strefy: { id: string; kierunek: string; poleM2: number; srednieDNDVI: number[]; wielokat: LatLon[] }[];
+};
+const dataSceny = (id: string) => id.replace(/^.*_(\d{4})(\d{2})(\d{2})_.*$/, "$1-$2-$3");
+/** Punkt w wielokącie (promień), współrzędne [lat, lon]. */
+function wWielokacie([y, x]: LatLon, w: LatLon[]): boolean {
+  let wewnatrz = false;
+  for (let i = 0, j = w.length - 1; i < w.length; j = i++) {
+    const [yi, xi] = w[i], [yj, xj] = w[j];
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) wewnatrz = !wewnatrz;
+  }
+  return wewnatrz;
+}
+/** Punkty co ok. 5 m wzdłuż odcinka: przejście przez strefę bez wierzchołka w środku też się liczy. */
+function probkiOdcinka(g: LatLon[]): LatLon[] {
+  const wynik: LatLon[] = [g[0]];
+  for (let i = 1; i < g.length; i++) {
+    const kroki = Math.max(1, Math.ceil(odl(g[i - 1], g[i]) / 5));
+    for (let k = 1; k <= kroki; k++) {
+      const t = k / kroki;
+      wynik.push([g[i - 1][0] + t * (g[i][0] - g[i - 1][0]), g[i - 1][1] + t * (g[i][1] - g[i - 1][1])]);
+    }
+  }
+  return wynik;
+}
 
 const strefyZmian: StrefaZmian[] = [];
-const budowa = surowe.ways.find((w) => w.tags.highway === "construction" && w.nodes.some((id) => { const n = nodes.get(id); return n && wGrafie(n); }));
-if (budowa) {
-  const { lat, lon } = srodekIPole(budowa.nodes);
-  const dLat = 60 / 111320, dLon = 60 / (111320 * Math.cos(rad(lat)));
-  const wielokat: LatLon[] = [[lat - dLat, lon - dLon], [lat - dLat, lon + dLon], [lat + dLat, lon + dLon], [lat + dLat, lon - dLon]];
-  strefyZmian.push({
-    id: "sz1", wielokat, scenaPrzed: PRZYKLADOWE.scenaPrzed, scenaPo: PRZYKLADOWE.scenaPo, ilustracja: true,
-    opis: `Ilustracja: strefa wokół budowy oznaczonej w OSM (way/${budowa.id}); para scen przykładowa.`,
-  });
+const PLIK_SENTINEL = "data/aglosat/sentinel-zmiany.json";
+const sentinel = existsSync(PLIK_SENTINEL) ? (JSON.parse(readFileSync(PLIK_SENTINEL, "utf8")) as PlikSentinel) : null;
+if (sentinel) {
+  const pary = sentinel.pary.map((p) => `${dataSceny(p.przed)} → ${dataSceny(p.po)}`).join(" oraz ");
+  for (const st of sentinel.strefy) {
+    strefyZmian.push({
+      id: st.id, wielokat: st.wielokat, ilustracja: false,
+      scenaPrzed: dataSceny(sentinel.pary[0].przed), scenaPo: dataSceny(sentinel.pary.at(-1)!.po),
+      opis: `Sentinel-2: ${st.kierunek} na ok. ${st.poleM2} m² (zmiana wskaźnika NDVI ${st.srednieDNDVI.map((v) => v.toFixed(2).replace(".", ",")).join(" i ")} w parach ${pary}).`,
+    });
+  }
   for (const o of odcinki) {
-    if (o.geometria.some(([y, x]) => Math.abs(y - lat) <= dLat && Math.abs(x - lon) <= dLon)) o.strefaZmian = "sz1";
+    const probki = probkiOdcinka(o.geometria);
+    const st = strefyZmian.find((z) => probki.some((p) => wWielokacie(p, z.wielokat)));
+    if (st) o.strefaZmian = st.id;
+  }
+} else {
+  const budowa = surowe.ways.find((w) => w.tags.highway === "construction" && w.nodes.some((id) => { const n = nodes.get(id); return n && wGrafie(n); }));
+  if (budowa) {
+    const { lat, lon } = srodekIPole(budowa.nodes);
+    const dLat = 60 / 111320, dLon = 60 / (111320 * Math.cos(rad(lat)));
+    const wielokat: LatLon[] = [[lat - dLat, lon - dLon], [lat - dLat, lon + dLon], [lat + dLat, lon + dLon], [lat + dLat, lon - dLon]];
+    strefyZmian.push({
+      id: "sz1", wielokat, scenaPrzed: PRZYKLADOWE.scenaPrzed, scenaPo: PRZYKLADOWE.scenaPo, ilustracja: true,
+      opis: `Ilustracja: strefa wokół budowy oznaczonej w OSM (way/${budowa.id}); para scen przykładowa.`,
+    });
+    for (const o of odcinki) {
+      if (o.geometria.some(([y, x]) => Math.abs(y - lat) <= dLat && Math.abs(x - lon) <= dLon)) o.strefaZmian = "sz1";
+    }
   }
 }
 
@@ -512,8 +559,11 @@ const pilot: Pilot = {
       "Geometria, tagi, budynki i usługi: OpenStreetMap (© współtwórcy OSM, ODbL).",
       `Wycinki: ${ORTO.zrodlo}, nalot ${ORTO.dataNalotu} (skorowidz GUGiK, arkusz ${ORTO.arkusz}).`,
       klasyfikacje
-        ? `Klasy dla wycinków: model ${klasyfikacje.model} (prompt v${klasyfikacje.wersjaPromptu}, ${klasyfikacje.data}). Strefa zmian Sentinel-2: dane przykładowe.`
-        : "Klasy modelu dla wycinków i strefa zmian Sentinel-2: dane przykładowe.",
+        ? `Klasy dla wycinków: model ${klasyfikacje.model} (prompt v${klasyfikacje.wersjaPromptu}, ${klasyfikacje.data}).`
+        : "Klasy modelu dla wycinków: dane przykładowe.",
+      sentinel
+        ? `Strefy zmian: Sentinel-2 L2A (Copernicus, archiwum Element84), |ΔNDVI| ≥ ${String(sentinel.metoda.prog).replace(".", ",")} w obu parach scen; sygnał możliwej zmiany, nie wykrycie chodnika.`
+        : "Strefa zmian Sentinel-2: ilustracja, dane przykładowe.",
       "Waga budynku: powierzchnia zabudowy × kondygnacje; przybliżenie, nie liczba mieszkańców.",
       "Ranking: analiza bazowa, policzona wcześniej dla profilu domyślnego.",
     ],

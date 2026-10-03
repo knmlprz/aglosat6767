@@ -25,6 +25,7 @@ Wszystkie dane demo są w repozytorium, więc aplikacja działa bez sieci, z wyj
 
 ```bash
 npm run aglosat:fetch     # pobiera wycinek OSM do data/aglosat/osm-extract.json
+npm run aglosat:sentinel  # strefy zmian z Sentinel-2 do data/aglosat/sentinel-zmiany.json
 npm run aglosat:build     # buduje public/aglosat/pilot.json: graf, dowody, ranking, mianownik
 npm run aglosat:wycinki   # pobiera brakujące wycinki ortofotomapy do public/aglosat/wycinki/
 npm run aglosat:klasyfikuj -- --dostawca openrouter --model anthropic/claude-sonnet-5.5 --prompt 3
@@ -43,29 +44,41 @@ Obszar i parametry są w `scripts/aglosat/config.ts`. Nowe miasto to nowy obszar
 | Trasy dla profilu, przeliczanie po kontroli, trasa kontroli | liczone w przeglądarce, na żywo |
 | Wycinki ortofotomapy | GUGiK (Geoportal), nalot 2025-04-28, piksel 5 cm |
 | Klasy dla wycinków | model Claude Sonnet 5.5 (przez OpenRouter), wyniki zapisane w repo |
-| Próbka referencyjna | 83 wycinki opisane ręcznie według instrukcji v2 (jedna osoba) |
-| Strefa zmian Sentinel-2 | **ilustracja**, jedna para scen, oznaczona w interfejsie |
+| Próbka referencyjna | 203 wycinki opisane ręcznie według instrukcji v2 (jedna osoba); 91 z nich to zbiór testowy |
+| Strefy zmian | Sentinel-2 L2A, dwie pary scen rok do roku (sierpień i wrzesień 2025 → 2026) |
 | Kontrole w terenie | wpisywane w sesji; trwały zapis to krok po hackathonie |
 
 ## Model wizyjny
 
 **Zadanie.** Model dostaje wycinek ortofotomapy z naniesionym przebiegiem odcinka z OSM i odpowiada jedną klasą: ciągły, przerwany albo niewidoczny, z oceną i jednym zdaniem uzasadnienia. Zasady są wspólne dla ludzi i modelu (`lib/aglosat/etykiety.ts`): ciągłość to pytanie, czy wzdłuż linii biegnie jeden nieprzerwany pas, po którym da się przejść; nawierzchnia, krawężniki, schody i auta to osobne cechy.
 
-**Wyniki** (Claude Sonnet 5.5, 83 wycinki, etykiety jednej osoby):
+**Wyniki** (Claude Sonnet 5.5, zbiór testowy: 91 wycinków nieużywanych przy poprawianiu promptu, etykiety jednej osoby):
 
 | Wersja | Co zmieniliśmy | Trafność |
 | --- | --- | --- |
-| prompt v1 | proste definicje klas | 34% |
-| prompt v2 | zasada ciągłości i tabela 13 przypadków spornych (droga, przejście, parking, auta, zieleń…) | 53% |
-| prompt v3 | dwa obrazy: bez linii i z linią; linia zasłaniała wąskie ścieżki, o które pytamy | 64% |
+| prompt v1 | proste definicje klas | 37% |
+| prompt v2 | zasada ciągłości i tabela 13 przypadków spornych (droga, przejście, parking, auta, zieleń…) | 48% |
+| prompt v3 | dwa obrazy: bez linii i z linią; linia zasłaniała wąskie ścieżki, o które pytamy | 59% |
 
-Gdy model mówi „ciągły”, zwykle ma rację, a wycinki, na których człowiek nic nie widzi, model też oznacza jako „niewidoczny”. **Model nie znajduje jednak przerw:** w v3 nie wskazał żadnej. Dlatego w AgloSat model zawęża listę miejsc do sprawdzenia, a przerwy rozstrzyga człowiek w terenie. Zgodność z obrazem to nie to samo co stan w terenie.
+Gdy model mówi „ciągły”, zwykle ma rację, a wycinki, na których człowiek nic nie widzi, model też oznacza jako „niewidoczny” (94%). **Model rzadko znajduje przerwy:** na zbiorze testowym wskazał 1 z 11 przerw widzianych przez człowieka. Dlatego w AgloSat model zawęża listę miejsc do sprawdzenia, a przerwy rozstrzyga człowiek w terenie. Zgodność z obrazem to nie to samo co stan w terenie.
 
 **Uwagi.**
 - Etykiety pochodzą od jednej osoby. Druga osoba opisująca te same wycinki da zgodność między ludźmi, czyli punkt odniesienia dla modelu (strona `/app/etykiety`).
 - Dane w aplikacji pochodzą z promptu v2 (`KLASYFIKACJA` w `scripts/aglosat/config.ts`), bo zawierają przypadek sprzeczny pokazywany w demo: przerwę, którą model zgłosił, bo ścieżkę zasłoniła nasza linia. Prompt v3 ten błąd naprawia.
-- Wybór promptu na podstawie tej samej próbki, na której mierzymy trafność, zawyża wynik; przy 83 wycinkach traktujemy liczby jako orientacyjne.
+- Podział na zbiór roboczy (112) i testowy (91) jest zamrożony w `data/aglosat/proba-oceny.json`; prompt poprawialiśmy, patrząc na zbiór roboczy. Przy tej liczbie wycinków liczby są orientacyjne.
 - Prototyp działa bez klucza API: wyniki modelu są w `data/aglosat/klasyfikacje/`. Klucz jest potrzebny tylko do ponownej klasyfikacji. Pierwszy przebieg (Qwen przez Groq, prompt v1, 56 wycinków) jest zachowany w historii.
+
+## Sentinel-2: strefy zmian
+
+Ortofotomapa jest z kwietnia 2025, a teren się zmienia. Sentinel-2 (10 m, co kilka dni) nie pokaże chodnika, ale pokaże, gdzie od tamtej pory coś się działo: odcinki w takiej strefie dostają adnotację „dane mogą być nieaktualne”.
+
+**Metoda** (`scripts/aglosat/sentinel.ts`, klasyczna teledetekcja, bez uczenia):
+- dwie pary scen z tej samej pory roku: 2025-08-13 → 2026-08-14 i 2025-09-20 → 2026-09-08 (Sentinel-2 L2A z archiwum Element84, bez logowania);
+- maska SCL odrzuca chmury, cienie chmur i ciemne piksele;
+- zmiana: wskaźnik roślinności NDVI zmienia się o co najmniej 0,2 **w obu parach i w tym samym kierunku**, co odsiewa jednorazowe różnice (cień, wilgoć, koszenie);
+- spójne grupy co najmniej 3 pikseli (300 m²) zamieniane na wielokąty.
+
+**Wynik:** 6 stref, wszystkie to ubytek roślinności; dotykają 8 odcinków sieci pieszej. Dwie z nich leżą tam, gdzie OSM ma chodniki oznaczone jako w budowie (`construction=footway`), a jedna obejmuje odcinek przy placu budowy, na którym model wizyjny zgłosił przerwę. Te trzy źródła (OSM, model, Sentinel) są niezależne. Wynik jest w repo, więc demo nie potrzebuje sieci.
 
 ## Reguły modelu danych
 
