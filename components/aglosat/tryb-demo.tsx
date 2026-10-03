@@ -14,7 +14,8 @@ type Kontrole = "brak" | "obnizony" | "wysoki" | "obnizony_odrzucenie";
 
 type Krok = {
   tytul: string;
-  mowimy: string;
+  /** Tekst albo funkcja danych pilota, gdy tekst zawiera liczby z analizy. */
+  mowimy: string | ((pilot: Pilot) => string);
   widok: "/app/planista" | "/app/mieszkaniec";
   wybierz: "miejsce1" | "sprzeczne" | null;
   zakladka?: "ranking" | "kontrola";
@@ -91,16 +92,24 @@ const K = {
   },
   sprzeczne: {
     tytul: "Przypadek sprzeczny",
-    mowimy:
-      "OpenStreetMap: chodnik ciągły. Model wizyjny: przerwa, ocena 0,85. Nie wybieramy za użytkownika: pokazujemy oba źródła z datami.",
+    mowimy: (p) => {
+      const o = odcinekSprzeczny(p);
+      return `OpenStreetMap: ciąg pieszy jest. Model (${o?.model ?? "model wizyjny"}): przerwa, ocena ${o?.ocena.toFixed(2).replace(".", ",") ?? "?"}. Nie wybieramy za użytkownika: pokazujemy oba źródła z datami.`;
+    },
     widok: "/app/planista",
     wybierz: "sprzeczne",
     kontrole: "obnizony",
   },
   odrzucenie: {
     tytul: "Błąd modelu, pokazany celowo",
-    mowimy:
-      "W terenie chodnik jest. Na ortofotomapie zasłania go przechylony dach budynku. Model nie podejmuje decyzji, wskazuje, gdzie spojrzeć.",
+    mowimy: (p) => {
+      const wersje = p.porownaniePromptow ?? [];
+      const proc = (x: number | null | undefined) => (x == null ? "?" : `${Math.round(100 * x)}%`);
+      const v2 = wersje.find((w) => w.wersjaPromptu === 2);
+      const v3 = wersje.find((w) => w.wersjaPromptu === 3);
+      const liczby = v2 && v3 ? ` Poprawiliśmy wejście (obraz bez linii i z linią): trafność na próbce z ${proc(v2.trafnosc)} do ${proc(v3.trafnosc)}.` : "";
+      return `Na zdjęciu bez nakładki ścieżka przez trawnik jest. Modelowi zasłoniła ją nasza własna linia z OSM.${liczby} Model wskazuje, gdzie spojrzeć; decyduje człowiek.`;
+    },
     widok: "/app/planista",
     wybierz: "sprzeczne",
     kontrole: "obnizony_odrzucenie",
@@ -143,7 +152,7 @@ function kontroleKroku(k: Kontrole, pilot: Pilot): Weryfikacja[] {
   return [
     ...krawedz("obnizony"),
     ...wpisKontroli([obs.odcinekId], "ciaglosc", "ciagly", {
-      notatka: "chodnik jest; na ortofotomapie zasłania go przechylony dach budynku",
+      notatka: "ścieżka jest; na obrazie dla modelu zasłoniła ją nasza linia z OSM",
       odrzuca: { [obs.odcinekId]: obs.id },
     }),
   ];
@@ -231,7 +240,7 @@ export function TrybDemo() {
             {scenariusz.nazwa} · krok {nr + 1} z {scenariusz.kroki.length}
           </p>
           <p className="font-bold">{krok.tytul}</p>
-          <p className="text-sm text-slate-300">{krok.mowimy}</p>
+          <p className="text-sm text-slate-300">{typeof krok.mowimy === "function" ? krok.mowimy(pilot) : krok.mowimy}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <label className="sr-only" htmlFor="demo-scenariusz">

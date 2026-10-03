@@ -176,7 +176,7 @@ export function SzczegolyMiejsca({
             {odrzucone.map(({ o, w }) => (
               <li key={o.id} className="text-xs text-slate-600">
                 <s>
-                  model wizyjny: {formatujWartosc("ciaglosc", o.klasa)} (ocena {o.ocena.toFixed(2)}, data obrazu {o.dataObrazu})
+                  model wizyjny: {formatujWartosc("ciaglosc", o.klasa)} (ocena {o.ocena.toFixed(2).replace(".", ",")}, data obrazu {o.dataObrazu})
                 </s>{" "}
                 → kontrola {w.dataKontroli}: {formatujWartosc(w.cecha, w.wartosc)}
                 {w.notatka && <>, „{w.notatka}”</>}

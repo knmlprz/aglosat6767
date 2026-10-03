@@ -27,6 +27,8 @@ Wszystkie dane demo są w repozytorium, więc aplikacja działa bez sieci, z wyj
 npm run aglosat:fetch     # pobiera wycinek OSM do data/aglosat/osm-extract.json
 npm run aglosat:build     # buduje public/aglosat/pilot.json: graf, dowody, ranking, mianownik
 npm run aglosat:wycinki   # pobiera brakujące wycinki ortofotomapy do public/aglosat/wycinki/
+npm run aglosat:klasyfikuj -- --dostawca openrouter --model anthropic/claude-sonnet-5.5 --prompt 3
+                          # klasyfikuje wycinki modelem wizyjnym (klucz w .env.local)
 npm run aglosat:check     # sprawdza reguły modelu danych i spójność demo
 ```
 
@@ -40,11 +42,30 @@ Obszar i parametry są w `scripts/aglosat/config.ts`. Nowe miasto to nowy obszar
 | Ranking miejsc do kontroli, mianownik, skrajny przypadek | policzone na tym grafie (analiza bazowa) |
 | Trasy dla profilu, przeliczanie po kontroli, trasa kontroli | liczone w przeglądarce, na żywo |
 | Wycinki ortofotomapy | GUGiK (Geoportal), nalot 2025-04-28, piksel 5 cm |
-| Klasy zwracane przez model wizyjny dla wycinków | **dane przykładowe**, oznaczone w interfejsie |
+| Klasy dla wycinków | model Claude Sonnet 5.5 (przez OpenRouter), wyniki zapisane w repo |
+| Próbka referencyjna | 83 wycinki opisane ręcznie według instrukcji v2 (jedna osoba) |
 | Strefa zmian Sentinel-2 | **ilustracja**, jedna para scen, oznaczona w interfejsie |
 | Kontrole w terenie | wpisywane w sesji; trwały zapis to krok po hackathonie |
 
-**Model wizyjny.** Prototyp nie uruchamia modelu i nie potrzebuje klucza API. Graf, trasy, ranking i trasa kontroli działają bez żadnego modelu. Wycinki w `public/aglosat/wycinki/` są gotowym wejściem dla modelu: wynik klasyfikacji („ciągły / przerwany / niewidoczny” z oceną) wystarczy zapisać w obserwacjach w `pilot.json`.
+## Model wizyjny
+
+**Zadanie.** Model dostaje wycinek ortofotomapy z naniesionym przebiegiem odcinka z OSM i odpowiada jedną klasą: ciągły, przerwany albo niewidoczny, z oceną i jednym zdaniem uzasadnienia. Zasady są wspólne dla ludzi i modelu (`lib/aglosat/etykiety.ts`): ciągłość to pytanie, czy wzdłuż linii biegnie jeden nieprzerwany pas, po którym da się przejść; nawierzchnia, krawężniki, schody i auta to osobne cechy.
+
+**Wyniki** (Claude Sonnet 5.5, 83 wycinki, etykiety jednej osoby):
+
+| Wersja | Co zmieniliśmy | Trafność |
+| --- | --- | --- |
+| prompt v1 | proste definicje klas | 34% |
+| prompt v2 | zasada ciągłości i tabela 13 przypadków spornych (droga, przejście, parking, auta, zieleń…) | 53% |
+| prompt v3 | dwa obrazy: bez linii i z linią; linia zasłaniała wąskie ścieżki, o które pytamy | 64% |
+
+Gdy model mówi „ciągły”, zwykle ma rację, a wycinki, na których człowiek nic nie widzi, model też oznacza jako „niewidoczny”. **Model nie znajduje jednak przerw:** w v3 nie wskazał żadnej. Dlatego w AgloSat model zawęża listę miejsc do sprawdzenia, a przerwy rozstrzyga człowiek w terenie. Zgodność z obrazem to nie to samo co stan w terenie.
+
+**Uwagi.**
+- Etykiety pochodzą od jednej osoby. Druga osoba opisująca te same wycinki da zgodność między ludźmi, czyli punkt odniesienia dla modelu (strona `/app/etykiety`).
+- Dane w aplikacji pochodzą z promptu v2 (`KLASYFIKACJA` w `scripts/aglosat/config.ts`), bo zawierają przypadek sprzeczny pokazywany w demo: przerwę, którą model zgłosił, bo ścieżkę zasłoniła nasza linia. Prompt v3 ten błąd naprawia.
+- Wybór promptu na podstawie tej samej próbki, na której mierzymy trafność, zawyża wynik; przy 83 wycinkach traktujemy liczby jako orientacyjne.
+- Prototyp działa bez klucza API: wyniki modelu są w `data/aglosat/klasyfikacje/`. Klucz jest potrzebny tylko do ponownej klasyfikacji. Pierwszy przebieg (Qwen przez Groq, prompt v1, 56 wycinków) jest zachowany w historii.
 
 ## Reguły modelu danych
 
