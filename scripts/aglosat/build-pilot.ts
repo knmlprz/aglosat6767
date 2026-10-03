@@ -296,7 +296,11 @@ const wersjeModelu = wybranyModel
       .sort((x, y) => x.wersjaPromptu - y.wersjaPromptu)
       .map((plik) => ({ wersja: plik.wersjaPromptu, plik }))
   : [];
-const klasyfikacje = wersjeModelu.filter((w) => kompletny(w.plik)).at(-1)?.plik ?? null;
+const klasyfikacje =
+  (KLASYFIKACJA?.wersjaPromptu
+    ? wersjeModelu.find((w) => w.wersja === KLASYFIKACJA.wersjaPromptu && kompletny(w.plik))
+    : wersjeModelu.filter((w) => kompletny(w.plik)).at(-1)
+  )?.plik ?? null;
 const istniejace = new Set(odcinki.map((o) => o.id));
 const obserwacje: Obserwacja[] = [];
 
