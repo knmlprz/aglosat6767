@@ -341,5 +341,5 @@ console.log(`odcinki: ${odcinki.length}, węzły: ${Object.keys(wezly).length}`)
 console.log(`przejezdne: ${licz((s) => s === "przejezdny")}, nieznane: ${licz((s) => s === "nieznany")}, nieprzejezdne: ${licz((s) => s === "nieprzejezdny")}`);
 console.log(`budynki: ${budynki.length} (kondygnacje przybliżone: ${budynki.filter((b) => b.kondygnacjePrzyblizone).length}), usługi: ${uslugi.length}`);
 console.log(`obserwacje: ${obserwacje.length}, strefy zmian: ${strefyZmian.length}, odcinki w strefie: ${odcinki.filter((o) => o.strefaZmian).length}`);
-console.log(`ranking: ${analiza.ranking.length} odcinków z wpływem, kandydaci: ${analiza.kandydaci.length}, analiza ${Date.now() - t0} ms`);
+console.log(`ranking: ${analiza.ranking.length} miejsc do kontroli z wpływem, kandydaci: ${analiza.kandydaci.length}, analiza ${Date.now() - t0} ms`);
 console.log("mianownik:", analiza.mianownik);

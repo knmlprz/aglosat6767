@@ -148,8 +148,11 @@ export type StrefaZmian = {
   ilustracja: boolean;
 };
 
+/** Wynik dla miejsca do kontroli: jednego albo kilku sąsiednich odcinków tej samej linii OSM. */
 export type WynikWplywu = {
+  /** Odcinek reprezentatywny miejsca (pierwszy z listy). */
   odcinekId: string;
+  odcinki: string[];
   profilId: string;
   wynik: number;
   utraconeRelacje: number;

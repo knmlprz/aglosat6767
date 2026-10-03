@@ -97,12 +97,23 @@ sprawdz(
     JSON.stringify(ponownie.mianownik) === JSON.stringify(p.mianownik),
   "ranking i mianownik przeliczone z wczytanego pliku są identyczne z zapisanymi",
 );
-const rowne = policzAnalize(p.odcinki, p.budynki, p.uslugi, oceny, profil, "rowne").ranking.slice(0, 10).map((r) => r.odcinekId);
-const zabudowa = p.ranking.slice(0, 10).map((r) => r.odcinekId);
-const wspolne = zabudowa.filter((id) => rowne.includes(id)).length;
-console.log(`     stabilność: ${wspolne}/10 odcinków z czoła rankingu zostaje przy równych wagach budynków`);
+// Miejsca w rankingu są rozłączne: żaden odcinek nie występuje w dwóch pozycjach.
+const wszystkieOdc = p.ranking.flatMap((r) => r.odcinki);
+sprawdz(new Set(wszystkieOdc).size === wszystkieOdc.length, `ranking to ${p.ranking.length} rozłącznych miejsc do kontroli (${wszystkieOdc.length} odcinków)`);
+
+// Stabilność przy równych wagach budynków: zmienia się kolejność czy skład czoła rankingu?
+const zabudowa = ponownie.ranking.map((r) => r.odcinekId);
+const rowne = policzAnalize(p.odcinki, p.budynki, p.uslugi, oceny, profil, "rowne").ranking.map((r) => r.odcinekId);
+const pozR = new Map(rowne.map((id, i) => [id, i]));
+const wspolne = zabudowa.filter((id) => pozR.has(id));
+const n = wspolne.length;
+const d2 = wspolne.reduce((s, id) => s + (zabudowa.indexOf(id) - pozR.get(id)!) ** 2, 0);
+const spearman = 1 - (6 * d2) / (n * (n * n - 1));
+const w20 = zabudowa.slice(0, 10).filter((id) => (pozR.get(id) ?? Infinity) < 20).length;
+console.log(`     stabilność przy równych wagach: korelacja Spearmana ${spearman.toFixed(2)} (n=${n}); ` +
+  `${w20}/10 pierwszych miejsc mieści się w pierwszej 20, ${zabudowa.slice(0, 10).filter((id) => (pozR.get(id) ?? Infinity) < 10).length}/10 w pierwszej 10`);
 const top = p.ranking.slice(0, 10);
-console.log(`     koncentracja: pierwsze 10 odcinków dotyka ${top.reduce((s, r) => s + r.utraconeRelacje + r.wydluzoneRelacje, 0)} relacji (z powtórzeniami)`);
+console.log(`     koncentracja: pierwsze 10 miejsc dotyka ${top.reduce((s, r) => s + r.utraconeRelacje + r.wydluzoneRelacje, 0)} relacji (z powtórzeniami)`);
 
 console.log(bledy === 0 ? "\nWszystkie reguły spełnione." : `\n${bledy} reguł nie spełniono.`);
 process.exit(bledy === 0 ? 0 : 1);

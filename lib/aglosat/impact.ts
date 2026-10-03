@@ -93,19 +93,27 @@ export function policzAnalize(
     }
   }
 
-  // Które relacje przechodzą przez który nieznany odcinek.
-  const przezOdcinek = new Map<string, Relacja[]>();
+  // Miejsca do kontroli: sąsiednie nieznane odcinki z tymi samymi brakującymi cechami to jedna
+  // wizyta w terenie. Podział linii w punktach podpięcia budynków tego nie zmienia.
+  const miejsca = miejscaDoKontroli(odcinki, oceny);
+  const miejsceOdcinka = new Map<string, string[]>();
+  for (const m of miejsca) for (const id of m) miejsceOdcinka.set(id, m);
+
+  // Które relacje przechodzą przez które miejsce (relacja liczona raz na miejsce).
+  const przezMiejsce = new Map<string[], Set<Relacja>>();
   for (const r of relacje) {
     for (const id of r.odcinki) {
-      if (p(id) !== "nieznany") continue;
-      let l = przezOdcinek.get(id);
-      if (!l) przezOdcinek.set(id, (l = []));
-      l.push(r);
+      const m = miejsceOdcinka.get(id);
+      if (!m) continue;
+      let l = przezMiejsce.get(m);
+      if (!l) przezMiejsce.set(m, (l = new Set()));
+      l.add(r);
     }
   }
 
   const ranking: WynikWplywu[] = [];
-  for (const [odcinekId, rel] of przezOdcinek) {
+  for (const [miejsce, rel] of przezMiejsce) {
+    const zamkniete = new Set(miejsce);
     const wgBudynku = new Map<Budynek, Relacja[]>();
     for (const r of rel) {
       const l = wgBudynku.get(r.budynek) ?? [];
@@ -120,7 +128,7 @@ export function policzAnalize(
     const dotknieteUslugi = new Set<string>();
 
     for (const [b, lista] of wgBudynku) {
-      const bez = dijkstra(graf, b.wezel, { dopusc: (id) => id !== odcinekId && dopuscWer(id), maxM: MAX_DOJSCIE_M });
+      const bez = dijkstra(graf, b.wezel, { dopusc: (id) => !zamkniete.has(id) && dopuscWer(id), maxM: MAX_DOJSCIE_M });
       for (const r of lista) {
         const nowa = najblizsza(bez, wgKategorii.get(r.kategoria)!);
         dotknieteUslugi.add(r.usluga.nazwa);
@@ -141,7 +149,8 @@ export function policzAnalize(
     }
     if (wynik <= 0) continue;
     ranking.push({
-      odcinekId,
+      odcinekId: miejsce[0],
+      odcinki: miejsce,
       profilId: profil.id,
       wynik: Math.round(wynik * 1000) / 1000,
       utraconeRelacje: utracone,
@@ -149,7 +158,7 @@ export function policzAnalize(
       dodatkowaDrogaM: wydluzone ? Math.round(sumaDodatkowej / wydluzone) : 0,
       dotknietaWaga: Math.round(dotknieta * 100) / 100,
       uslugi: [...dotknieteUslugi].sort(),
-      brakujaceCechy: oceny.get(odcinekId)?.nieznane ?? [],
+      brakujaceCechy: oceny.get(miejsce[0])?.nieznane ?? [],
     });
   }
   ranking.sort((x, y) => y.wynik - x.wynik);
@@ -158,4 +167,36 @@ export function policzAnalize(
   kandydaci.sort((x, y) => (wagaBud.get(y.budynekId)! - wagaBud.get(x.budynekId)!) || x.pieszoM - y.pieszoM);
 
   return { ranking, mianownik, kandydaci: kandydaci.slice(0, 20) };
+}
+
+/**
+ * Grupuje nieznane odcinki w miejsca do kontroli: wspólny węzeł, te same brakujące cechy
+ * i ta sama linia OSM (przejścia także między liniami).
+ */
+export function miejscaDoKontroli(odcinki: Odcinek[], oceny: Map<string, OcenaOdcinka>): string[][] {
+  const nieznane = odcinki.filter((o) => oceny.get(o.id)?.przejezdnosc === "nieznany");
+  // Przejście z wysepką to w OSM dwie linie ze wspólnym węzłem, ale w terenie jedna wizyta.
+  const linia = (o: Odcinek) => (o.typ === "przejscie" ? "przejscie" : String(o.osmWayId));
+  const klucz = (o: Odcinek) => `${linia(o)}|${[...oceny.get(o.id)!.nieznane].sort().join(",")}`;
+  const rodzic = new Map(nieznane.map((o) => [o.id, o.id]));
+  const znajdz = (x: string): string => {
+    while (rodzic.get(x) !== x) {
+      rodzic.set(x, rodzic.get(rodzic.get(x)!)!);
+      x = rodzic.get(x)!;
+    }
+    return x;
+  };
+  const wgWezla = new Map<string, Odcinek[]>();
+  for (const o of nieznane) {
+    for (const w of [o.a, o.b]) wgWezla.set(`${w}|${klucz(o)}`, [...(wgWezla.get(`${w}|${klucz(o)}`) ?? []), o]);
+  }
+  for (const grupa of wgWezla.values()) {
+    for (let i = 1; i < grupa.length; i++) rodzic.set(znajdz(grupa[i].id), znajdz(grupa[0].id));
+  }
+  const miejsca = new Map<string, string[]>();
+  for (const o of nieznane) {
+    const r = znajdz(o.id);
+    miejsca.set(r, [...(miejsca.get(r) ?? []), o.id]);
+  }
+  return [...miejsca.values()].map((m) => m.sort());
 }
