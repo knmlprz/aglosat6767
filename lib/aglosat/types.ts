@@ -63,6 +63,13 @@ export type OsmDostepnosc = {
   smoothness: string | null;
   kerb: string | null;
   width: string | null;
+  /** tactile_paving z way albo z węzłów odcinka (np. przejścia); "partial", gdy węzły się różnią. */
+  tactile_paving: string | null;
+  /**
+   * Sygnalizacja dla niewidomych na światłach odcinka (traffic_signals:sound / :vibration z węzłów):
+   * "none" | "sound" | "vibration" | "sound;vibration" | "unknown"; null, gdy na odcinku nie ma świateł.
+   */
+  traffic_signals: string | null;
 };
 
 export type Odcinek = {
