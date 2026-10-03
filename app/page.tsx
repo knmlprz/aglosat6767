@@ -36,6 +36,7 @@ function policzLiczby(): LiczbyStrony {
           }
         : null,
     dataNalotu: p.wycinki[0]?.dataObrazu ?? null,
+    model: p.obserwacje.find((o) => !o.przykladowe && o.model)?.model ?? null,
   };
 }
 

@@ -85,7 +85,7 @@ export function WycinekObrazu({
         </label>
         {!ukryjModel && obserwacje.map((o) => (
           <span key={o.id} className={odrzucone.has(o.id) ? "text-slate-500" : "text-slate-700"}>
-            {odrzucone.has(o.id) ? <s>Model wizyjny</s> : "Model wizyjny"}: <strong>{formatujWartosc("ciaglosc", o.klasa)}</strong>, ocena{" "}
+            {odrzucone.has(o.id) ? <s>Model wizyjny{o.model && ` (${o.model})`}</s> : `Model wizyjny${o.model ? ` (${o.model})` : ""}`}: <strong>{formatujWartosc("ciaglosc", o.klasa)}</strong>, ocena{" "}
             {o.ocena.toFixed(2).replace(".", ",")}. {o.uzasadnienie}.
             {odrzucone.has(o.id) && " Odrzucone w terenie."}
             {o.przykladowe && <span className="ml-1 rounded bg-amber-100 px-1 text-amber-800">klasa: {ETYKIETA_PRZYKLADOWE}</span>}

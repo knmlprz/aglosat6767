@@ -15,6 +15,8 @@ import type { WynikWplywu } from "@/lib/aglosat/types.ts";
 import { idWpisu } from "@/lib/aglosat/weryfikacja.ts";
 import { useAglosat } from "@/components/aglosat/stan-aglosat";
 import { lokalizacja } from "@/lib/aglosat/opis.ts";
+import { OcenaModeluKarta } from "@/components/aglosat/ocena-modelu";
+import { ModelKontraTeren } from "@/components/aglosat/model-kontra-teren";
 import { TrasaRelacji, type Relacja } from "@/components/aglosat/trasa-relacji";
 import { TrasaKontroliPanel, type UstawieniaKontroli } from "@/components/aglosat/trasa-kontroli";
 import type { KontrolaNaMapie } from "@/components/aglosat/mapa-niewiedzy";
@@ -194,8 +196,13 @@ export function PlanistaView() {
           <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-600">
             OpenStreetMap, pobrano {pilot.meta.pobranoOsm}
           </span>
+          {pilot.obserwacje[0]?.model && (
+            <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-600">
+              obserwacje z obrazu: model {pilot.obserwacje[0].model}
+            </span>
+          )}
           <span className="rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-amber-800">
-            {ETYKIETA_PRZYKLADOWE}: obserwacje z obrazu, strefa Sentinel-2
+            {ETYKIETA_PRZYKLADOWE}: {pilot.obserwacje.some((o) => o.przykladowe) ? "obserwacje z obrazu, " : ""}strefa Sentinel-2
           </span>
         </div>
       </header>
@@ -380,6 +387,13 @@ export function PlanistaView() {
         )}
       </fieldset>
 
+      {pilot.obserwacje.some((o) => !o.przykladowe) && (
+        <div className="grid gap-4 lg:grid-cols-2">
+          {pilot.ocenaModelu && pilot.ocenaModelu.n > 0 && <OcenaModeluKarta ocena={pilot.ocenaModelu} />}
+          <ModelKontraTeren obserwacje={pilot.obserwacje.filter((o) => !o.przykladowe)} weryfikacje={weryfikacje} />
+        </div>
+      )}
+
       {sprzeczne.length > 0 && (
         <section aria-labelledby="sprzeczne-tytul" className="rounded-2xl border border-fuchsia-200 bg-fuchsia-50/50 p-4">
           <h3 id="sprzeczne-tytul" className="text-sm font-bold text-slate-800">
@@ -387,7 +401,10 @@ export function PlanistaView() {
           </h3>
           <p className="text-xs text-slate-600">
             OpenStreetMap opisuje odcinek jako ciągły, a model wizyjny wskazuje przerwę. Pokazujemy oba źródła; rozstrzyga
-            kontrola w terenie. <span className="text-amber-700">Wykrycia modelu: {ETYKIETA_PRZYKLADOWE}.</span>
+            kontrola w terenie.
+            {pilot.obserwacje.some((o) => o.przykladowe) && (
+              <span className="text-amber-700"> Wykrycia modelu: {ETYKIETA_PRZYKLADOWE}.</span>
+            )}
           </p>
           <ul className="mt-2 flex flex-wrap gap-2">
             {sprzeczne.map((o) => (

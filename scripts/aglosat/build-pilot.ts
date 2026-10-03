@@ -5,7 +5,7 @@
 // szerokość, nachylenie), budynki, usługi, ranking i mianownik policzone na tym grafie.
 // Co jest przykładowe (oznaczone polem przykladowe): obserwacje z obrazu, strefa zmian Sentinel-2.
 
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { OBSZAR, ORTO, PRZYKLADOWE } from "./config.ts";
 import type {
   Budynek, Dowod, KategoriaUslugi, LatLon, Obserwacja, Odcinek, Pilot, StrefaZmian, TypOdcinka, Usluga, Wycinek,
@@ -13,7 +13,10 @@ import type {
 import { PROFIL_DOMYSLNY } from "../../lib/aglosat/profile.ts";
 import { ocenWszystkie } from "../../lib/aglosat/routing.ts";
 import { policzAnalize } from "../../lib/aglosat/impact.ts";
-import { OPIS_ISTNIENIA_W_OSM, OPIS_ZALOZENIA_KRAWEZNIKA, zwinPilot } from "../../lib/aglosat/data.ts";
+import { OPIS_ISTNIENIA_W_OSM, OPIS_ZALOZENIA_KRAWEZNIKA, zwinPilot, type PilotZapisany } from "../../lib/aglosat/data.ts";
+import type { PlikKlasyfikacji } from "./klasyfikuj.ts";
+import type { PlikEtykiet } from "../../lib/aglosat/etykiety.ts";
+import { policzOcene } from "../../lib/aglosat/metryki.ts";
 
 type N = { id: number; lat: number; lon: number; tags?: Record<string, string> };
 type W = { id: number; nodes: number[]; tags: Record<string, string> };
@@ -267,30 +270,47 @@ const uslugi: Usluga[] = uslugiSurowe
   .map(({ wezelOsm, ...u }) => ({ ...u, wezel: `n${wezelOsm}` }))
   .filter((u) => wezly[u.wezel]);
 
-// --- dane przykładowe: obserwacje z obrazu -------------------------------------------------
+// --- obserwacje z obrazu: wyniki modelu, a bez nich dane przykładowe -------------------------
 
-const UZASADNIENIA = {
-  ciagly: ["nawierzchnia widoczna na całej długości odcinka", "jednolity pas nawierzchni wzdłuż przebiegu"],
-  przerwany: ["pas nawierzchni urywa się w połowie odcinka", "na przebiegu widoczny pas trawy lub ziemi"],
-  niewidoczny: ["odcinek zasłonięty koronami drzew", "cień budynku zasłania przebieg"],
-};
-const doObserwacji = odcinki.filter((o) => (o.typ === "chodnik" || o.typ === "ciag_pieszy") && o.dlugoscM > 15);
+const PLIK_MODELU = "data/aglosat/klasyfikacje-modelu.json";
+const klasyfikacje = existsSync(PLIK_MODELU) ? (JSON.parse(readFileSync(PLIK_MODELU, "utf8")) as PlikKlasyfikacji) : null;
+const istniejace = new Set(odcinki.map((o) => o.id));
 const obserwacje: Obserwacja[] = [];
-const wybrane = new Set<string>();
-const KLASY: [keyof typeof UZASADNIENIA, number, [number, number]][] = [
-  ["ciagly", 18, [0.72, 0.96]], ["niewidoczny", 6, [0.4, 0.6]], ["przerwany", 6, [0.55, 0.86]],
-];
-for (const [klasa, ile, [min, max]] of KLASY) {
-  for (let i = 0; i < ile; i++) {
-    let o: Odcinek;
-    do o = doObserwacji[Math.floor(los() * doObserwacji.length)]; while (wybrane.has(o.id));
-    wybrane.add(o.id);
+
+if (klasyfikacje) {
+  // Klucz wyniku to identyfikator wycinka: w_<odcinek reprezentatywny miejsca>.
+  for (const [wycinekId, r] of Object.entries(klasyfikacje.wyniki)) {
+    const odcinekId = wycinekId.slice(2);
+    if (!istniejace.has(odcinekId)) continue;
     obserwacje.push({
-      id: `obs${obserwacje.length + 1}`, odcinekId: o.id, cecha: "ciaglosc", klasa,
-      ocena: Math.round((min + los() * (max - min)) * 100) / 100,
-      dataObrazu: PRZYKLADOWE.dataObrazu, zrodloObrazu: PRZYKLADOWE.zrodloObrazu,
-      uzasadnienie: UZASADNIENIA[klasa][Math.floor(los() * 2)], wycinek: null, przykladowe: true,
+      id: `obs_${odcinekId}`, odcinekId, cecha: "ciaglosc", klasa: r.klasa, ocena: r.ocena,
+      dataObrazu: ORTO.dataNalotu, zrodloObrazu: ORTO.zrodlo, uzasadnienie: r.uzasadnienie,
+      wycinek: null, przykladowe: false, model: klasyfikacje.model,
     });
+  }
+} else {
+  const UZASADNIENIA = {
+    ciagly: ["nawierzchnia widoczna na całej długości odcinka", "jednolity pas nawierzchni wzdłuż przebiegu"],
+    przerwany: ["pas nawierzchni urywa się w połowie odcinka", "na przebiegu widoczny pas trawy lub ziemi"],
+    niewidoczny: ["odcinek zasłonięty koronami drzew", "cień budynku zasłania przebieg"],
+  };
+  const doObserwacji = odcinki.filter((o) => (o.typ === "chodnik" || o.typ === "ciag_pieszy") && o.dlugoscM > 15);
+  const wybrane = new Set<string>();
+  const KLASY: [keyof typeof UZASADNIENIA, number, [number, number]][] = [
+    ["ciagly", 18, [0.72, 0.96]], ["niewidoczny", 6, [0.4, 0.6]], ["przerwany", 6, [0.55, 0.86]],
+  ];
+  for (const [klasa, ile, [min, max]] of KLASY) {
+    for (let i = 0; i < ile; i++) {
+      let o: Odcinek;
+      do o = doObserwacji[Math.floor(los() * doObserwacji.length)]; while (wybrane.has(o.id));
+      wybrane.add(o.id);
+      obserwacje.push({
+        id: `obs${obserwacje.length + 1}`, odcinekId: o.id, cecha: "ciaglosc", klasa,
+        ocena: Math.round((min + los() * (max - min)) * 100) / 100,
+        dataObrazu: PRZYKLADOWE.dataObrazu, zrodloObrazu: PRZYKLADOWE.zrodloObrazu,
+        uzasadnienie: UZASADNIENIA[klasa][Math.floor(los() * 2)], wycinek: null, przykladowe: true,
+      });
+    }
   }
 }
 
@@ -330,14 +350,23 @@ function bboxWycinka(geometrie: LatLon[]): [number, number, number, number] {
   const r = (x: number) => Math.round(x * 1e7) / 1e7;
   return [r(sLat - dLat), r(sLon - dLon), r(sLat + dLat), r(sLon + dLon)];
 }
+// Zasięg istniejącego wycinka zostaje, dopóki jest plik: obraz, nakładka i wynik modelu muszą do siebie pasować.
+const PLIK_PILOTA = "public/aglosat/pilot.json";
+const poprzednieBbox = new Map<string, Wycinek["bbox"]>(
+  existsSync(PLIK_PILOTA)
+    ? ((JSON.parse(readFileSync(PLIK_PILOTA, "utf8")) as PilotZapisany).wycinki ?? []).map((w) => [w.id, w.bbox])
+    : [],
+);
 const wycinki: Wycinek[] = [];
 const dodajWycinek = (odcinekId: string, odcinkiMiejsca: string[]) => {
   if (wycinki.some((w) => w.odcinekId === odcinekId)) return;
   const geometrie = odcinkiMiejsca.flatMap((id) => odcinekPoId.get(id)?.geometria ?? []);
   if (geometrie.length === 0) return;
+  const id = `w_${odcinekId}`;
+  const plik = `/aglosat/wycinki/${id}.jpg`;
+  const poprzedni = existsSync(`public${plik}`) ? poprzednieBbox.get(id) : undefined;
   wycinki.push({
-    id: `w_${odcinekId}`, odcinekId, plik: `/aglosat/wycinki/w_${odcinekId}.jpg`,
-    bbox: bboxWycinka(geometrie), dataObrazu: ORTO.dataNalotu, zrodlo: ORTO.zrodlo,
+    id, odcinekId, plik, bbox: poprzedni ?? bboxWycinka(geometrie), dataObrazu: ORTO.dataNalotu, zrodlo: ORTO.zrodlo,
   });
 };
 for (const r of analiza.ranking) dodajWycinek(r.odcinekId, r.odcinki);
@@ -347,6 +376,20 @@ for (const o of obserwacje) {
   o.wycinek = `/aglosat/wycinki/w_${o.odcinekId}.jpg`;
 }
 
+// --- ocena modelu na próbce opisanej ręcznie (strona /app/etykiety) ------------------------
+
+const PLIK_ETYKIET = "data/aglosat/etykiety-reczne.json";
+const etykiety = existsSync(PLIK_ETYKIET) ? (JSON.parse(readFileSync(PLIK_ETYKIET, "utf8")) as PlikEtykiet) : null;
+const ocenaModelu =
+  klasyfikacje && etykiety
+    ? policzOcene(
+        klasyfikacje.model,
+        Object.entries(etykiety.etykiety)
+          .filter(([id]) => klasyfikacje.wyniki[id])
+          .map(([id, e]) => ({ czlowiek: e.klasa, model: klasyfikacje.wyniki[id].klasa })),
+      )
+    : null;
+
 const pilot: Pilot = {
   meta: {
     obszar: { nazwa: OBSZAR.nazwa, bbox: OBSZAR.bboxGrafu, srodek: OBSZAR.srodek },
@@ -355,12 +398,14 @@ const pilot: Pilot = {
     uwagi: [
       "Geometria, tagi, budynki i usługi: OpenStreetMap (© współtwórcy OSM, ODbL).",
       `Wycinki: ${ORTO.zrodlo}, nalot ${ORTO.dataNalotu} (skorowidz GUGiK, arkusz ${ORTO.arkusz}).`,
-      "Klasy modelu dla wycinków i strefa zmian Sentinel-2: dane przykładowe.",
+      klasyfikacje
+        ? `Klasy dla wycinków: model ${klasyfikacje.model} (prompt v${klasyfikacje.wersjaPromptu}, ${klasyfikacje.data}). Strefa zmian Sentinel-2: dane przykładowe.`
+        : "Klasy modelu dla wycinków i strefa zmian Sentinel-2: dane przykładowe.",
       "Waga budynku: powierzchnia zabudowy × kondygnacje; przybliżenie, nie liczba mieszkańców.",
       "Ranking: analiza bazowa, policzona wcześniej dla profilu domyślnego.",
     ],
   },
-  wezly, odcinki, obserwacje, budynki, uslugi, strefyZmian, wycinki,
+  wezly, odcinki, obserwacje, budynki, uslugi, strefyZmian, wycinki, ocenaModelu,
   ranking: analiza.ranking.slice(0, 200),
   mianownik: analiza.mianownik,
   kandydaci: analiza.kandydaci,
@@ -372,6 +417,7 @@ console.log(`odcinki: ${odcinki.length}, węzły: ${Object.keys(wezly).length}`)
 console.log(`przejezdne: ${licz((s) => s === "przejezdny")}, nieznane: ${licz((s) => s === "nieznany")}, nieprzejezdne: ${licz((s) => s === "nieprzejezdny")}`);
 console.log(`budynki: ${budynki.length} (kondygnacje przybliżone: ${budynki.filter((b) => b.kondygnacjePrzyblizone).length}), usługi: ${uslugi.length}`);
 console.log(`wycinki: ${wycinki.length}`);
-console.log(`obserwacje: ${obserwacje.length}, strefy zmian: ${strefyZmian.length}, odcinki w strefie: ${odcinki.filter((o) => o.strefaZmian).length}`);
+console.log(ocenaModelu ? `ocena modelu: n=${ocenaModelu.n}, trafność ${ocenaModelu.trafnosc}, precyzja „przerwany” ${ocenaModelu.precyzjaPrzerwany}, czułość ${ocenaModelu.czuloscPrzerwany}` : "ocena modelu: brak (potrzebne wyniki modelu i etykiety ręczne)");
+console.log(`obserwacje: ${obserwacje.length} (${klasyfikacje ? `model ${klasyfikacje.model}` : "przykładowe"}), strefy zmian: ${strefyZmian.length}, odcinki w strefie: ${odcinki.filter((o) => o.strefaZmian).length}`);
 console.log(`ranking: ${analiza.ranking.length} miejsc do kontroli z wpływem, kandydaci: ${analiza.kandydaci.length}, analiza ${Date.now() - t0} ms`);
 console.log("mianownik:", analiza.mianownik);

@@ -3,6 +3,8 @@
 //               npm run aglosat:klasyfikuj -- --modele   (lista modeli dostępnych dla klucza)
 //               npm run aglosat:klasyfikuj -- --od-nowa  (klasyfikuje wszystko jeszcze raz)
 //               npm run aglosat:klasyfikuj -- --podglad  (zapisuje wejście modelu dla 3 wycinków, bez API)
+//               npm run aglosat:klasyfikuj -- --limit 5  (tylko pierwsze N, do próby modelu)
+// Model: zmienna GROQ_MODEL (domyślnie poniżej).
 // Klucz: zmienna GROQ_API_KEY albo plik .env.local (nie trafia do repo).
 // Wyniki: data/aglosat/klasyfikacje-modelu.json; demo działa bez klucza.
 
@@ -14,7 +16,7 @@ import type { PilotZapisany } from "../../lib/aglosat/data.ts";
 import type { KlasaObrazu, LatLon, Wycinek } from "../../lib/aglosat/types.ts";
 
 const API = "https://api.groq.com/openai/v1";
-const MODEL = process.env.GROQ_MODEL ?? "meta-llama/llama-4-scout-17b-16e-instruct";
+const MODEL = process.env.GROQ_MODEL ?? "qwen/qwen3.8-27b";
 const WERSJA_PROMPTU = 1;
 const PLIK = "data/aglosat/klasyfikacje-modelu.json";
 const PRZERWA_MS = 2500;
@@ -135,7 +137,10 @@ if (process.argv.includes("--podglad")) {
   process.exit(0);
 }
 
-const doZrobienia = pilot.wycinki.filter((w) => !plik.wyniki[w.id]);
+const limit = Number(process.argv[process.argv.indexOf("--limit") + 1]);
+const doZrobienia = pilot.wycinki
+  .filter((w) => !plik.wyniki[w.id])
+  .slice(0, process.argv.includes("--limit") && limit > 0 ? limit : undefined);
 console.log(`model: ${MODEL}; wycinki: ${pilot.wycinki.length}, do klasyfikacji: ${doZrobienia.length}`);
 for (const [i, w] of doZrobienia.entries()) {
   const przebiegi = (miejsca.get(w.odcinekId) ?? [w.odcinekId]).map((id) => odcinki.get(id)!.geometria);

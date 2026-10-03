@@ -83,6 +83,8 @@ export type Obserwacja = {
   /** Ścieżka do wycinka w public/; null, dopóki nie ma wycinka. */
   wycinek: string | null;
   przykladowe: boolean;
+  /** Model, który zwrócił klasę (brak przy danych przykładowych). */
+  model?: string;
 };
 
 export type Weryfikacja = {
@@ -191,6 +193,8 @@ export type Pilot = {
   uslugi: Usluga[];
   strefyZmian: StrefaZmian[];
   wycinki: Wycinek[];
+  /** Porównanie modelu z próbką opisaną ręcznie; null, gdy brak wyników modelu lub etykiet. */
+  ocenaModelu?: import("./metryki.ts").OcenaModelu | null;
   /** Analiza bazowa: policzona przez skrypt, nie przeliczana na żywo. */
   ranking: WynikWplywu[];
   mianownik: {

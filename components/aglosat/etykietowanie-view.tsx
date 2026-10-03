@@ -6,6 +6,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAglosat } from "@/components/aglosat/stan-aglosat";
 import { WycinekObrazu } from "@/components/aglosat/wycinek-obrazu";
+import { OcenaModeluKarta } from "@/components/aglosat/ocena-modelu";
+import { policzOcene } from "@/lib/aglosat/metryki.ts";
 import { KLASY_OBRAZU, type PlikEtykiet } from "@/lib/aglosat/etykiety.ts";
 import { lokalizacja } from "@/lib/aglosat/opis.ts";
 import type { KlasaObrazu, Wycinek } from "@/lib/aglosat/types.ts";
@@ -39,6 +41,16 @@ export function EtykietowanieView() {
   }, []);
 
   const kolejka = useMemo(() => (pilot ? wymieszaj(pilot.wycinki) : []), [pilot]);
+  // Porównanie z modelem na żywo, tylko zbiorczo (pojedyncze odpowiedzi modelu zostają ukryte).
+  const ocenaNaZywo = useMemo(() => {
+    const zModelu = pilot?.obserwacje.filter((o) => !o.przykladowe && o.model) ?? [];
+    if (!pilot || !etykiety || zModelu.length === 0) return null;
+    const wgWycinka = new Map(zModelu.map((o) => [`w_${o.odcinekId}`, o.klasa]));
+    const pary = Object.entries(etykiety)
+      .filter(([id]) => wgWycinka.has(id))
+      .map(([id, e]) => ({ czlowiek: e.klasa, model: wgWycinka.get(id)! }));
+    return policzOcene(zModelu[0].model!, pary);
+  }, [pilot, etykiety]);
   const wycinek = kolejka[nr];
   const opisane = etykiety ? kolejka.filter((w) => etykiety[w.id]).length : 0;
 
@@ -108,6 +120,17 @@ export function EtykietowanieView() {
           <div className="h-full bg-slate-900" style={{ width: `${(100 * opisane) / kolejka.length}%` }} />
         </div>
       </header>
+
+      {ocenaNaZywo && (
+        <details className="max-w-4xl">
+          <summary className="cursor-pointer text-sm font-medium text-slate-700">
+            Pokaż porównanie z modelem (zbiorczo; otwórz po zakończeniu opisywania)
+          </summary>
+          <div className="mt-2">
+            <OcenaModeluKarta ocena={ocenaNaZywo} naZywo />
+          </div>
+        </details>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,560px)_1fr]">
         <section aria-labelledby="wycinek-tytul" className="flex flex-col gap-2">

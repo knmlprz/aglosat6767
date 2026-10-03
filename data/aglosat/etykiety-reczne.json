@@ -1,0 +1,45 @@
+{
+  "opis": "Ręczne etykiety wycinków ortofotomapy (próbka referencyjna). Klucz: identyfikator wycinka.",
+  "etykiety": {
+    "w_s1157054648_2723": {
+      "klasa": "ciagly",
+      "kiedy": "2026-10-03T20:36:06.141Z"
+    },
+    "w_s1163307025_2728": {
+      "klasa": "przerwany",
+      "kiedy": "2026-10-03T20:36:40.808Z"
+    },
+    "w_s128505080_523": {
+      "klasa": "ciagly",
+      "kiedy": "2026-10-03T20:36:21.912Z"
+    },
+    "w_s1333426188_3324": {
+      "klasa": "ciagly",
+      "kiedy": "2026-10-03T20:36:23.777Z"
+    },
+    "w_s1364486601_3929": {
+      "klasa": "ciagly",
+      "kiedy": "2026-10-03T20:36:22.019Z"
+    },
+    "w_s1413962211_4238": {
+      "klasa": "przerwany",
+      "kiedy": "2026-10-03T20:36:17.645Z"
+    },
+    "w_s1413962405_4247": {
+      "klasa": "niewidoczny",
+      "kiedy": "2026-10-03T20:36:20.212Z"
+    },
+    "w_s1420061428_4431": {
+      "klasa": "przerwany",
+      "kiedy": "2026-10-03T20:36:34.797Z"
+    },
+    "w_s300509969_1003": {
+      "klasa": "ciagly",
+      "kiedy": "2026-10-03T20:36:11.477Z"
+    },
+    "w_s970756713_2069": {
+      "klasa": "przerwany",
+      "kiedy": "2026-10-03T20:36:32.805Z"
+    }
+  }
+}
