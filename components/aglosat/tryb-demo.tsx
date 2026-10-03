@@ -193,8 +193,8 @@ export function TrybDemo() {
   useEffect(() => {
     if (!aktywny) return;
     const naKlawisz = (e: KeyboardEvent) => {
-      const t = e.target as HTMLElement;
-      if (t.closest("input, select, textarea")) return;
+      const t = e.target;
+      if (t instanceof Element && t.closest("input, select, textarea")) return;
       if (e.key === "ArrowRight") idz(nr + 1);
       if (e.key === "ArrowLeft") idz(nr - 1);
     };
