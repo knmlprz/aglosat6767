@@ -67,6 +67,13 @@ const DZIALA = [
   "trasa kontroli na zadany czas",
   "widok mieszkańca z opisem tekstowym trasy",
 ];
+/** Gdy wszystkie warstwy są z prawdziwych danych: zamiast pustej listy „przykładowych” mówimy, czego prototyp nie rozstrzyga. */
+const OGRANICZENIA = [
+  "próbkę do oceny modelu opisały osoby z zespołu, nie audytorzy dostępności",
+  "kontrole w terenie zapisują się w przeglądarce, na czas sesji",
+  "waga budynku to powierzchnia zabudowy × kondygnacje, przybliżenie liczby mieszkańców",
+  "Sentinel-2 daje sygnał zmiany terenu, nie wykrywa chodników",
+];
 const ZAPROJEKTOWANE = [
   "trwały zapis kontroli i wielu użytkowników",
   "zgłoszenia od mieszkańców",
@@ -232,17 +239,17 @@ export function LandingPage({ liczby }: { liczby: LiczbyStrony }) {
                   ...(liczby.sentinel ? [`strefy zmian z Sentinel-2: ${liczby.sentinel.strefy}, pary scen ${liczby.sentinel.pary}`] : []),
                 ]}
               />
-              <Lista
-                tytul="Dane przykładowe, oznaczone w interfejsie"
-                elementy={
-                  liczby.model && liczby.sentinel
-                    ? ["brak: warstwy pochodzą z prawdziwych danych; próbkę do oceny modelu opisały dwie osoby z zespołu"]
-                    : [
-                        ...(liczby.model ? [] : ["klasy zwracane przez model wizyjny dla wycinków"]),
-                        ...(liczby.sentinel ? [] : ["strefa zmian Sentinel-2 (jedna para scen)"]),
-                      ]
-                }
-              />
+              {liczby.model && liczby.sentinel ? (
+                <Lista tytul="Ograniczenia, mówimy wprost" elementy={OGRANICZENIA} />
+              ) : (
+                <Lista
+                  tytul="Dane przykładowe, oznaczone w interfejsie"
+                  elementy={[
+                    ...(liczby.model ? [] : ["klasy zwracane przez model wizyjny dla wycinków"]),
+                    ...(liczby.sentinel ? [] : ["strefa zmian Sentinel-2 (jedna para scen)"]),
+                  ]}
+                />
+              )}
               <Lista tytul="Zaprojektowane, poza prototypem" elementy={ZAPROJEKTOWANE} />
             </div>
           </div>
