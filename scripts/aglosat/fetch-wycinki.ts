@@ -26,8 +26,16 @@ async function pobierz(w: (typeof pilot.wycinki)[number]): Promise<void> {
     HEIGHT: String(ORTO.rozmiarPx),
     FORMAT: "image/jpeg",
   });
-  for (let proba = 1; proba <= 3; proba++) {
-    const res = await fetch(`${ORTO.wms}?${params}`, { headers: { "User-Agent": "AgloSat-hackathon/0.1" } });
+  for (let proba = 1; proba <= 5; proba++) {
+    let res: Response;
+    try {
+      res = await fetch(`${ORTO.wms}?${params}`, { headers: { "User-Agent": "AgloSat-hackathon/0.1" } });
+    } catch (e) {
+      // Geoportal czasem zrywa połączenie przy kilku zapytaniach naraz: czekamy i próbujemy ponownie.
+      console.warn(`  ${w.id}: ${String((e as Error).cause ?? e)}, próba ${proba}`);
+      await new Promise((r) => setTimeout(r, 2000 * proba));
+      continue;
+    }
     const typ = res.headers.get("content-type") ?? "";
     if (res.ok && typ.startsWith("image/")) {
       writeFileSync(`public${w.plik}`, Buffer.from(await res.arrayBuffer()));
@@ -42,7 +50,7 @@ async function pobierz(w: (typeof pilot.wycinki)[number]): Promise<void> {
 const kolejka = [...doPobrania];
 let gotowe = 0;
 await Promise.all(
-  Array.from({ length: 4 }, async () => {
+  Array.from({ length: 2 }, async () => {
     for (let w = kolejka.shift(); w; w = kolejka.shift()) {
       await pobierz(w);
       if (++gotowe % 10 === 0) console.log(`  ${gotowe}/${doPobrania.length}`);

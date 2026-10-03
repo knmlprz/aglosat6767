@@ -54,6 +54,7 @@ export function SzczegolyMiejsca({
   onZamknij: () => void;
 }) {
   const odc = pilot.odcinki.find((o) => o.id === odcinekId)!;
+  const strefa = odc.strefaZmian ? pilot.strefyZmian.find((s) => s.id === odc.strefaZmian) : undefined;
   // Kliknięty przycisk listy znika, więc fokus przenosimy na nagłówek panelu (klawiatura, czytnik ekranu).
   const naglowek = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
@@ -106,6 +107,17 @@ export function SzczegolyMiejsca({
           obserwacje={pilot.obserwacje.filter((o) => naMiejscu.has(o.odcinekId))}
           odrzucone={new Set(weryfikacje.map((w) => w.odrzucaObserwacje).filter((x): x is string => !!x))}
         />
+      )}
+
+      {strefa && (
+        <p className="rounded-lg border border-cyan-300 bg-cyan-50 p-2 text-xs text-cyan-900">
+          Odcinek leży w strefie sygnału możliwej zmiany (Sentinel-2): dane mogą być nieaktualne.{" "}
+          {strefa.ilustracja ? (
+            <span className="text-amber-700">Ilustracja, {ETYKIETA_PRZYKLADOWE}.</span>
+          ) : (
+            <span>{strefa.opis} Ortofotomapa jest starsza niż zmiana: rozstrzyga kontrola.</span>
+          )}
+        </p>
       )}
 
       {wynik && (
@@ -165,13 +177,6 @@ export function SzczegolyMiejsca({
         onCofnij={onCofnij}
       />
 
-      {odc.strefaZmian && (
-        <p className="rounded-lg border border-cyan-300 bg-cyan-50 p-2 text-xs text-cyan-900">
-          Odcinek leży w strefie sygnału możliwej zmiany (Sentinel-2): dane mogą być nieaktualne.{" "}
-          <span className="text-amber-700">Ilustracja, {ETYKIETA_PRZYKLADOWE}.</span>
-        </p>
-      )}
-
       {odrzucone.length > 0 && (
         <div className="rounded-lg border border-slate-200 bg-slate-50 p-2.5">
           <h4 className="text-xs font-bold text-slate-700">Wykrycia modelu odrzucone w terenie</h4>
@@ -179,7 +184,7 @@ export function SzczegolyMiejsca({
             {odrzucone.map(({ o, w }) => (
               <li key={o.id} className="text-xs text-slate-600">
                 <s>
-                  model wizyjny: {formatujWartosc("ciaglosc", o.klasa)} (ocena {o.ocena.toFixed(2)}, data obrazu {o.dataObrazu})
+                  model wizyjny: {formatujWartosc("ciaglosc", o.klasa)} (ocena {o.ocena.toFixed(2).replace(".", ",")}, data obrazu {o.dataObrazu})
                 </s>{" "}
                 → kontrola {w.dataKontroli}: {formatujWartosc(w.cecha, w.wartosc)}
                 {w.notatka && <>, „{w.notatka}”</>}

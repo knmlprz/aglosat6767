@@ -103,6 +103,8 @@ export type Obserwacja = {
   /** Ścieżka do wycinka w public/; null, dopóki nie ma wycinka. */
   wycinek: string | null;
   przykladowe: boolean;
+  /** Model, który zwrócił klasę (brak przy danych przykładowych). */
+  model?: string;
 };
 
 export type Weryfikacja = {
@@ -195,6 +197,10 @@ export type Wycinek = {
   bbox: [number, number, number, number];
   dataObrazu: string;
   zrodlo: string;
+  /** Skąd wycinek: miejsce z rankingu/obserwacja, losowa próbka sieci albo miejsce ryzyka przerwy. */
+  proba?: "ranking" | "losowa" | "ryzyko";
+  /** Zbiór do oceny modelu: na roboczym poprawiamy prompt, testowy sprawdzamy raz i raportujemy. */
+  zbior?: "roboczy" | "testowy";
 };
 
 export type Pilot = {
@@ -211,6 +217,10 @@ export type Pilot = {
   uslugi: Usluga[];
   strefyZmian: StrefaZmian[];
   wycinki: Wycinek[];
+  /** Porównanie modelu z próbką opisaną ręcznie; null, gdy brak wyników modelu lub etykiet. */
+  ocenaModelu?: import("./metryki.ts").OcenaModelu | null;
+  /** Ta sama próbka dla każdej wersji promptu: „przed i po” poprawce. */
+  porownaniePromptow?: import("./metryki.ts").OcenaModelu[];
   /** Analiza bazowa: policzona przez skrypt, nie przeliczana na żywo. */
   ranking: WynikWplywu[];
   mianownik: {

@@ -3,17 +3,20 @@
 //
 // Co jest prawdziwe: geometria sieci pieszej, tagi OSM (nawierzchnia, schody, krawężniki,
 // szerokość, nachylenie), budynki, usługi, ranking i mianownik policzone na tym grafie.
-// Co jest przykładowe (oznaczone polem przykladowe): obserwacje z obrazu, strefa zmian Sentinel-2.
+// Co jest przykładowe (oznaczone polem przykladowe): obserwacje z obrazu bez wyników modelu, strefa zmian bez wyniku Sentinel-2.
 
-import { readFileSync, writeFileSync } from "node:fs";
-import { OBSZAR, ORTO, PRZYKLADOWE } from "./config.ts";
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { KLASYFIKACJA, OBSZAR, ORTO, PRZYKLADOWE } from "./config.ts";
 import type {
   Budynek, Dowod, KategoriaUslugi, LatLon, Obserwacja, Odcinek, Pilot, StrefaZmian, TypOdcinka, Usluga, Wycinek,
 } from "../../lib/aglosat/types.ts";
 import { PROFIL_DOMYSLNY } from "../../lib/aglosat/profile.ts";
 import { ocenWszystkie } from "../../lib/aglosat/routing.ts";
 import { policzAnalize } from "../../lib/aglosat/impact.ts";
-import { OPIS_ISTNIENIA_W_OSM, OPIS_ZALOZENIA_KRAWEZNIKA, zwinPilot } from "../../lib/aglosat/data.ts";
+import { OPIS_ISTNIENIA_W_OSM, OPIS_ZALOZENIA_KRAWEZNIKA, zwinPilot, type PilotZapisany } from "../../lib/aglosat/data.ts";
+import type { PlikKlasyfikacji } from "./klasyfikuj.ts";
+import { paryDoOceny, wczytajEtykiety, zgodnoscLudzi } from "../../lib/aglosat/etykiety.ts";
+import { policzOcene } from "../../lib/aglosat/metryki.ts";
 import { osmDostepnoscZTagow } from "../../lib/aglosat/osm.ts";
 import type { OsmDostepnosc } from "../../lib/aglosat/types.ts";
 
@@ -298,47 +301,139 @@ const uslugi: Usluga[] = uslugiSurowe
   .map(({ wezelOsm, ...u }) => ({ ...u, wezel: `n${wezelOsm}` }))
   .filter((u) => wezly[u.wezel]);
 
-// --- dane przykładowe: obserwacje z obrazu -------------------------------------------------
+// --- obserwacje z obrazu: wyniki modelu, a bez nich dane przykładowe -------------------------
 
-const UZASADNIENIA = {
-  ciagly: ["nawierzchnia widoczna na całej długości odcinka", "jednolity pas nawierzchni wzdłuż przebiegu"],
-  przerwany: ["pas nawierzchni urywa się w połowie odcinka", "na przebiegu widoczny pas trawy lub ziemi"],
-  niewidoczny: ["odcinek zasłonięty koronami drzew", "cień budynku zasłania przebieg"],
-};
-const doObserwacji = odcinki.filter((o) => (o.typ === "chodnik" || o.typ === "ciag_pieszy") && o.dlugoscM > 15);
-const obserwacje: Obserwacja[] = [];
-const wybrane = new Set<string>();
-const KLASY: [keyof typeof UZASADNIENIA, number, [number, number]][] = [
-  ["ciagly", 18, [0.72, 0.96]], ["niewidoczny", 6, [0.4, 0.6]], ["przerwany", 6, [0.55, 0.86]],
+// Wyniki modeli: data/aglosat/klasyfikacje/*.json (plik na model i wersję promptu).
+// Stary plik data/aglosat/klasyfikacje-modelu.json to pierwszy przebieg: Groq, prompt v1.
+const KATALOG_KLASYFIKACJI = "data/aglosat/klasyfikacje";
+const wszystkieWyniki: PlikKlasyfikacji[] = [
+  ...(existsSync("data/aglosat/klasyfikacje-modelu.json")
+    ? [{ dostawca: "groq", ...(JSON.parse(readFileSync("data/aglosat/klasyfikacje-modelu.json", "utf8")) as PlikKlasyfikacji) }]
+    : []),
+  ...(existsSync(KATALOG_KLASYFIKACJI)
+    ? readdirSync(KATALOG_KLASYFIKACJI)
+        .filter((f) => f.endsWith(".json"))
+        .map((f) => JSON.parse(readFileSync(`${KATALOG_KLASYFIKACJI}/${f}`, "utf8")) as PlikKlasyfikacji)
+    : []),
 ];
-for (const [klasa, ile, [min, max]] of KLASY) {
-  for (let i = 0; i < ile; i++) {
-    let o: Odcinek;
-    do o = doObserwacji[Math.floor(los() * doObserwacji.length)]; while (wybrane.has(o.id));
-    wybrane.add(o.id);
+const kompletny = (p: PlikKlasyfikacji) => Object.keys(p.wyniki).length >= 80;
+// Wybrany model (config) albo model z najnowszego kompletnego pliku.
+const wybranyModel =
+  KLASYFIKACJA ?? [...wszystkieWyniki].filter(kompletny).sort((x, y) => x.data.localeCompare(y.data)).at(-1) ?? null;
+// Tylko wersje promptu tego modelu; do danych pilota najwyższa kompletna wersja.
+const wersjeModelu = wybranyModel
+  ? wszystkieWyniki
+      .filter((p) => p.model === wybranyModel.model && (p.dostawca ?? "groq") === (wybranyModel.dostawca ?? "groq"))
+      .sort((x, y) => x.wersjaPromptu - y.wersjaPromptu)
+      .map((plik) => ({ wersja: plik.wersjaPromptu, plik }))
+  : [];
+const przypietaWersja = KLASYFIKACJA?.wersjaPromptu;
+const klasyfikacje =
+  (przypietaWersja
+    ? wersjeModelu.find((w) => w.wersja === przypietaWersja && kompletny(w.plik))
+    : wersjeModelu.filter((w) => kompletny(w.plik)).at(-1)
+  )?.plik ?? null;
+const istniejace = new Set(odcinki.map((o) => o.id));
+const obserwacje: Obserwacja[] = [];
+
+if (klasyfikacje) {
+  // Klucz wyniku to identyfikator wycinka: w_<odcinek reprezentatywny miejsca>.
+  for (const [wycinekId, r] of Object.entries(klasyfikacje.wyniki)) {
+    const odcinekId = wycinekId.slice(2);
+    if (!istniejace.has(odcinekId)) continue;
     obserwacje.push({
-      id: `obs${obserwacje.length + 1}`, odcinekId: o.id, cecha: "ciaglosc", klasa,
-      ocena: Math.round((min + los() * (max - min)) * 100) / 100,
-      dataObrazu: PRZYKLADOWE.dataObrazu, zrodloObrazu: PRZYKLADOWE.zrodloObrazu,
-      uzasadnienie: UZASADNIENIA[klasa][Math.floor(los() * 2)], wycinek: null, przykladowe: true,
+      id: `obs_${odcinekId}`, odcinekId, cecha: "ciaglosc", klasa: r.klasa, ocena: r.ocena,
+      dataObrazu: ORTO.dataNalotu, zrodloObrazu: ORTO.zrodlo, uzasadnienie: r.uzasadnienie,
+      wycinek: null, przykladowe: false, model: klasyfikacje.model,
     });
+  }
+} else {
+  const UZASADNIENIA = {
+    ciagly: ["nawierzchnia widoczna na całej długości odcinka", "jednolity pas nawierzchni wzdłuż przebiegu"],
+    przerwany: ["pas nawierzchni urywa się w połowie odcinka", "na przebiegu widoczny pas trawy lub ziemi"],
+    niewidoczny: ["odcinek zasłonięty koronami drzew", "cień budynku zasłania przebieg"],
+  };
+  const doObserwacji = odcinki.filter((o) => (o.typ === "chodnik" || o.typ === "ciag_pieszy") && o.dlugoscM > 15);
+  const wybrane = new Set<string>();
+  const KLASY: [keyof typeof UZASADNIENIA, number, [number, number]][] = [
+    ["ciagly", 18, [0.72, 0.96]], ["niewidoczny", 6, [0.4, 0.6]], ["przerwany", 6, [0.55, 0.86]],
+  ];
+  for (const [klasa, ile, [min, max]] of KLASY) {
+    for (let i = 0; i < ile; i++) {
+      let o: Odcinek;
+      do o = doObserwacji[Math.floor(los() * doObserwacji.length)]; while (wybrane.has(o.id));
+      wybrane.add(o.id);
+      obserwacje.push({
+        id: `obs${obserwacje.length + 1}`, odcinekId: o.id, cecha: "ciaglosc", klasa,
+        ocena: Math.round((min + los() * (max - min)) * 100) / 100,
+        dataObrazu: PRZYKLADOWE.dataObrazu, zrodloObrazu: PRZYKLADOWE.zrodloObrazu,
+        uzasadnienie: UZASADNIENIA[klasa][Math.floor(los() * 2)], wycinek: null, przykladowe: true,
+      });
+    }
   }
 }
 
-// --- dane przykładowe: strefa zmian Sentinel-2 wokół budowy z OSM ----------------------------
+// --- strefy zmian Sentinel-2 ----------------------------------------------------------------
+// Prawdziwe strefy z npm run aglosat:sentinel; bez pliku: ilustracja wokół budowy z OSM.
+
+type PlikSentinel = {
+  pary: { przed: string; po: string }[];
+  metoda: { prog: number };
+  strefy: { id: string; kierunek: string; poleM2: number; srednieDNDVI: number[]; wielokat: LatLon[] }[];
+};
+const dataSceny = (id: string) => id.replace(/^.*_(\d{4})(\d{2})(\d{2})_.*$/, "$1-$2-$3");
+/** Punkt w wielokącie (promień), współrzędne [lat, lon]. */
+function wWielokacie([y, x]: LatLon, w: LatLon[]): boolean {
+  let wewnatrz = false;
+  for (let i = 0, j = w.length - 1; i < w.length; j = i++) {
+    const [yi, xi] = w[i], [yj, xj] = w[j];
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) wewnatrz = !wewnatrz;
+  }
+  return wewnatrz;
+}
+/** Punkty co ok. 5 m wzdłuż odcinka: przejście przez strefę bez wierzchołka w środku też się liczy. */
+function probkiOdcinka(g: LatLon[]): LatLon[] {
+  const wynik: LatLon[] = [g[0]];
+  for (let i = 1; i < g.length; i++) {
+    const kroki = Math.max(1, Math.ceil(odl(g[i - 1], g[i]) / 5));
+    for (let k = 1; k <= kroki; k++) {
+      const t = k / kroki;
+      wynik.push([g[i - 1][0] + t * (g[i][0] - g[i - 1][0]), g[i - 1][1] + t * (g[i][1] - g[i - 1][1])]);
+    }
+  }
+  return wynik;
+}
 
 const strefyZmian: StrefaZmian[] = [];
-const budowa = surowe.ways.find((w) => w.tags.highway === "construction" && w.nodes.some((id) => { const n = nodes.get(id); return n && wGrafie(n); }));
-if (budowa) {
-  const { lat, lon } = srodekIPole(budowa.nodes);
-  const dLat = 60 / 111320, dLon = 60 / (111320 * Math.cos(rad(lat)));
-  const wielokat: LatLon[] = [[lat - dLat, lon - dLon], [lat - dLat, lon + dLon], [lat + dLat, lon + dLon], [lat + dLat, lon - dLon]];
-  strefyZmian.push({
-    id: "sz1", wielokat, scenaPrzed: PRZYKLADOWE.scenaPrzed, scenaPo: PRZYKLADOWE.scenaPo, ilustracja: true,
-    opis: `Ilustracja: strefa wokół budowy oznaczonej w OSM (way/${budowa.id}); para scen przykładowa.`,
-  });
+const PLIK_SENTINEL = "data/aglosat/sentinel-zmiany.json";
+const sentinel = existsSync(PLIK_SENTINEL) ? (JSON.parse(readFileSync(PLIK_SENTINEL, "utf8")) as PlikSentinel) : null;
+if (sentinel) {
+  const pary = sentinel.pary.map((p) => `${dataSceny(p.przed)} → ${dataSceny(p.po)}`).join(" oraz ");
+  for (const st of sentinel.strefy) {
+    strefyZmian.push({
+      id: st.id, wielokat: st.wielokat, ilustracja: false,
+      scenaPrzed: dataSceny(sentinel.pary[0].przed), scenaPo: dataSceny(sentinel.pary.at(-1)!.po),
+      opis: `Sentinel-2: ${st.kierunek} na ok. ${st.poleM2} m² (zmiana wskaźnika NDVI ${st.srednieDNDVI.map((v) => v.toFixed(2).replace(".", ",")).join(" i ")} w parach ${pary}).`,
+    });
+  }
   for (const o of odcinki) {
-    if (o.geometria.some(([y, x]) => Math.abs(y - lat) <= dLat && Math.abs(x - lon) <= dLon)) o.strefaZmian = "sz1";
+    const probki = probkiOdcinka(o.geometria);
+    const st = strefyZmian.find((z) => probki.some((p) => wWielokacie(p, z.wielokat)));
+    if (st) o.strefaZmian = st.id;
+  }
+} else {
+  const budowa = surowe.ways.find((w) => w.tags.highway === "construction" && w.nodes.some((id) => { const n = nodes.get(id); return n && wGrafie(n); }));
+  if (budowa) {
+    const { lat, lon } = srodekIPole(budowa.nodes);
+    const dLat = 60 / 111320, dLon = 60 / (111320 * Math.cos(rad(lat)));
+    const wielokat: LatLon[] = [[lat - dLat, lon - dLon], [lat - dLat, lon + dLon], [lat + dLat, lon + dLon], [lat + dLat, lon - dLon]];
+    strefyZmian.push({
+      id: "sz1", wielokat, scenaPrzed: PRZYKLADOWE.scenaPrzed, scenaPo: PRZYKLADOWE.scenaPo, ilustracja: true,
+      opis: `Ilustracja: strefa wokół budowy oznaczonej w OSM (way/${budowa.id}); para scen przykładowa.`,
+    });
+    for (const o of odcinki) {
+      if (o.geometria.some(([y, x]) => Math.abs(y - lat) <= dLat && Math.abs(x - lon) <= dLon)) o.strefaZmian = "sz1";
+    }
   }
 }
 
@@ -361,14 +456,23 @@ function bboxWycinka(geometrie: LatLon[]): [number, number, number, number] {
   const r = (x: number) => Math.round(x * 1e7) / 1e7;
   return [r(sLat - dLat), r(sLon - dLon), r(sLat + dLat), r(sLon + dLon)];
 }
+// Zasięg istniejącego wycinka zostaje, dopóki jest plik: obraz, nakładka i wynik modelu muszą do siebie pasować.
+const PLIK_PILOTA = "public/aglosat/pilot.json";
+const poprzednieBbox = new Map<string, Wycinek["bbox"]>(
+  existsSync(PLIK_PILOTA)
+    ? ((JSON.parse(readFileSync(PLIK_PILOTA, "utf8")) as PilotZapisany).wycinki ?? []).map((w) => [w.id, w.bbox])
+    : [],
+);
 const wycinki: Wycinek[] = [];
 const dodajWycinek = (odcinekId: string, odcinkiMiejsca: string[]) => {
   if (wycinki.some((w) => w.odcinekId === odcinekId)) return;
   const geometrie = odcinkiMiejsca.flatMap((id) => odcinekPoId.get(id)?.geometria ?? []);
   if (geometrie.length === 0) return;
+  const id = `w_${odcinekId}`;
+  const plik = `/aglosat/wycinki/${id}.jpg`;
+  const poprzedni = existsSync(`public${plik}`) ? poprzednieBbox.get(id) : undefined;
   wycinki.push({
-    id: `w_${odcinekId}`, odcinekId, plik: `/aglosat/wycinki/w_${odcinekId}.jpg`,
-    bbox: bboxWycinka(geometrie), dataObrazu: ORTO.dataNalotu, zrodlo: ORTO.zrodlo,
+    id, odcinekId, plik, bbox: poprzedni ?? bboxWycinka(geometrie), dataObrazu: ORTO.dataNalotu, zrodlo: ORTO.zrodlo,
   });
 };
 for (const r of analiza.ranking) dodajWycinek(r.odcinekId, r.odcinki);
@@ -378,6 +482,105 @@ for (const o of obserwacje) {
   o.wycinek = `/aglosat/wycinki/w_${o.odcinekId}.jpg`;
 }
 
+// --- próbka do oceny modelu: losowa i „ryzyko przerwy”, zamrożona w pliku ---------------------
+// Wybór i podział na zbiory zapisujemy przy pierwszym uruchomieniu, zanim ktokolwiek zobaczy wyniki modelu.
+
+type PlikProby = {
+  opis: string;
+  utworzono: string;
+  wycinki: { odcinekId: string; proba: "losowa" | "ryzyko" }[];
+  zbiory: Record<string, "roboczy" | "testowy">;
+};
+const PLIK_PROBY = "data/aglosat/proba-oceny.json";
+const zbiorZeSkrotu = (id: string): "roboczy" | "testowy" => {
+  let h = 2166136261;
+  for (let i = 0; i < id.length; i++) h = Math.imul(h ^ id.charCodeAt(i), 16777619);
+  return (h >>> 0) % 2 === 0 ? "roboczy" : "testowy";
+};
+let proba: PlikProby;
+if (existsSync(PLIK_PROBY)) {
+  proba = JSON.parse(readFileSync(PLIK_PROBY, "utf8")) as PlikProby;
+} else {
+  let z = 2026;
+  const losProby = () => {
+    z = (z + 0x6d2b79f5) | 0;
+    let t = Math.imul(z ^ (z >>> 15), 1 | z);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const wylosuj = <T,>(lista: T[], ile: number) => {
+    const kopia = [...lista];
+    const wynik: T[] = [];
+    while (wynik.length < ile && kopia.length) wynik.push(kopia.splice(Math.floor(losProby() * kopia.length), 1)[0]);
+    return wynik;
+  };
+  const stopien = new Map<string, number>();
+  for (const o of odcinki) for (const w of [o.a, o.b]) stopien.set(w, (stopien.get(w) ?? 0) + 1);
+  const typyWWezle = new Map<string, Set<string>>();
+  for (const o of odcinki) for (const w of [o.a, o.b]) typyWWezle.set(w, (typyWWezle.get(w) ?? new Set()).add(o.typ));
+  const juzSa = new Set(wycinki.map((w) => w.odcinekId));
+  const PIESZE_TYPY = new Set(["chodnik", "ciag_pieszy", "sciezka"]);
+  const pula = odcinki.filter(
+    (o) => ["chodnik", "ciag_pieszy", "sciezka", "przejscie", "droga_osiedlowa"].includes(o.typ) && o.dlugoscM >= 8 && !juzSa.has(o.id),
+  );
+  // Ryzyko przerwy: ciąg pieszy kończy się ślepo albo krótki łącznik dochodzi do drogi osiedlowej.
+  const ryzykowne = pula.filter(
+    (o) =>
+      PIESZE_TYPY.has(o.typ) &&
+      ([o.a, o.b].some((w) => stopien.get(w) === 1) ||
+        (o.dlugoscM <= 20 && [o.a, o.b].some((w) => typyWWezle.get(w)?.has("droga_osiedlowa")))),
+  );
+  const ryzyko = wylosuj(ryzykowne, 40);
+  const zostaly = pula.filter((o) => !ryzyko.includes(o));
+  // Losowa próbka z kwotami proporcjonalnymi do liczby odcinków każdego typu.
+  const wgTypu = new Map<string, Odcinek[]>();
+  for (const o of zostaly) wgTypu.set(o.typ, [...(wgTypu.get(o.typ) ?? []), o]);
+  const losowe = [...wgTypu.values()].flatMap((l) => wylosuj(l, Math.round((80 * l.length) / zostaly.length)));
+  proba = {
+    opis: "Próbka do oceny modelu: 80 losowych odcinków (kwoty według typu) i 40 miejsc ryzyka przerwy. Zbiory: roboczy do poprawiania promptu, testowy do raportu.",
+    utworzono: new Date().toISOString().slice(0, 10),
+    wycinki: [...losowe.map((o) => ({ odcinekId: o.id, proba: "losowa" as const })), ...ryzyko.map((o) => ({ odcinekId: o.id, proba: "ryzyko" as const }))],
+    zbiory: {},
+  };
+  for (const w of [...wycinki.map((x) => x.id), ...proba.wycinki.map((x) => `w_${x.odcinekId}`)]) proba.zbiory[w] = zbiorZeSkrotu(w);
+  writeFileSync(PLIK_PROBY, JSON.stringify(proba, null, 2) + "\n");
+  console.log(`próbka oceny: zapisano ${proba.wycinki.length} nowych wycinków do ${PLIK_PROBY}`);
+}
+const zProby = new Map(proba.wycinki.map((x) => [x.odcinekId, x.proba]));
+for (const x of proba.wycinki) dodajWycinek(x.odcinekId, [x.odcinekId]);
+for (const w of wycinki) {
+  w.proba = zProby.get(w.odcinekId) ?? "ranking";
+  w.zbior = proba.zbiory[w.id] ?? zbiorZeSkrotu(w.id);
+}
+
+// --- ocena modelu na próbce opisanej ręcznie (strona /app/etykiety) ------------------------
+
+const PLIK_ETYKIET = "data/aglosat/etykiety-reczne.json";
+const etykiety = existsSync(PLIK_ETYKIET) ? wczytajEtykiety(JSON.parse(readFileSync(PLIK_ETYKIET, "utf8"))) : null;
+const ludzie = etykiety ? zgodnoscLudzi(etykiety) : undefined;
+// Wszystkie wersje promptu oceniane na tej samej próbce (etykiety według bieżącej instrukcji).
+const zbiorWycinka = new Map(wycinki.map((w) => [w.id, w.zbior]));
+const ZBIORY = ["wszystkie", "roboczy", "testowy"] as const;
+const porownaniePromptow = etykiety
+  ? wersjeModelu.flatMap((w) =>
+      ZBIORY.map((zbior) => ({
+        ...policzOcene(
+          w.plik.model,
+          paryDoOceny(etykiety, (id) => w.plik.wyniki[id]?.klasa).filter((p) => zbior === "wszystkie" || zbiorWycinka.get(p.wycinekId) === zbior),
+        ),
+        wersjaPromptu: w.wersja,
+        zbior,
+        zgodnoscLudzi: ludzie,
+      })),
+    )
+  : [];
+// Do pokazania: najlepsza dostępna wersja promptu na zbiorze testowym (gdy ma etykiety), inaczej na wszystkich.
+const najwyzsza = wersjeModelu.at(-1)?.wersja;
+const ocenaModelu =
+  porownaniePromptow.find((o) => o.wersjaPromptu === najwyzsza && o.zbior === "testowy" && o.n > 0) ??
+  porownaniePromptow.find((o) => o.wersjaPromptu === najwyzsza && o.zbior === "wszystkie") ??
+  null;
+
 const pilot: Pilot = {
   meta: {
     obszar: { nazwa: OBSZAR.nazwa, bbox: OBSZAR.bboxGrafu, srodek: OBSZAR.srodek },
@@ -386,12 +589,17 @@ const pilot: Pilot = {
     uwagi: [
       "Geometria, tagi, budynki i usługi: OpenStreetMap (© współtwórcy OSM, ODbL).",
       `Wycinki: ${ORTO.zrodlo}, nalot ${ORTO.dataNalotu} (skorowidz GUGiK, arkusz ${ORTO.arkusz}).`,
-      "Klasy modelu dla wycinków i strefa zmian Sentinel-2: dane przykładowe.",
+      klasyfikacje
+        ? `Klasy dla wycinków: model ${klasyfikacje.model} (prompt v${klasyfikacje.wersjaPromptu}, ${klasyfikacje.data}).`
+        : "Klasy modelu dla wycinków: dane przykładowe.",
+      sentinel
+        ? `Strefy zmian: Sentinel-2 L2A (Copernicus, archiwum Element84), |ΔNDVI| ≥ ${String(sentinel.metoda.prog).replace(".", ",")} w obu parach scen; sygnał możliwej zmiany, nie wykrycie chodnika.`
+        : "Strefa zmian Sentinel-2: ilustracja, dane przykładowe.",
       "Waga budynku: powierzchnia zabudowy × kondygnacje; przybliżenie, nie liczba mieszkańców.",
       "Ranking: analiza bazowa, policzona wcześniej dla profilu domyślnego.",
     ],
   },
-  wezly, odcinki, obserwacje, budynki, uslugi, strefyZmian, wycinki,
+  wezly, odcinki, obserwacje, budynki, uslugi, strefyZmian, wycinki, ocenaModelu, porownaniePromptow,
   ranking: analiza.ranking.slice(0, 200),
   mianownik: analiza.mianownik,
   kandydaci: analiza.kandydaci,
@@ -402,7 +610,12 @@ const licz = (f: (s: string) => boolean) => [...oceny.values()].filter((o) => f(
 console.log(`odcinki: ${odcinki.length}, węzły: ${Object.keys(wezly).length}`);
 console.log(`przejezdne: ${licz((s) => s === "przejezdny")}, nieznane: ${licz((s) => s === "nieznany")}, nieprzejezdne: ${licz((s) => s === "nieprzejezdny")}`);
 console.log(`budynki: ${budynki.length} (kondygnacje przybliżone: ${budynki.filter((b) => b.kondygnacjePrzyblizone).length}), usługi: ${uslugi.length}`);
-console.log(`wycinki: ${wycinki.length}`);
-console.log(`obserwacje: ${obserwacje.length}, strefy zmian: ${strefyZmian.length}, odcinki w strefie: ${odcinki.filter((o) => o.strefaZmian).length}`);
+console.log(`wycinki: ${wycinki.length} (ranking ${wycinki.filter((w) => w.proba === "ranking").length}, losowe ${wycinki.filter((w) => w.proba === "losowa").length}, ryzyko ${wycinki.filter((w) => w.proba === "ryzyko").length}; testowe ${wycinki.filter((w) => w.zbior === "testowy").length})`);
+for (const o of porownaniePromptow) {
+  console.log(`ocena modelu ${o.model} prompt v${o.wersjaPromptu} [${o.zbior}]: n=${o.n}, trafność ${o.trafnosc}, precyzja „przerwany” ${o.precyzjaPrzerwany}, czułość ${o.czuloscPrzerwany}, poprawne „niewidoczny” ${o.poprawneNiewidoczny}`);
+}
+if (ludzie) console.log(`zgodność ludzi: ${ludzie.zgodnosc} na ${ludzie.n} wycinkach`);
+console.log(`dane pilota: obserwacje z ${klasyfikacje ? `promptu v${klasyfikacje.wersjaPromptu}` : "danych przykładowych"}`);
+console.log(`obserwacje: ${obserwacje.length} (${klasyfikacje ? `model ${klasyfikacje.model}` : "przykładowe"}), strefy zmian: ${strefyZmian.length}, odcinki w strefie: ${odcinki.filter((o) => o.strefaZmian).length}`);
 console.log(`ranking: ${analiza.ranking.length} miejsc do kontroli z wpływem, kandydaci: ${analiza.kandydaci.length}, analiza ${Date.now() - t0} ms`);
 console.log("mianownik:", analiza.mianownik);

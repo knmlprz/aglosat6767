@@ -1,0 +1,691 @@
+{
+  "opis": "Próbka do oceny modelu: 80 losowych odcinków (kwoty według typu) i 40 miejsc ryzyka przerwy. Zbiory: roboczy do poprawiania promptu, testowy do raportu.",
+  "utworzono": "2026-10-03",
+  "wycinki": [
+    {
+      "odcinekId": "s1420055378_4423",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1079309939_2501",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s962735669_1750",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s153920530_678",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s42383663_31",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1459239206_4569",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s107637034_188",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1418929379_4421",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1362930406_3745",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s112656144_284",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s276803152_930",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s107637033_180",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1433871183_4460",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s914867688_1367",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1364260387_3841",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1340862610_3377",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s914867688_1364",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s228553224_815",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s276803152_937",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1353158954_3437",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1340862610_3376",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s914267727_1331",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1077809267_2475",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1420055378_4422",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s153920534_681",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s31670518_15",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s107637032_179",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s128505053_478",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1434813379_4471",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1388939525_4184",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s128614925_649",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s128614923_644",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s968786522_2011",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1077537898_2387",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s376133680_1094",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1420061434_4438",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1366301177_4039",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s128447575_367",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1467517477_4598",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1077809261_2458",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1364575166_4008",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s300071712_963",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1077537904_2402",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s993165383_2246",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s128447576_371",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1367162421_4060",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1363144951_3802",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1467510345_4582",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1328915584_3249",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s128447588_381",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1434813377_4468",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1413962458_4266",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s967398734_1945",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s967398674_1910",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s31670186_10",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s300481957_997",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1359701503_3540",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1367270907_4066",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s993165390_2257",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s153920561_731",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s128505070_504",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s969876362_2042",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1537153649_4735",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1360885957_3690",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s244321639_915",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s914278302_1345",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1270624797_3009",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1364260400_3868",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s752007931_1178",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1259000402_2940",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1418177938_4356",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s128504981_408",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1232503130_2862",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s340319860_1080",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1287298903_3063",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1279527454_3012",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s752008203_1183",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s907785968_1294",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s957870854_1673",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s752007928_1164",
+      "proba": "losowa"
+    },
+    {
+      "odcinekId": "s1077277990_2373",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s957870832_1624",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s1270624738_2970",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s1212173221_2814",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s625215680_1157",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s887197403_1257",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s1270624764_2990",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s1363647130_3823",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s955140613_1546",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s128505078_514",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s234589354_899",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s1220376204_2824",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s969876346_2037",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s300509974_1012",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s757263637_1195",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s964100313_1848",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s993165393_2265",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s1459204378_4562",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s1127987417_2695",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s107137640_60",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s907785966_1289",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s956987986_1590",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s1362930688_3762",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s1469178561_4614",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s1467510352_4588",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s1359849740_3545",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s955140604_1533",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s954097783_1483",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s993165417_2297",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s958504181_1720",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s1270624749_2975",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s1388173179_4159",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s963062670_1752",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s1420061437_4441",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s244318352_909",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s128614920_643",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s967398723_1933",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s1359849740_3546",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s1315565333_3223",
+      "proba": "ryzyko"
+    },
+    {
+      "odcinekId": "s993165417_2294",
+      "proba": "ryzyko"
+    }
+  ],
+  "zbiory": {
+    "w_s1338573503_3349": "roboczy",
+    "w_s232470220_850": "roboczy",
+    "w_s969876369_2045": "testowy",
+    "w_s552402693_1130": "roboczy",
+    "w_s970756713_2069": "testowy",
+    "w_s1418177933_4346": "roboczy",
+    "w_s1308888826_3175": "testowy",
+    "w_s1333426188_3324": "roboczy",
+    "w_s107637025_160": "testowy",
+    "w_s1287298904_3066": "roboczy",
+    "w_s1360628824_3687": "testowy",
+    "w_s1418889242_4383": "roboczy",
+    "w_s1286404732_3038": "roboczy",
+    "w_s1360885960_3694": "testowy",
+    "w_s107637004_136": "testowy",
+    "w_s1356385271_3469": "roboczy",
+    "w_s300114914_986": "testowy",
+    "w_s1418889240_4380": "testowy",
+    "w_s944367545_1476": "roboczy",
+    "w_s1523981154_4719": "testowy",
+    "w_s107575312_110": "roboczy",
+    "w_s1359849748_3559": "testowy",
+    "w_s993165389_2255": "roboczy",
+    "w_s993165419_2300": "testowy",
+    "w_s1333426190_3327": "roboczy",
+    "w_s1338723143_3365": "testowy",
+    "w_s1182209816_2748": "roboczy",
+    "w_s1169593660_2744": "roboczy",
+    "w_s1468667530_4606": "testowy",
+    "w_s1229753784_2843": "roboczy",
+    "w_s1468667532_4609": "roboczy",
+    "w_s1359849747_3557": "roboczy",
+    "w_s228553204_805": "testowy",
+    "w_s1361674993_3741": "testowy",
+    "w_s964100280_1801": "testowy",
+    "w_s1282401958_3028": "roboczy",
+    "w_s957870880_1708": "testowy",
+    "w_s1360885988_3696": "testowy",
+    "w_s1333426153_3290": "roboczy",
+    "w_s1364260390_3848": "roboczy",
+    "w_s1359849741_3547": "testowy",
+    "w_s1359849744_3552": "roboczy",
+    "w_s1413962405_4247": "testowy",
+    "w_s1413962211_4238": "roboczy",
+    "w_s300509970_1004": "testowy",
+    "w_s300509977_1013": "roboczy",
+    "w_s1420061428_4431": "testowy",
+    "w_s993165382_2243": "roboczy",
+    "w_s1270624765_2991": "roboczy",
+    "w_s1282401951_3024": "testowy",
+    "w_s300509968_1001": "testowy",
+    "w_s1333426185_3321": "roboczy",
+    "w_s1338573503_3350": "roboczy",
+    "w_s969876369_2046": "roboczy",
+    "w_s1127918859_2662": "roboczy",
+    "w_s1157054648_2723": "roboczy",
+    "w_s1163307025_2728": "roboczy",
+    "w_s128447588_373": "testowy",
+    "w_s128447590_393": "roboczy",
+    "w_s128504981_409": "roboczy",
+    "w_s128505019_441": "testowy",
+    "w_s128505070_505": "testowy",
+    "w_s128505080_523": "roboczy",
+    "w_s128614883_586": "testowy",
+    "w_s128986774_663": "roboczy",
+    "w_s1333419929_3263": "testowy",
+    "w_s1353023854_3403": "testowy",
+    "w_s1355357746_3456": "testowy",
+    "w_s1363144949_3801": "testowy",
+    "w_s1364486601_3929": "testowy",
+    "w_s1364490252_3994": "roboczy",
+    "w_s1364574972_4003": "roboczy",
+    "w_s1434813379_4470": "testowy",
+    "w_s1459204499_4563": "roboczy",
+    "w_s1468667523_4603": "roboczy",
+    "w_s1543139949_4736": "testowy",
+    "w_s186239828_753": "testowy",
+    "w_s232470221_854": "testowy",
+    "w_s300509969_1003": "roboczy",
+    "w_s376133680_1092": "roboczy",
+    "w_s887197405_1267": "roboczy",
+    "w_s907785966_1287": "roboczy",
+    "w_s957870842_1651": "roboczy",
+    "w_s1420055378_4423": "testowy",
+    "w_s1079309939_2501": "testowy",
+    "w_s962735669_1750": "testowy",
+    "w_s153920530_678": "roboczy",
+    "w_s42383663_31": "roboczy",
+    "w_s1459239206_4569": "roboczy",
+    "w_s107637034_188": "testowy",
+    "w_s1418929379_4421": "testowy",
+    "w_s1362930406_3745": "roboczy",
+    "w_s112656144_284": "testowy",
+    "w_s276803152_930": "testowy",
+    "w_s107637033_180": "roboczy",
+    "w_s1433871183_4460": "roboczy",
+    "w_s914867688_1367": "testowy",
+    "w_s1364260387_3841": "testowy",
+    "w_s1340862610_3377": "roboczy",
+    "w_s914867688_1364": "roboczy",
+    "w_s228553224_815": "roboczy",
+    "w_s276803152_937": "roboczy",
+    "w_s1353158954_3437": "roboczy",
+    "w_s1340862610_3376": "testowy",
+    "w_s914267727_1331": "roboczy",
+    "w_s1077809267_2475": "roboczy",
+    "w_s1420055378_4422": "roboczy",
+    "w_s153920534_681": "roboczy",
+    "w_s31670518_15": "roboczy",
+    "w_s107637032_179": "testowy",
+    "w_s128505053_478": "testowy",
+    "w_s1434813379_4471": "roboczy",
+    "w_s1388939525_4184": "testowy",
+    "w_s128614925_649": "roboczy",
+    "w_s128614923_644": "testowy",
+    "w_s968786522_2011": "roboczy",
+    "w_s1077537898_2387": "roboczy",
+    "w_s376133680_1094": "roboczy",
+    "w_s1420061434_4438": "testowy",
+    "w_s1366301177_4039": "roboczy",
+    "w_s128447575_367": "roboczy",
+    "w_s1467517477_4598": "roboczy",
+    "w_s1077809261_2458": "testowy",
+    "w_s1364575166_4008": "testowy",
+    "w_s300071712_963": "roboczy",
+    "w_s1077537904_2402": "roboczy",
+    "w_s993165383_2246": "roboczy",
+    "w_s128447576_371": "roboczy",
+    "w_s1367162421_4060": "roboczy",
+    "w_s1363144951_3802": "testowy",
+    "w_s1467510345_4582": "roboczy",
+    "w_s1328915584_3249": "testowy",
+    "w_s128447588_381": "roboczy",
+    "w_s1434813377_4468": "roboczy",
+    "w_s1413962458_4266": "roboczy",
+    "w_s967398734_1945": "roboczy",
+    "w_s967398674_1910": "testowy",
+    "w_s31670186_10": "roboczy",
+    "w_s300481957_997": "testowy",
+    "w_s1359701503_3540": "testowy",
+    "w_s1367270907_4066": "testowy",
+    "w_s993165390_2257": "roboczy",
+    "w_s153920561_731": "roboczy",
+    "w_s128505070_504": "roboczy",
+    "w_s969876362_2042": "testowy",
+    "w_s1537153649_4735": "roboczy",
+    "w_s1360885957_3690": "testowy",
+    "w_s244321639_915": "roboczy",
+    "w_s914278302_1345": "roboczy",
+    "w_s1270624797_3009": "roboczy",
+    "w_s1364260400_3868": "roboczy",
+    "w_s752007931_1178": "roboczy",
+    "w_s1259000402_2940": "testowy",
+    "w_s1418177938_4356": "roboczy",
+    "w_s128504981_408": "testowy",
+    "w_s1232503130_2862": "testowy",
+    "w_s340319860_1080": "roboczy",
+    "w_s1287298903_3063": "roboczy",
+    "w_s1279527454_3012": "testowy",
+    "w_s752008203_1183": "testowy",
+    "w_s907785968_1294": "roboczy",
+    "w_s957870854_1673": "testowy",
+    "w_s752007928_1164": "testowy",
+    "w_s1077277990_2373": "testowy",
+    "w_s957870832_1624": "testowy",
+    "w_s1270624738_2970": "testowy",
+    "w_s1212173221_2814": "roboczy",
+    "w_s625215680_1157": "roboczy",
+    "w_s887197403_1257": "testowy",
+    "w_s1270624764_2990": "roboczy",
+    "w_s1363647130_3823": "testowy",
+    "w_s955140613_1546": "testowy",
+    "w_s128505078_514": "testowy",
+    "w_s234589354_899": "roboczy",
+    "w_s1220376204_2824": "roboczy",
+    "w_s969876346_2037": "testowy",
+    "w_s300509974_1012": "roboczy",
+    "w_s757263637_1195": "testowy",
+    "w_s964100313_1848": "testowy",
+    "w_s993165393_2265": "roboczy",
+    "w_s1459204378_4562": "testowy",
+    "w_s1127987417_2695": "roboczy",
+    "w_s107137640_60": "roboczy",
+    "w_s907785966_1289": "roboczy",
+    "w_s956987986_1590": "testowy",
+    "w_s1362930688_3762": "testowy",
+    "w_s1469178561_4614": "roboczy",
+    "w_s1467510352_4588": "roboczy",
+    "w_s1359849740_3545": "roboczy",
+    "w_s955140604_1533": "testowy",
+    "w_s954097783_1483": "testowy",
+    "w_s993165417_2297": "roboczy",
+    "w_s958504181_1720": "roboczy",
+    "w_s1270624749_2975": "roboczy",
+    "w_s1388173179_4159": "roboczy",
+    "w_s963062670_1752": "testowy",
+    "w_s1420061437_4441": "roboczy",
+    "w_s244318352_909": "testowy",
+    "w_s128614920_643": "testowy",
+    "w_s967398723_1933": "testowy",
+    "w_s1359849740_3546": "testowy",
+    "w_s1315565333_3223": "roboczy",
+    "w_s993165417_2294": "testowy"
+  }
+}
