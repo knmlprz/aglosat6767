@@ -12,6 +12,7 @@ export function WycinekObrazu({
   przebiegi,
   obserwacje,
   odrzucone,
+  ukryjModel = false,
 }: {
   wycinek: Wycinek;
   /** Geometrie odcinków miejsca. */
@@ -20,6 +21,8 @@ export function WycinekObrazu({
   obserwacje: Obserwacja[];
   /** Identyfikatory obserwacji odrzuconych w terenie. */
   odrzucone: Set<string>;
+  /** Przy etykietowaniu ukrywamy odpowiedź modelu, żeby nie sugerowała człowiekowi. */
+  ukryjModel?: boolean;
 }) {
   const [nakladka, setNakladka] = useState(true);
   const [brak, setBrak] = useState(false);
@@ -80,7 +83,7 @@ export function WycinekObrazu({
           <input type="checkbox" checked={nakladka} onChange={(e) => setNakladka(e.target.checked)} className="accent-slate-900" />
           pokaż przebieg z OSM
         </label>
-        {obserwacje.map((o) => (
+        {!ukryjModel && obserwacje.map((o) => (
           <span key={o.id} className={odrzucone.has(o.id) ? "text-slate-500" : "text-slate-700"}>
             {odrzucone.has(o.id) ? <s>Model wizyjny</s> : "Model wizyjny"}: <strong>{formatujWartosc("ciaglosc", o.klasa)}</strong>, ocena{" "}
             {o.ocena.toFixed(2).replace(".", ",")}. {o.uzasadnienie}.

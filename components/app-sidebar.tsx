@@ -14,11 +14,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { ListChecksIcon, RouteIcon, SatelliteIcon } from "lucide-react"
+import { ListChecksIcon, RouteIcon, SatelliteIcon, TagIcon } from "lucide-react"
 
 const navMain = [
   { title: "Planista", url: "/app/planista", icon: <ListChecksIcon /> },
   { title: "Mieszkaniec", url: "/app/mieszkaniec", icon: <RouteIcon /> },
+  { title: "Próbka dla modelu", url: "/app/etykiety", icon: <TagIcon /> },
 ]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
