@@ -146,3 +146,8 @@ body {
   background: transparent !important;
   border: none !important;
 }
+
+/* AgloSat: przygaszony podkład, żeby mapa niewiedzy była czytelna */
+.agl-podklad {
+  filter: brightness(0.6) saturate(0.4);
+}

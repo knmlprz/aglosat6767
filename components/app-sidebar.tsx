@@ -23,6 +23,7 @@ import {
   FileTextIcon,
   Settings2Icon,
   CircleHelpIcon,
+  ListChecksIcon,
 } from "lucide-react"
 
 const data = {
@@ -32,6 +33,7 @@ const data = {
     avatar: "",
   },
   navMain: [
+    { title: "Planista", url: "/app/planista", icon: <ListChecksIcon /> },
     { title: "Panel główny", url: "/app", icon: <HomeIcon /> },
     { title: "Mapa", url: "/app#mapa", icon: <MapIcon /> },
   ],

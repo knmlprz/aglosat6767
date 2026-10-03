@@ -9,7 +9,7 @@ import { stanOdcinka, CECHY } from "../../lib/aglosat/status.ts";
 import { ocenWszystkie, trasyRelacji, zbudujGraf } from "../../lib/aglosat/routing.ts";
 import { policzAnalize } from "../../lib/aglosat/impact.ts";
 
-const p: Pilot = rozwinPilot(JSON.parse(readFileSync("data/aglosat/pilot.json", "utf8")) as PilotZapisany);
+const p: Pilot = rozwinPilot(JSON.parse(readFileSync("public/aglosat/pilot.json", "utf8")) as PilotZapisany);
 let bledy = 0;
 function sprawdz(warunek: boolean, opis: string) {
   console.log(`${warunek ? "OK  " : "BŁĄD"} ${opis}`);

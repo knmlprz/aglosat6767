@@ -41,6 +41,8 @@ export type OcenaOdcinka = {
   niespelnione: Cecha[];
   /** Cechy przejezdne, ale utrudniające; pokazujemy je przy trasie, nie blokują jej. */
   utrudnienia: Cecha[];
+  /** Wymagane cechy ze sprzecznymi źródłami (zawierają się w „nieznane”). */
+  sprzeczne: Cecha[];
 };
 
 const KRAWEZNIK_CM: Record<string, number> = { nie_dotyczy: 0, zrownany: 0, obnizony: 2, wysoki: 12 };
@@ -76,7 +78,9 @@ export function ocenOdcinek(stany: Record<Cecha, StanCechy>, p: Profil): OcenaOd
   const nieznane: Cecha[] = [];
   const niespelnione: Cecha[] = [];
   const utrudnienia: Cecha[] = [];
+  const sprzeczne: Cecha[] = [];
   for (const cecha of p.wymagane) {
+    if (stany[cecha].status === "sprzeczne") sprzeczne.push(cecha);
     const o = ocenCeche(stany[cecha], p);
     if (o === "nieznane") nieznane.push(cecha);
     else if (o === "nie_spelnia") niespelnione.push(cecha);
@@ -84,5 +88,5 @@ export function ocenOdcinek(stany: Record<Cecha, StanCechy>, p: Profil): OcenaOd
   }
   const przejezdnosc: Przejezdnosc =
     niespelnione.length > 0 ? "nieprzejezdny" : nieznane.length > 0 ? "nieznany" : "przejezdny";
-  return { przejezdnosc, nieznane, niespelnione, utrudnienia };
+  return { przejezdnosc, nieznane, niespelnione, utrudnienia, sprzeczne };
 }

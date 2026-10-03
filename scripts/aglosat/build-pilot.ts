@@ -1,4 +1,4 @@
-// Buduje data/aglosat/pilot.json z wycinka OSM.
+// Buduje public/aglosat/pilot.json z wycinka OSM.
 // Uruchomienie: npm run aglosat:build
 //
 // Co jest prawdziwe: geometria sieci pieszej, tagi OSM (nawierzchnia, schody, krawężniki,
@@ -334,7 +334,7 @@ const pilot: Pilot = {
   mianownik: analiza.mianownik,
   kandydaci: analiza.kandydaci,
 };
-writeFileSync("data/aglosat/pilot.json", JSON.stringify(zwinPilot(pilot)));
+writeFileSync("public/aglosat/pilot.json", JSON.stringify(zwinPilot(pilot)));
 
 const licz = (f: (s: string) => boolean) => [...oceny.values()].filter((o) => f(o.przejezdnosc)).length;
 console.log(`odcinki: ${odcinki.length}, węzły: ${Object.keys(wezly).length}`);
