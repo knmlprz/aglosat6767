@@ -1,0 +1,423 @@
+{
+  "dostawca": "openrouter",
+  "model": "anthropic/claude-sonnet-5.5",
+  "wersjaPromptu": 3,
+  "data": "2026-10-03",
+  "wyniki": {
+    "w_s107575312_110": {
+      "klasa": "ciagly",
+      "ocena": 0.88,
+      "uzasadnienie": "Linia biegnie wzdłuż ciągłej asfaltowej drogi u dołu obrazu, bez widocznych przerw ani przeszkód."
+    },
+    "w_s107637004_136": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Większość linii biegnie pod koronami drzew, więc nie widać nawierzchni ani tego, czy pas jest ciągły; tylko krótki odcinek przy parkingu jest odsłonięty."
+    },
+    "w_s107637025_160": {
+      "klasa": "niewidoczny",
+      "ocena": 0.7,
+      "uzasadnienie": "Większość linii biegnie pod koronami drzew, więc nie widać, czy pod nimi jest ścieżka, a widoczne fragmenty przy parkingu na górze i na dole nie rozstrzygają o całości."
+    },
+    "w_s1127918859_2662": {
+      "klasa": "ciagly",
+      "ocena": 0.8,
+      "uzasadnienie": "Linia biegnie po utwardzonej asfaltowej nawierzchni drogi/parkingu wzdłuż zieleni, bez widocznej przerwy czy przeszkody."
+    },
+    "w_s1157054648_2723": {
+      "klasa": "ciagly",
+      "ocena": 0.8,
+      "uzasadnienie": "Widoczna utwardzona ścieżka ukośnie przez trawnik łączy się z chodnikiem i zacienioną jezdnią, bez przerwy ani przeszkody."
+    },
+    "w_s1163307025_2728": {
+      "klasa": "niewidoczny",
+      "ocena": 0.8,
+      "uzasadnienie": "Cała linia biegnie pod koronami drzew, więc nawierzchni nie widać i nie da się ocenić ciągłości."
+    },
+    "w_s1169593660_2744": {
+      "klasa": "ciagly",
+      "ocena": 0.8,
+      "uzasadnienie": "Linia biegnie krótkim odcinkiem po asfaltowym parkingu/drodze osiedlowej w cieniu budynku, utwardzony pas jest ciągły."
+    },
+    "w_s1182209816_2748": {
+      "klasa": "ciagly",
+      "ocena": 0.8,
+      "uzasadnienie": "Linia przecina asfaltową jezdnię między chodnikami po obu stronach, więc pas do przejścia jest ciągły."
+    },
+    "w_s1229753784_2843": {
+      "klasa": "ciagly",
+      "ocena": 0.8,
+      "uzasadnienie": "Linia biegnie po utwardzonym parkingu/placu obok zaparkowanych aut, a nawierzchnia jest ciągła bez widocznej przerwy."
+    },
+    "w_s1270624765_2991": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Zaznaczony odcinek jest bardzo krótki i leży na skraju asfaltowego placu przy drzewach i cieniu, więc nie da się pewnie ocenić ciągłości pasa."
+    },
+    "w_s1282401951_3024": {
+      "klasa": "ciagly",
+      "ocena": 0.88,
+      "uzasadnienie": "Krótka linia przecina asfaltową drogę osiedlową obok parkingu, w miejscu przejścia, więc utwardzony pas jest nieprzerwany."
+    },
+    "w_s1282401958_3028": {
+      "klasa": "ciagly",
+      "ocena": 0.85,
+      "uzasadnienie": "Krótki odcinek linii biegnie po utwardzonej jezdni między chodnikiem na północy a ścieżką na południu, bez widocznej przerwy ani przeszkody."
+    },
+    "w_s128447588_373": {
+      "klasa": "ciagly",
+      "ocena": 0.8,
+      "uzasadnienie": "Wzdłuż linii widać ciągły jasny chodnik, który dalej przechodzi w utwardzony parking, bez widocznej przerwy."
+    },
+    "w_s128447590_393": {
+      "klasa": "niewidoczny",
+      "ocena": 0.8,
+      "uzasadnienie": "Linia biegnie niemal w całości pod koronami drzew, więc nie widać, czy pod nimi jest ścieżka, czy trawnik."
+    },
+    "w_s128504981_409": {
+      "klasa": "niewidoczny",
+      "ocena": 0.7,
+      "uzasadnienie": "Linia biegnie wzdłuż północnej krawędzi budynku, w większości zasłonięta koronami drzew i cieniem, więc nie widać nawierzchni ani ciągłości."
+    },
+    "w_s128505019_441": {
+      "klasa": "ciagly",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie po utwardzonym placu/parkingu w cieniu obok budynku, który łączy się z drogą dojazdową, a pas wydaje się nieprzerwany."
+    },
+    "w_s128505070_505": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Większość linii biegnie pod koronami drzew i w cieniu, więc nie widać, czy jest tam ciągły chodnik; widoczny jest tylko fragment utwardzonej ścieżki przy prawym końcu."
+    },
+    "w_s128505080_523": {
+      "klasa": "ciagly",
+      "ocena": 0.85,
+      "uzasadnienie": "Linia biegnie po szerokim, utwardzonym chodniku przy budynku, częściowo w cieniu, bez widocznej przerwy ani przeszkody."
+    },
+    "w_s128614883_586": {
+      "klasa": "niewidoczny",
+      "ocena": 0.7,
+      "uzasadnienie": "Linia biegnie pod koronami drzew przy budynku; widać tylko mały fragment jasnej ścieżki, a większości przebiegu nie da się rozpoznać."
+    },
+    "w_s1286404732_3038": {
+      "klasa": "ciagly",
+      "ocena": 0.8,
+      "uzasadnienie": "Linia biegnie od jezdni przez utwardzony plac parkingowy do budynku; pas jest ciągły, a furgonetka to tylko przeszkoda tymczasowa."
+    },
+    "w_s1287298904_3066": {
+      "klasa": "ciagly",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie po utwardzonym placu/dojeździe asfaltowym w cieniu drzew, bez widocznej przerwy ani przeszkody."
+    },
+    "w_s128986774_663": {
+      "klasa": "ciagly",
+      "ocena": 0.68,
+      "uzasadnienie": "Widoczny chodnik biegnie od skrzyżowania na wschód i z powrotem w dół do dolnej alejki; tylko zakręt pod koroną drzewa jest częściowo zasłonięty, bez widocznej przerwy."
+    },
+    "w_s1308888826_3175": {
+      "klasa": "ciagly",
+      "ocena": 0.85,
+      "uzasadnienie": "Linia biegnie po asfaltowej drodze osiedlowej, której nawierzchnia jest ciągła i bez stałych przeszkód."
+    },
+    "w_s1333419929_3263": {
+      "klasa": "niewidoczny",
+      "ocena": 0.85,
+      "uzasadnienie": "Cała linia biegnie pod koronami drzew i w cieniu, więc nie widać nawierzchni ani ewentualnej przerwy."
+    },
+    "w_s1333426153_3290": {
+      "klasa": "ciagly",
+      "ocena": 0.85,
+      "uzasadnienie": "Krótka linia biegnie po ciągłej asfaltowej jezdni/dojeździe przy zaparkowanych autach, bez widocznej przerwy."
+    },
+    "w_s1333426185_3321": {
+      "klasa": "ciagly",
+      "ocena": 0.8,
+      "uzasadnienie": "Krótki odcinek linii biegnie po utwardzonym placu/drodze dojazdowej przy bloku, częściowo w cieniu drzew, ale nawierzchnia jest ciągła."
+    },
+    "w_s1333426188_3324": {
+      "klasa": "ciagly",
+      "ocena": 0.7,
+      "uzasadnienie": "Krótki odcinek linii biegnie po utwardzonym asfaltowym dojeździe/parkingu przy budynku, bez widocznej przerwy ani przeszkody."
+    },
+    "w_s1333426190_3327": {
+      "klasa": "ciagly",
+      "ocena": 0.5,
+      "uzasadnienie": "Krótki odcinek leży na końcu asfaltowego przejazdu, który łączy się ze ścieżką biegnącą dalej na wschód, choć fragment jest częściowo przesłonięty koroną drzewa."
+    },
+    "w_s1338573503_3349": {
+      "klasa": "ciagly",
+      "ocena": 0.6,
+      "uzasadnienie": "Krótki odcinek biegnie po ciemnej, utwardzonej nawierzchni dojazdu w cieniu budynku, bez widocznej przerwy ani przeszkody."
+    },
+    "w_s1338573503_3350": {
+      "klasa": "niewidoczny",
+      "ocena": 0.45,
+      "uzasadnienie": "Krótki odcinek leży w głębokim cieniu budynku i pod drzewami, obok stoją auta, więc nawierzchni nie da się pewnie ocenić."
+    },
+    "w_s1338723143_3365": {
+      "klasa": "ciagly",
+      "ocena": 0.8,
+      "uzasadnienie": "Krótki odcinek linii biegnie po utwardzonym placyku lub drodze dojazdowej między budynkami, bez widocznej przerwy."
+    },
+    "w_s1353023854_3403": {
+      "klasa": "ciagly",
+      "ocena": 0.7,
+      "uzasadnienie": "Wzdłuż linii, równolegle do ulicy, widać jasny chodnik biegnący od lewej do prawej strony, z drobnymi zacienieniami drzew, ale bez wyraźnej przerwy."
+    },
+    "w_s1355357746_3456": {
+      "klasa": "niewidoczny",
+      "ocena": 0.7,
+      "uzasadnienie": "Linia biegnie przy północnej krawędzi budynku, pod koronami drzew i w cieniu, więc nawierzchni nie widać."
+    },
+    "w_s1356385271_3469": {
+      "klasa": "ciagly",
+      "ocena": 0.8,
+      "uzasadnienie": "Krótki odcinek linii biegnie po asfaltowej ulicy osiedlowej wzdłuż zaparkowanych aut, a pas jezdni jest ciągły i przejezdny."
+    },
+    "w_s1359849741_3547": {
+      "klasa": "ciagly",
+      "ocena": 0.8,
+      "uzasadnienie": "Krótka linia biegnie po asfaltowej jezdni przy parkingu, a utwardzony pas jest tam ciągły, bez ogrodzenia ani przerwy."
+    },
+    "w_s1359849744_3552": {
+      "klasa": "ciagly",
+      "ocena": 0.72,
+      "uzasadnienie": "Linia biegnie krótkim odcinkiem po asfaltowej jezdni przy parkingu, bez widocznej przerwy czy przeszkody."
+    },
+    "w_s1359849747_3557": {
+      "klasa": "ciagly",
+      "ocena": 0.55,
+      "uzasadnienie": "Krótki odcinek linii biegnie przy krawędzi asfaltowej jezdni, częściowo w cieniu i pod koronami drzew, ale pas nawierzchni wydaje się ciągły."
+    },
+    "w_s1359849748_3559": {
+      "klasa": "ciagly",
+      "ocena": 0.8,
+      "uzasadnienie": "Krótka linia biegnie po utwardzonej drodze asfaltowej, częściowo w cieniu drzew, ale pas jest ciągły i przejezdny."
+    },
+    "w_s1360628824_3687": {
+      "klasa": "ciagly",
+      "ocena": 0.7,
+      "uzasadnienie": "Krótki odcinek linii biegnie po utwardzonej nawierzchni (droga/plac dojazdowy w cieniu drzew) i jest ciągły, bez widocznej przeszkody."
+    },
+    "w_s1360885960_3694": {
+      "klasa": "ciagly",
+      "ocena": 0.8,
+      "uzasadnienie": "Linia biegnie krótkim odcinkiem po utwardzonej drodze dojazdowej/parkingu przy samochodach, bez widocznej przerwy."
+    },
+    "w_s1360885988_3696": {
+      "klasa": "niewidoczny",
+      "ocena": 0.55,
+      "uzasadnienie": "Linia biegnie częściowo pod koronami drzew, a częściowo przez zacienioną jezdnię przy budynku, więc nie da się pewnie ocenić ciągłości pasa."
+    },
+    "w_s1361674993_3741": {
+      "klasa": "ciagly",
+      "ocena": 0.8,
+      "uzasadnienie": "Krótki odcinek linii biegnie po utwardzonym placu lub drodze osiedlowej przy budynku, bez widocznej przerwy ani przeszkody."
+    },
+    "w_s1363144949_3801": {
+      "klasa": "ciagly",
+      "ocena": 0.8,
+      "uzasadnienie": "Linia biegnie wzdłuż utwardzonego chodnika przy miejscach parkingowych, który tworzy nieprzerwany pas od rogu budynku w dół do skrzyżowania ze ścieżką."
+    },
+    "w_s1364260390_3848": {
+      "klasa": "ciagly",
+      "ocena": 0.7,
+      "uzasadnienie": "Krótki odcinek linii biegnie po szarym utwardzonym chodniku, który łączy się z drogą i ciągnie się dalej na wschód, bez widocznej przerwy."
+    },
+    "w_s1364486601_3929": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie od utwardzonego placu przy budynku w stronę drzew, a większość jej przebiegu jest zasłonięta koronami i cieniem, więc nie widać, czy jest tam ścieżka."
+    },
+    "w_s1364490252_3994": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie wąskim pasem między koronami drzew a cieniem budynku, więc większości nawierzchni nie widać i nie da się rozstrzygnąć, czy pas jest ciągły."
+    },
+    "w_s1364574972_4003": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie w głębokim cieniu budynku przy jego zachodniej ścianie, więc nawierzchni i ciągłości pasa nie da się rozpoznać."
+    },
+    "w_s1413962211_4238": {
+      "klasa": "ciagly",
+      "ocena": 0.7,
+      "uzasadnienie": "Krótki odcinek linii biegnie po szarej utwardzonej nawierzchni (chodnik/plac przy parkingu), częściowo w cieniu, bez widocznej przerwy."
+    },
+    "w_s1413962405_4247": {
+      "klasa": "niewidoczny",
+      "ocena": 0.7,
+      "uzasadnienie": "Cała krótka linia leży pod koroną drzewa, więc nawierzchni nie widać, a chodnik zaczyna się dopiero tuż poniżej."
+    },
+    "w_s1418177933_4346": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Krótki odcinek linii leży w cieniu pod koronami drzew obok zaparkowanego czerwonego auta, więc nawierzchni nie widać wyraźnie."
+    },
+    "w_s1418889240_4380": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Krótki odcinek linii (ok. 220-260, 235-245 px) leży pod koronami drzew i w cieniu, więc nie widać, czy jest tam ciągły pas do przejścia."
+    },
+    "w_s1418889242_4383": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Krótki odcinek linii leży pod koronami drzew przy drodze osiedlowej i nie widać, co jest pod nimi."
+    },
+    "w_s1420061428_4431": {
+      "klasa": "ciagly",
+      "ocena": 0.5,
+      "uzasadnienie": "Krótka linia biegnie od asfaltowej ulicy w stronę przejścia między budynkami, utwardzona nawierzchnia wydaje się ciągła, choć część jest w cieniu i pod drzewami."
+    },
+    "w_s1434813379_4470": {
+      "klasa": "ciagly",
+      "ocena": 0.75,
+      "uzasadnienie": "Wzdłuż linii widać wąską, jasną ścieżkę biegnącą łukiem wzdłuż budynku, bez wyraźnej przerwy, choć część jest w cieniu drzew."
+    },
+    "w_s1459204499_4563": {
+      "klasa": "ciagly",
+      "ocena": 0.7,
+      "uzasadnienie": "Linia biegnie wzdłuż asfaltowej jezdni i wąskiego chodnika przy skwerze, bez widocznej przerwy, częściowo w cieniu."
+    },
+    "w_s1468667523_4603": {
+      "klasa": "ciagly",
+      "ocena": 0.6,
+      "uzasadnienie": "Wzdłuż linii, przy północnej ścianie budynku, biegnie utwardzony pas dojazdu/parkingu z autami, częściowo w cieniu, ale bez widocznej przerwy."
+    },
+    "w_s1468667530_4606": {
+      "klasa": "niewidoczny",
+      "ocena": 0.8,
+      "uzasadnienie": "Krótki odcinek linii biegnie pod koronami drzew i zielenią, nie widać nawierzchni ani ścieżki, więc nie da się rozstrzygnąć ciągłości."
+    },
+    "w_s1468667532_4609": {
+      "klasa": "niewidoczny",
+      "ocena": 0.7,
+      "uzasadnienie": "Krótka linia biegnie w cieniu i pod koronami drzew obok parkingu, więc nawierzchni i ciągłości pasa nie widać."
+    },
+    "w_s1523981154_4719": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie głównie pod koronami drzew; widać tylko fragment wydeptanej ścieżki na polanie, a dolna część jest zasłonięta i nie da się rozstrzygnąć ciągłości."
+    },
+    "w_s1543139949_4736": {
+      "klasa": "ciagly",
+      "ocena": 0.55,
+      "uzasadnienie": "Wzdłuż linii, tuż obok budynku, biegnie ciągły asfaltowy parking i droga dojazdowa, choć fragment linii wchodzi na zieleń przy budynku."
+    },
+    "w_s186239828_753": {
+      "klasa": "ciagly",
+      "ocena": 0.72,
+      "uzasadnienie": "Linia biegnie główną aleją cmentarną, widoczny jest jasny utwardzony pas między grobami, choć miejscami zacieniony drzewami."
+    },
+    "w_s228553204_805": {
+      "klasa": "ciagly",
+      "ocena": 0.75,
+      "uzasadnienie": "Linia biegnie po asfaltowym dojeździe i parkingu wokół budynku, bez widocznych przerw ani przeszkód."
+    },
+    "w_s232470220_850": {
+      "klasa": "ciagly",
+      "ocena": 0.8,
+      "uzasadnienie": "Linia biegnie po asfaltowym podjeździe i parkingu, a dalej drogą wzdłuż budynku; nawierzchnia jest ciągła, tylko końcówka jest lekko zacieniona drzewami."
+    },
+    "w_s232470221_854": {
+      "klasa": "niewidoczny",
+      "ocena": 0.88,
+      "uzasadnienie": "Cała linia biegnie pod koronami drzew i w cieniu, więc nie widać nawierzchni ani ewentualnej ścieżki."
+    },
+    "w_s300114914_986": {
+      "klasa": "ciagly",
+      "ocena": 0.9,
+      "uzasadnienie": "Linia biegnie po przejściu dla pieszych przez asfaltową jezdnię, które łączy oba chodniki bez przeszkody."
+    },
+    "w_s300509968_1001": {
+      "klasa": "ciagly",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie od lewej przez wąski utwardzony pas przy budynku, następnie przez asfaltową drogę i parking do budynku po prawej; pas jest w większości widoczny i ciągły."
+    },
+    "w_s300509969_1003": {
+      "klasa": "ciagly",
+      "ocena": 0.8,
+      "uzasadnienie": "Linia biegnie asfaltową drogą i parkingiem, który tworzy ciągły utwardzony pas, a zaparkowane auta są tylko przeszkodą tymczasową."
+    },
+    "w_s300509970_1004": {
+      "klasa": "niewidoczny",
+      "ocena": 0.85,
+      "uzasadnienie": "Linia biegnie pionowo pod gęstymi koronami drzew, przy budynku, i nie widać nawierzchni ani ścieżki."
+    },
+    "w_s300509977_1013": {
+      "klasa": "niewidoczny",
+      "ocena": 0.88,
+      "uzasadnienie": "Cała linia biegnie pod gęstymi koronami drzew, więc nawierzchni ani ewentualnej przerwy nie widać."
+    },
+    "w_s376133680_1092": {
+      "klasa": "niewidoczny",
+      "ocena": 0.75,
+      "uzasadnienie": "Linia biegnie w cieniu budynku i pod koronami drzew, więc nawierzchni ani ewentualnej przerwy nie widać."
+    },
+    "w_s552402693_1130": {
+      "klasa": "ciagly",
+      "ocena": 0.85,
+      "uzasadnienie": "Linia biegnie przez przejście dla pieszych (pasy) na utwardzonej nawierzchni, bez widocznej przerwy czy przeszkody."
+    },
+    "w_s887197405_1267": {
+      "klasa": "niewidoczny",
+      "ocena": 0.8,
+      "uzasadnienie": "Linia biegnie pod koronami drzew tuż przy budynku, więc nawierzchni nie widać i nie da się stwierdzić, czy pas jest ciągły."
+    },
+    "w_s907785966_1287": {
+      "klasa": "ciagly",
+      "ocena": 0.85,
+      "uzasadnienie": "Linia biegnie wzdłuż asfaltowej drogi i dalej przez asfaltowy plac z rondem, więc utwardzony pas jest nieprzerwany."
+    },
+    "w_s944367545_1476": {
+      "klasa": "ciagly",
+      "ocena": 0.9,
+      "uzasadnienie": "Linia biegnie po przejściu dla pieszych przez torowisko tramwajowe, a pas jest wyraźnie widoczny i nieprzerwany."
+    },
+    "w_s957870842_1651": {
+      "klasa": "ciagly",
+      "ocena": 0.8,
+      "uzasadnienie": "Linia biegnie wzdłuż ciągłej asfaltowej drogi osiedlowej, częściowo w cieniu i z zaparkowanymi autami, bez widocznej przerwy."
+    },
+    "w_s957870880_1708": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Krótka linia biegnie w cieniu i pod koronami drzew między chodnikiem a parkingiem, więc nawierzchni nie widać i nie da się ocenić ciągłości."
+    },
+    "w_s964100280_1801": {
+      "klasa": "ciagly",
+      "ocena": 0.93,
+      "uzasadnienie": "Linia biegnie po przejściu dla pieszych przez jezdnię, które łączy oba chodniki, bez widocznej przeszkody."
+    },
+    "w_s969876369_2045": {
+      "klasa": "ciagly",
+      "ocena": 0.85,
+      "uzasadnienie": "Linia biegnie pionowo po utwardzonym placu/asfalcie i przez jezdnię, bez widocznej przerwy ani przeszkody."
+    },
+    "w_s969876369_2046": {
+      "klasa": "ciagly",
+      "ocena": 0.85,
+      "uzasadnienie": "Krótki odcinek linii biegnie po utwardzonym placu przed budynkiem i dalej do jezdni, bez widocznej przerwy ani przeszkody."
+    },
+    "w_s970756713_2069": {
+      "klasa": "ciagly",
+      "ocena": 0.7,
+      "uzasadnienie": "Linia przecina asfaltową jezdnię i sąsiadujący utwardzony chodnik przy parkingu, bez widocznej przerwy ani ogrodzenia, tylko częściowo w cieniu."
+    },
+    "w_s993165382_2243": {
+      "klasa": "ciagly",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie od utwardzonego placu przez wąski przejazd przy budynku do asfaltowej drogi; środek częściowo pod koronami drzew, ale bez widocznej przerwy."
+    },
+    "w_s993165389_2255": {
+      "klasa": "ciagly",
+      "ocena": 0.8,
+      "uzasadnienie": "Linia biegnie po przejściu dla pieszych z widocznymi białymi pasami przez jezdnię, więc pas jest ciągły."
+    },
+    "w_s993165419_2300": {
+      "klasa": "ciagly",
+      "ocena": 0.55,
+      "uzasadnienie": "Wzdłuż krótkiej linii widać jasny, utwardzony lub ubity pas przy skraju drzew, bez wyraźnej przerwy, choć teren jest częściowo zacieniony i sąsiaduje z placem budowy."
+    }
+  }
+}
