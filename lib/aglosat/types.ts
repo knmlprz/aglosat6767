@@ -177,6 +177,10 @@ export type Wycinek = {
   bbox: [number, number, number, number];
   dataObrazu: string;
   zrodlo: string;
+  /** Skąd wycinek: miejsce z rankingu/obserwacja, losowa próbka sieci albo miejsce ryzyka przerwy. */
+  proba?: "ranking" | "losowa" | "ryzyko";
+  /** Zbiór do oceny modelu: na roboczym poprawiamy prompt, testowy sprawdzamy raz i raportujemy. */
+  zbior?: "roboczy" | "testowy";
 };
 
 export type Pilot = {

@@ -404,6 +404,77 @@ for (const o of obserwacje) {
   o.wycinek = `/aglosat/wycinki/w_${o.odcinekId}.jpg`;
 }
 
+// --- próbka do oceny modelu: losowa i „ryzyko przerwy”, zamrożona w pliku ---------------------
+// Wybór i podział na zbiory zapisujemy przy pierwszym uruchomieniu, zanim ktokolwiek zobaczy wyniki modelu.
+
+type PlikProby = {
+  opis: string;
+  utworzono: string;
+  wycinki: { odcinekId: string; proba: "losowa" | "ryzyko" }[];
+  zbiory: Record<string, "roboczy" | "testowy">;
+};
+const PLIK_PROBY = "data/aglosat/proba-oceny.json";
+const zbiorZeSkrotu = (id: string): "roboczy" | "testowy" => {
+  let h = 2166136261;
+  for (let i = 0; i < id.length; i++) h = Math.imul(h ^ id.charCodeAt(i), 16777619);
+  return (h >>> 0) % 2 === 0 ? "roboczy" : "testowy";
+};
+let proba: PlikProby;
+if (existsSync(PLIK_PROBY)) {
+  proba = JSON.parse(readFileSync(PLIK_PROBY, "utf8")) as PlikProby;
+} else {
+  let z = 2026;
+  const losProby = () => {
+    z = (z + 0x6d2b79f5) | 0;
+    let t = Math.imul(z ^ (z >>> 15), 1 | z);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const wylosuj = <T,>(lista: T[], ile: number) => {
+    const kopia = [...lista];
+    const wynik: T[] = [];
+    while (wynik.length < ile && kopia.length) wynik.push(kopia.splice(Math.floor(losProby() * kopia.length), 1)[0]);
+    return wynik;
+  };
+  const stopien = new Map<string, number>();
+  for (const o of odcinki) for (const w of [o.a, o.b]) stopien.set(w, (stopien.get(w) ?? 0) + 1);
+  const typyWWezle = new Map<string, Set<string>>();
+  for (const o of odcinki) for (const w of [o.a, o.b]) typyWWezle.set(w, (typyWWezle.get(w) ?? new Set()).add(o.typ));
+  const juzSa = new Set(wycinki.map((w) => w.odcinekId));
+  const PIESZE_TYPY = new Set(["chodnik", "ciag_pieszy", "sciezka"]);
+  const pula = odcinki.filter(
+    (o) => ["chodnik", "ciag_pieszy", "sciezka", "przejscie", "droga_osiedlowa"].includes(o.typ) && o.dlugoscM >= 8 && !juzSa.has(o.id),
+  );
+  // Ryzyko przerwy: ciąg pieszy kończy się ślepo albo krótki łącznik dochodzi do drogi osiedlowej.
+  const ryzykowne = pula.filter(
+    (o) =>
+      PIESZE_TYPY.has(o.typ) &&
+      ([o.a, o.b].some((w) => stopien.get(w) === 1) ||
+        (o.dlugoscM <= 20 && [o.a, o.b].some((w) => typyWWezle.get(w)?.has("droga_osiedlowa")))),
+  );
+  const ryzyko = wylosuj(ryzykowne, 40);
+  const zostaly = pula.filter((o) => !ryzyko.includes(o));
+  // Losowa próbka z kwotami proporcjonalnymi do liczby odcinków każdego typu.
+  const wgTypu = new Map<string, Odcinek[]>();
+  for (const o of zostaly) wgTypu.set(o.typ, [...(wgTypu.get(o.typ) ?? []), o]);
+  const losowe = [...wgTypu.values()].flatMap((l) => wylosuj(l, Math.round((80 * l.length) / zostaly.length)));
+  proba = {
+    opis: "Próbka do oceny modelu: 80 losowych odcinków (kwoty według typu) i 40 miejsc ryzyka przerwy. Zbiory: roboczy do poprawiania promptu, testowy do raportu.",
+    utworzono: new Date().toISOString().slice(0, 10),
+    wycinki: [...losowe.map((o) => ({ odcinekId: o.id, proba: "losowa" as const })), ...ryzyko.map((o) => ({ odcinekId: o.id, proba: "ryzyko" as const }))],
+    zbiory: {},
+  };
+  for (const w of [...wycinki.map((x) => x.id), ...proba.wycinki.map((x) => `w_${x.odcinekId}`)]) proba.zbiory[w] = zbiorZeSkrotu(w);
+  writeFileSync(PLIK_PROBY, JSON.stringify(proba, null, 2) + "\n");
+  console.log(`próbka oceny: zapisano ${proba.wycinki.length} nowych wycinków do ${PLIK_PROBY}`);
+}
+const zProby = new Map(proba.wycinki.map((x) => [x.odcinekId, x.proba]));
+for (const x of proba.wycinki) dodajWycinek(x.odcinekId, [x.odcinekId]);
+for (const w of wycinki) {
+  w.proba = zProby.get(w.odcinekId) ?? "ranking";
+  w.zbior = proba.zbiory[w.id] ?? zbiorZeSkrotu(w.id);
+}
+
 // --- ocena modelu na próbce opisanej ręcznie (strona /app/etykiety) ------------------------
 
 const PLIK_ETYKIET = "data/aglosat/etykiety-reczne.json";
@@ -445,7 +516,7 @@ const licz = (f: (s: string) => boolean) => [...oceny.values()].filter((o) => f(
 console.log(`odcinki: ${odcinki.length}, węzły: ${Object.keys(wezly).length}`);
 console.log(`przejezdne: ${licz((s) => s === "przejezdny")}, nieznane: ${licz((s) => s === "nieznany")}, nieprzejezdne: ${licz((s) => s === "nieprzejezdny")}`);
 console.log(`budynki: ${budynki.length} (kondygnacje przybliżone: ${budynki.filter((b) => b.kondygnacjePrzyblizone).length}), usługi: ${uslugi.length}`);
-console.log(`wycinki: ${wycinki.length}`);
+console.log(`wycinki: ${wycinki.length} (ranking ${wycinki.filter((w) => w.proba === "ranking").length}, losowe ${wycinki.filter((w) => w.proba === "losowa").length}, ryzyko ${wycinki.filter((w) => w.proba === "ryzyko").length}; testowe ${wycinki.filter((w) => w.zbior === "testowy").length})`);
 for (const o of porownaniePromptow) {
   console.log(`ocena modelu ${o.model} prompt v${o.wersjaPromptu}: n=${o.n}, trafność ${o.trafnosc}, precyzja „przerwany” ${o.precyzjaPrzerwany}, czułość ${o.czuloscPrzerwany}, poprawne „niewidoczny” ${o.poprawneNiewidoczny}`);
 }
