@@ -1,0 +1,287 @@
+{
+  "model": "qwen/qwen3.8-27b",
+  "wersjaPromptu": 1,
+  "data": "2026-10-03",
+  "wyniki": {
+    "w_s107575312_110": {
+      "klasa": "ciagly",
+      "ocena": 0.9,
+      "uzasadnienie": "Wzdłuż całej zaznaczonej linii widoczna jest ciągła, jasna nawierzchnia chodnika biegnąca równolegle do drogi."
+    },
+    "w_s107637004_136": {
+      "klasa": "przerwany",
+      "ocena": 0.9,
+      "uzasadnienie": "Wzdłuż zaznaczonej linii widać wyraźne przerwy w nawierzchni, gdzie ścieżka przechodzi przez tereny zielone i zarośla."
+    },
+    "w_s107637025_160": {
+      "klasa": "niewidoczny",
+      "ocena": 0.9,
+      "uzasadnienie": "Widok na nawierzchnię pieszą wzdłuż zaznaczonej linii jest w dużej mierze zasłonięty przez korony drzew i cienie."
+    },
+    "w_s1169593660_2744": {
+      "klasa": "przerwany",
+      "ocena": 0.85,
+      "uzasadnienie": "Wzdłuż zaznaczonej linii widać przerwy w nawierzchni, gdzie występuje trawa i ziemia między fragmentami chodnika."
+    },
+    "w_s1182209816_2748": {
+      "klasa": "przerwany",
+      "ocena": 0.9,
+      "uzasadnienie": "Zaznaczona linia biegnie przez jezdnię, a nie po ciągłej nawierzchni chodnika."
+    },
+    "w_s1229753784_2843": {
+      "klasa": "przerwany",
+      "ocena": 0.85,
+      "uzasadnienie": "Wzdłuż zaznaczonej linii widać przerwy w nawierzchni, gdzie występuje trawa i ziemia zamiast ciągłego chodnika."
+    },
+    "w_s1270624765_2991": {
+      "klasa": "ciagly",
+      "ocena": 0.8,
+      "uzasadnienie": "Wzdłuż zaznaczonej linii widoczna jest ciągła, jasna nawierzchnia chodnika."
+    },
+    "w_s1282401951_3024": {
+      "klasa": "ciagly",
+      "ocena": 0.9,
+      "uzasadnienie": "Wzdłuż zaznaczonej linii widoczna jest ciągła, jasna nawierzchnia chodnika biegnąca wzdłuż budynku."
+    },
+    "w_s1282401958_3028": {
+      "klasa": "ciagly",
+      "ocena": 0.9,
+      "uzasadnienie": "Wzdłuż zaznaczonej linii widoczna jest ciągła, jasna nawierzchnia chodnika bez przerw."
+    },
+    "w_s1286404732_3038": {
+      "klasa": "przerwany",
+      "ocena": 0.85,
+      "uzasadnienie": "Wzdłuż linii widać fragmenty nawierzchni, ale są one przerywane przez trawę i ziemię, szczególnie w środkowej i lewej części odcinka."
+    },
+    "w_s1287298904_3066": {
+      "klasa": "przerwany",
+      "ocena": 0.85,
+      "uzasadnienie": "Wzdłuż zaznaczonej linii widać przerwy w nawierzchni, gdzie występuje trawa i ziemia zamiast ciągłego chodnika."
+    },
+    "w_s1308888826_3175": {
+      "klasa": "ciagly",
+      "ocena": 0.9,
+      "uzasadnienie": "Wzdłuż zaznaczonej linii widoczna jest ciągła, jasna nawierzchnia chodnika bez przerw."
+    },
+    "w_s1333426153_3290": {
+      "klasa": "przerwany",
+      "ocena": 0.9,
+      "uzasadnienie": "Wzdłuż zaznaczonej linii widać przerwy w nawierzchni, gdzie występuje trawa i ziemia zamiast ciągłego chodnika."
+    },
+    "w_s1333426185_3321": {
+      "klasa": "przerwany",
+      "ocena": 0.85,
+      "uzasadnienie": "Wzdłuż zaznaczonej linii widać przerwy w nawierzchni, gdzie występuje trawa i ziemia zamiast ciągłego chodnika."
+    },
+    "w_s1333426188_3324": {
+      "klasa": "ciagly",
+      "ocena": 0.9,
+      "uzasadnienie": "Wzdłuż zaznaczonej linii widoczna jest ciągła, jasna nawierzchnia chodnika biegnąca równolegle do budynku."
+    },
+    "w_s1333426190_3327": {
+      "klasa": "niewidoczny",
+      "ocena": 0.9,
+      "uzasadnienie": "Zaznaczona linia przebiega przez gęste korony drzew, które całkowicie zasłaniają nawierzchnię, uniemożliwiając jej ocenę."
+    },
+    "w_s1338573503_3349": {
+      "klasa": "niewidoczny",
+      "ocena": 0.9,
+      "uzasadnienie": "Zaznaczona linia przebiega przez gęste korony drzew, które całkowicie zasłaniają widok na nawierzchnię."
+    },
+    "w_s1338573503_3350": {
+      "klasa": "niewidoczny",
+      "ocena": 0.9,
+      "uzasadnienie": "Zaznaczony odcinek linii znajduje się w obszarze gęsto zadrzewionym, gdzie korony drzew całkowicie zasłaniają nawierzchnię, uniemożliwiając jej ocenę."
+    },
+    "w_s1338723143_3365": {
+      "klasa": "ciagly",
+      "ocena": 0.9,
+      "uzasadnienie": "Wzdłuż zaznaczonej linii widoczna jest ciągła, jasna nawierzchnia chodnika bez przerw."
+    },
+    "w_s1356385271_3469": {
+      "klasa": "ciagly",
+      "ocena": 0.8,
+      "uzasadnienie": "Wzdłuż zaznaczonej linii widoczna jest ciągła, jasna nawierzchnia chodnika biegnąca równolegle do drogi."
+    },
+    "w_s1359849741_3547": {
+      "klasa": "przerwany",
+      "ocena": 0.9,
+      "uzasadnienie": "Wzdłuż zaznaczonej linii widać przerwy w nawierzchni, gdzie występuje trawa i ziemia zamiast ciągłego chodnika."
+    },
+    "w_s1359849744_3552": {
+      "klasa": "przerwany",
+      "ocena": 0.9,
+      "uzasadnienie": "Zaznaczona linia biegnie przez teren parkingu i jest w całości przykryta cieniem drzewa, co uniemożliwia zobaczenie nawierzchni."
+    },
+    "w_s1359849747_3557": {
+      "klasa": "przerwany",
+      "ocena": 0.9,
+      "uzasadnienie": "Zaznaczona linia przebiega przez teren zielony z drzewami, gdzie nie widać ciągłej nawierzchni pieszej."
+    },
+    "w_s1359849748_3559": {
+      "klasa": "przerwany",
+      "ocena": 0.9,
+      "uzasadnienie": "Wzdłuż zaznaczonej linii widać zieloną trawę i korony drzew, co wskazuje na brak ciągłej nawierzchni pieszej."
+    },
+    "w_s1360628824_3687": {
+      "klasa": "niewidoczny",
+      "ocena": 0.9,
+      "uzasadnienie": "Zaznaczona linia przebiega przez gęstą koronę drzewa, która całkowicie zasłania nawierzchnię."
+    },
+    "w_s1360885960_3694": {
+      "klasa": "przerwany",
+      "ocena": 0.8,
+      "uzasadnienie": "Wzdłuż zaznaczonej linii widać nieutwardzony, ziemny teren bez wyraźnej nawierzchni chodnika."
+    },
+    "w_s1360885988_3696": {
+      "klasa": "niewidoczny",
+      "ocena": 0.9,
+      "uzasadnienie": "Zaznaczona linia przebiega przez gęste korony drzew, które całkowicie zasłaniają nawierzchnię."
+    },
+    "w_s1361674993_3741": {
+      "klasa": "ciagly",
+      "ocena": 0.9,
+      "uzasadnienie": "Wzdłuż zaznaczonej linii widoczna jest ciągła, jasna nawierzchnia chodnika biegnąca równolegle do budynku."
+    },
+    "w_s1364260390_3848": {
+      "klasa": "przerwany",
+      "ocena": 0.85,
+      "uzasadnienie": "Wzdłuż zaznaczonej linii widać zieloną trawę i krzewy zamiast ciągłej nawierzchni pieszej."
+    },
+    "w_s1364574972_4003": {
+      "klasa": "niewidoczny",
+      "ocena": 0.9,
+      "uzasadnienie": "Zaznaczona linia przebiega wzdłuż budynku i jest całkowicie zasłonięta przez jego głęboki cień, co uniemożliwia ocenę nawierzchni."
+    },
+    "w_s1413962211_4238": {
+      "klasa": "przerwany",
+      "ocena": 0.85,
+      "uzasadnienie": "Wzdłuż zaznaczonej linii widać przerwy w nawierzchni, gdzie rośnie trawa i ziemia."
+    },
+    "w_s1413962405_4247": {
+      "klasa": "przerwany",
+      "ocena": 0.9,
+      "uzasadnienie": "Wzdłuż zaznaczonej linii widać zieloną trawę i drzewa, a nie ciągłą nawierzchnię chodnika."
+    },
+    "w_s1418177933_4346": {
+      "klasa": "niewidoczny",
+      "ocena": 0.9,
+      "uzasadnienie": "Zaznaczona linia przebiega przez gęstą koronę drzew, która całkowicie zasłania nawierzchnię, uniemożliwiając jej ocenę."
+    },
+    "w_s1418889240_4380": {
+      "klasa": "przerwany",
+      "ocena": 0.9,
+      "uzasadnienie": "Wzdłuż zaznaczonej linii widać zieloną trawę i ziemię, a nie ciągłą nawierzchnię chodnika."
+    },
+    "w_s1418889242_4383": {
+      "klasa": "niewidoczny",
+      "ocena": 0.9,
+      "uzasadnienie": "Zaznaczona linia przebiega przez gęstą zieleń i cień drzew, co całkowicie zasłania nawierzchnię ścieżki."
+    },
+    "w_s1420061428_4431": {
+      "klasa": "przerwany",
+      "ocena": 0.9,
+      "uzasadnienie": "Wzdłuż zaznaczonej linii widać zieloną trawę i drzewa, co wskazuje na brak ciągłej nawierzchni pieszej."
+    },
+    "w_s1468667530_4606": {
+      "klasa": "niewidoczny",
+      "ocena": 0.9,
+      "uzasadnienie": "Zaznaczona linia przebiega przez gęstą zieleń i korony drzew, które całkowicie zasłaniają nawierzchnię."
+    },
+    "w_s1468667532_4609": {
+      "klasa": "niewidoczny",
+      "ocena": 0.9,
+      "uzasadnienie": "Zaznaczona linia przebiega przez gęste korony drzew, które całkowicie zasłaniają nawierzchnię."
+    },
+    "w_s1523981154_4719": {
+      "klasa": "przerwany",
+      "ocena": 0.9,
+      "uzasadnienie": "Wzdłuż zaznaczonej linii widać wąską, nieutwardzoną ścieżkę, która w wielu miejscach jest przerwana przez trawę i zarośla."
+    },
+    "w_s228553204_805": {
+      "klasa": "ciagly",
+      "ocena": 0.8,
+      "uzasadnienie": "Wzdłuż zaznaczonej linii widoczna jest ciągła, jasna nawierzchnia chodnika biegnąca wokół budynku."
+    },
+    "w_s232470220_850": {
+      "klasa": "ciagly",
+      "ocena": 0.9,
+      "uzasadnienie": "Wzdłuż całej zaznaczonej linii widoczna jest ciągła, jasna nawierzchnia chodnika biegnąca między budynkami a parkingiem."
+    },
+    "w_s300114914_986": {
+      "klasa": "przerwany",
+      "ocena": 0.9,
+      "uzasadnienie": "Zaznaczona linia przebiega bezpośrednio po jezdni drogi, na której nie ma wydzielonej nawierzchni pieszej."
+    },
+    "w_s300509968_1001": {
+      "klasa": "przerwany",
+      "ocena": 0.9,
+      "uzasadnienie": "Wzdłuż zaznaczonej linii widać wyraźne przerwy w nawierzchni, gdzie chodnik przechodzi w trawę lub znikają w pobliżu drzew."
+    },
+    "w_s300509969_1003": {
+      "klasa": "ciagly",
+      "ocena": 0.9,
+      "uzasadnienie": "Wzdłuż całej zaznaczonej linii widoczna jest ciągła, jasna nawierzchnia chodnika biegnąca równolegle do parkingu."
+    },
+    "w_s300509970_1004": {
+      "klasa": "przerwany",
+      "ocena": 0.9,
+      "uzasadnienie": "Wzdłuż zaznaczonej linii nie widać ciągłej nawierzchni, a jedynie trawę i krzaki."
+    },
+    "w_s300509977_1013": {
+      "klasa": "niewidoczny",
+      "ocena": 0.9,
+      "uzasadnienie": "Zaznaczona linia przebiega przez gęstą zieleń, a nawierzchnia chodnika jest całkowicie zasłonięta przez korony drzew."
+    },
+    "w_s552402693_1130": {
+      "klasa": "przerwany",
+      "ocena": 0.8,
+      "uzasadnienie": "Wzdłuż zaznaczonej linii widać nieutwardzony teren z ziemią i trawą, a nie ciągłą nawierzchnię chodnika."
+    },
+    "w_s887197405_1267": {
+      "klasa": "niewidoczny",
+      "ocena": 0.9,
+      "uzasadnienie": "Widok na nawierzchnię pieszą wzdłuż zaznaczonej linii jest w dużej mierze zasłonięty przez korony drzew i cień budynku."
+    },
+    "w_s944367545_1476": {
+      "klasa": "ciagly",
+      "ocena": 0.9,
+      "uzasadnienie": "Wzdłuż zaznaczonej linii widoczna jest ciągła, jasna nawierzchnia chodnika prowadząca przez przejście dla pieszych."
+    },
+    "w_s957870880_1708": {
+      "klasa": "niewidoczny",
+      "ocena": 0.9,
+      "uzasadnienie": "Zaznaczona linia przebiega przez gęste korony drzew, które całkowicie zasłaniają widok na nawierzchnię."
+    },
+    "w_s964100280_1801": {
+      "klasa": "przerwany",
+      "ocena": 0.9,
+      "uzasadnienie": "Zaznaczona linia przebiega przez jezdnię (pas ruchu), co oznacza brak ciągłej nawierzchni pieszej w tym miejscu."
+    },
+    "w_s969876369_2045": {
+      "klasa": "przerwany",
+      "ocena": 0.9,
+      "uzasadnienie": "Wzdłuż zaznaczonej linii widać przerwy w nawierzchni, gdzie występuje trawa i ziemia zamiast ciągłego chodnika."
+    },
+    "w_s970756713_2069": {
+      "klasa": "ciagly",
+      "ocena": 0.8,
+      "uzasadnienie": "Wzdłuż zaznaczonej linii widoczna jest ciągła, jasna nawierzchnia chodnika biegnąca równolegle do drogi."
+    },
+    "w_s993165382_2243": {
+      "klasa": "ciagly",
+      "ocena": 0.9,
+      "uzasadnienie": "Wzdłuż całej zaznaczonej linii widoczna jest ciągła, jasna nawierzchnia chodnika bez przerw."
+    },
+    "w_s993165389_2255": {
+      "klasa": "niewidoczny",
+      "ocena": 0.9,
+      "uzasadnienie": "Zaznaczona linia przebiega przez gęstą zieleń i korony drzew, które całkowicie zasłaniają nawierzchnię."
+    },
+    "w_s993165419_2300": {
+      "klasa": "przerwany",
+      "ocena": 0.85,
+      "uzasadnienie": "Wzdłuż linii widać głównie nieutwardzony teren z ziemią, trawą i zaroślami, bez ciągłej nawierzchni pieszej."
+    }
+  }
+}

@@ -15,6 +15,8 @@ import type { WynikWplywu } from "@/lib/aglosat/types.ts";
 import { idWpisu } from "@/lib/aglosat/weryfikacja.ts";
 import { useAglosat } from "@/components/aglosat/stan-aglosat";
 import { lokalizacja } from "@/lib/aglosat/opis.ts";
+import { OcenaModeluKarta } from "@/components/aglosat/ocena-modelu";
+import { ModelKontraTeren } from "@/components/aglosat/model-kontra-teren";
 import { TrasaRelacji, type Relacja } from "@/components/aglosat/trasa-relacji";
 import { TrasaKontroliPanel, type UstawieniaKontroli } from "@/components/aglosat/trasa-kontroli";
 import type { KontrolaNaMapie } from "@/components/aglosat/mapa-niewiedzy";
@@ -173,6 +175,10 @@ export function PlanistaView() {
   }
 
   const m = pilot.mianownik;
+  const przykladowe = [
+    ...(pilot.obserwacje.some((o) => o.przykladowe) ? ["obserwacje z obrazu"] : []),
+    ...(pilot.strefyZmian.some((s) => s.ilustracja) ? ["strefa Sentinel-2"] : []),
+  ];
   const przelacz = (k: KategoriaMapy) =>
     setWidoczne((prev) => {
       const nowe = new Set(prev);
@@ -194,9 +200,21 @@ export function PlanistaView() {
           <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-600">
             OpenStreetMap, pobrano {pilot.meta.pobranoOsm}
           </span>
-          <span className="rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-amber-800">
-            {ETYKIETA_PRZYKLADOWE}: obserwacje z obrazu, strefa Sentinel-2
-          </span>
+          {pilot.obserwacje[0]?.model && (
+            <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-600">
+              obserwacje z obrazu: model {pilot.obserwacje[0].model}
+            </span>
+          )}
+          {pilot.strefyZmian.length > 0 && !pilot.strefyZmian.some((s) => s.ilustracja) && (
+            <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-600">
+              strefy zmian: Sentinel-2, sceny {pilot.strefyZmian[0].scenaPrzed} → {pilot.strefyZmian[0].scenaPo}
+            </span>
+          )}
+          {przykladowe.length > 0 && (
+            <span className="rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-amber-800">
+              {ETYKIETA_PRZYKLADOWE}: {przykladowe.join(", ")}
+            </span>
+          )}
         </div>
       </header>
 
@@ -374,11 +392,24 @@ export function PlanistaView() {
             <span className="mt-1 size-3.5 shrink-0 border-2 border-dashed border-cyan-400" aria-hidden />
             <span>
               <span className="font-medium text-slate-800">sygnał możliwej zmiany (Sentinel-2)</span>
-              <span className="block text-xs text-amber-700">ilustracja, {ETYKIETA_PRZYKLADOWE}</span>
+              {pilot.strefyZmian.some((s) => s.ilustracja) ? (
+                <span className="block text-xs text-amber-700">ilustracja, {ETYKIETA_PRZYKLADOWE}</span>
+              ) : (
+                <span className="block text-xs text-slate-600">ubytek roślinności w dwóch parach scen rok do roku; nie wykrywa chodników</span>
+              )}
             </span>
           </div>
         )}
       </fieldset>
+
+      {pilot.obserwacje.some((o) => !o.przykladowe) && (
+        <div className="grid gap-4 lg:grid-cols-2">
+          {pilot.ocenaModelu && pilot.ocenaModelu.n > 0 && (
+            <OcenaModeluKarta ocena={pilot.ocenaModelu} porownanie={pilot.porownaniePromptow ?? []} />
+          )}
+          <ModelKontraTeren obserwacje={pilot.obserwacje.filter((o) => !o.przykladowe)} weryfikacje={weryfikacje} />
+        </div>
+      )}
 
       {sprzeczne.length > 0 && (
         <section aria-labelledby="sprzeczne-tytul" className="rounded-2xl border border-fuchsia-200 bg-fuchsia-50/50 p-4">
@@ -387,7 +418,10 @@ export function PlanistaView() {
           </h3>
           <p className="text-xs text-slate-600">
             OpenStreetMap opisuje odcinek jako ciągły, a model wizyjny wskazuje przerwę. Pokazujemy oba źródła; rozstrzyga
-            kontrola w terenie. <span className="text-amber-700">Wykrycia modelu: {ETYKIETA_PRZYKLADOWE}.</span>
+            kontrola w terenie.
+            {pilot.obserwacje.some((o) => o.przykladowe) && (
+              <span className="text-amber-700"> Wykrycia modelu: {ETYKIETA_PRZYKLADOWE}.</span>
+            )}
           </p>
           <ul className="mt-2 flex flex-wrap gap-2">
             {sprzeczne.map((o) => (

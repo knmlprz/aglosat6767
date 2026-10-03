@@ -14,9 +14,10 @@ type Kontrole = "brak" | "obnizony" | "wysoki" | "obnizony_odrzucenie";
 
 type Krok = {
   tytul: string;
-  mowimy: string;
+  /** Tekst albo funkcja danych pilota, gdy tekst zawiera liczby z analizy. */
+  mowimy: string | ((pilot: Pilot) => string);
   widok: "/app/planista" | "/app/mieszkaniec";
-  wybierz: "miejsce1" | "sprzeczne" | null;
+  wybierz: "miejsce1" | "sprzeczne" | "sentinel" | null;
   zakladka?: "ranking" | "kontrola";
   pokazKontrole?: boolean;
   kontrole: Kontrole;
@@ -72,18 +73,40 @@ const K = {
   },
   sprzeczne: {
     tytul: "Przypadek sprzeczny",
-    mowimy:
-      "OpenStreetMap: chodnik ciągły. Model wizyjny: przerwa, ocena 0,85. Nie wybieramy za użytkownika: pokazujemy oba źródła z datami.",
+    mowimy: (p) => {
+      const o = odcinekSprzeczny(p);
+      return `OpenStreetMap: ciąg pieszy jest. Model (${o?.model ?? "model wizyjny"}): przerwa, ocena ${o?.ocena.toFixed(2).replace(".", ",") ?? "?"}. Nie wybieramy za użytkownika: pokazujemy oba źródła z datami.`;
+    },
     widok: "/app/planista",
     wybierz: "sprzeczne",
     kontrole: "obnizony",
   },
   odrzucenie: {
     tytul: "Błąd modelu, pokazany celowo",
-    mowimy:
-      "W terenie chodnik jest. Na ortofotomapie zasłania go przechylony dach budynku. Model nie podejmuje decyzji, wskazuje, gdzie spojrzeć.",
+    mowimy: (p) => {
+      const wersje = p.porownaniePromptow ?? [];
+      const proc = (x: number | null | undefined) => (x == null ? "?" : `${Math.round(100 * x)}%`);
+      // Liczby ze zbioru testowego, jeśli są na nim etykiety; inaczej ze wszystkich wycinków.
+      const zbior = wersje.some((w) => w.zbior === "testowy" && w.n > 0) ? "testowy" : "wszystkie";
+      const v2 = wersje.find((w) => w.wersjaPromptu === 2 && w.zbior === zbior);
+      const v3 = wersje.find((w) => w.wersjaPromptu === 3 && w.zbior === zbior);
+      const liczby = v2 && v3 ? ` Poprawiliśmy wejście (obraz bez linii i z linią): trafność na próbce z ${proc(v2.trafnosc)} do ${proc(v3.trafnosc)}.` : "";
+      return `Na zdjęciu bez nakładki ścieżka przez trawnik jest. Modelowi zasłoniła ją nasza własna linia z OSM.${liczby} Model wskazuje, gdzie spojrzeć; decyduje człowiek.`;
+    },
     widok: "/app/planista",
     wybierz: "sprzeczne",
+    kontrole: "obnizony_odrzucenie",
+  },
+  sentinel: {
+    tytul: "Teren się zmienia: Sentinel-2",
+    mowimy: (p) => {
+      const { strefa, obserwacja } = odcinekSentinel(p);
+      const ubytek = strefa ? ` Tu: ubytek roślinności na ${strefa.opis.match(/ok\. (\d+) m²/)?.[1] ?? "?"} m² w obu parach scen rok do roku.` : "";
+      const model = obserwacja ? " Na tym samym odcinku model, patrząc na starsze zdjęcie, zgłosił przerwę przy budowie." : "";
+      return `Ortofotomapa jest z kwietnia 2025. Sentinel-2 nie zobaczy chodnika, ale wskaże, gdzie od tamtej pory coś się zmieniło.${ubytek}${model} Dwa niezależne źródła: dane mogą być nieaktualne, tu warto wysłać kontrolę.`;
+    },
+    widok: "/app/planista",
+    wybierz: "sentinel",
     kontrole: "obnizony_odrzucenie",
   },
   wysoki: {
@@ -106,12 +129,22 @@ export const KROKI: Krok[] = [
   K.mieszkaniecPo,
   K.sprzeczne,
   K.odrzucenie,
+  K.sentinel,
   K.wysoki,
 ];
 
 /** Odcinek ze sprzecznymi źródłami do demo: wykrycie przerwy z najwyższą oceną. */
 function odcinekSprzeczny(pilot: Pilot) {
   return [...pilot.obserwacje].filter((o) => o.klasa === "przerwany").sort((a, b) => b.ocena - a.ocena)[0];
+}
+
+/** Odcinek w strefie zmian Sentinel-2; najpierw taki, na którym model też zgłosił przerwę. */
+function odcinekSentinel(pilot: Pilot) {
+  const wStrefie = pilot.odcinki.filter((o) => o.strefaZmian);
+  const obserwacja = pilot.obserwacje.find((o) => o.klasa === "przerwany" && wStrefie.some((x) => x.id === o.odcinekId));
+  const odcinek = wStrefie.find((o) => o.id === obserwacja?.odcinekId) ?? wStrefie[0];
+  const strefa = pilot.strefyZmian.find((s) => s.id === odcinek?.strefaZmian && !s.ilustracja);
+  return { odcinekId: odcinek?.id ?? null, strefa, obserwacja };
 }
 
 function kontroleKroku(k: Kontrole, pilot: Pilot): Weryfikacja[] {
@@ -124,7 +157,7 @@ function kontroleKroku(k: Kontrole, pilot: Pilot): Weryfikacja[] {
   return [
     ...krawedz("obnizony"),
     ...wpisKontroli([obs.odcinekId], "ciaglosc", "ciagly", {
-      notatka: "chodnik jest; na ortofotomapie zasłania go przechylony dach budynku",
+      notatka: "ścieżka jest; na obrazie dla modelu zasłoniła ją nasza linia z OSM",
       odrzuca: { [obs.odcinekId]: obs.id },
     }),
   ];
@@ -143,7 +176,7 @@ export function TrybDemo() {
   const zastosuj = useCallback(
     (k: Krok, przed: Krok | null) => {
       if (!pilot) return;
-      const wybierz = k.wybierz === "miejsce1" ? pilot.ranking[0]?.odcinekId : k.wybierz === "sprzeczne" ? odcinekSprzeczny(pilot).odcinekId : null;
+      const wybierz = k.wybierz === "miejsce1" ? pilot.ranking[0]?.odcinekId : k.wybierz === "sprzeczne" ? odcinekSprzeczny(pilot).odcinekId : k.wybierz === "sentinel" ? odcinekSentinel(pilot).odcinekId : null;
       const zadanie: ZadanieDemo = { wybierz: wybierz ?? null, zakladka: k.zakladka ?? "ranking", pokazKontrole: !!k.pokazKontrole };
       const tenSamWidok =
         !!przed &&
@@ -210,7 +243,7 @@ export function TrybDemo() {
             krok {nr + 1} z {KROKI.length}
           </p>
           <p className="font-bold">{krok.tytul}</p>
-          <p className="text-sm text-slate-300">{krok.mowimy}</p>
+          <p className="text-sm text-slate-300">{typeof krok.mowimy === "function" ? krok.mowimy(pilot) : krok.mowimy}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button

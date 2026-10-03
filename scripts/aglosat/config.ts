@@ -35,3 +35,15 @@ export const PRZYKLADOWE = {
   scenaPrzed: "2025-08-10",
   scenaPo: "2026-09-14",
 };
+
+/**
+ * Model, którego wyniki trafiają do danych pilota (plik w data/aglosat/klasyfikacje/).
+ * Porównujemy tylko wersje promptu tego samego modelu; bez wpisu: model z najnowszego kompletnego pliku.
+ * wersjaPromptu przypina wersję użytą w danych; bez niej: najwyższa kompletna.
+ */
+export const KLASYFIKACJA: { dostawca: string; model: string; wersjaPromptu?: number } | null = {
+  dostawca: "openrouter",
+  model: "anthropic/claude-sonnet-5.5",
+  // v3 nie wskazuje przerw, więc demo straciłoby przypadek sprzeczny; do decyzji zostajemy przy v2.
+  wersjaPromptu: 2,
+};

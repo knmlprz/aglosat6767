@@ -1,0 +1,1023 @@
+{
+  "dostawca": "openrouter",
+  "model": "anthropic/claude-sonnet-5.5",
+  "wersjaPromptu": 1,
+  "data": "2026-10-03",
+  "wyniki": {
+    "w_s107137640_60": {
+      "klasa": "niewidoczny",
+      "ocena": 0.85,
+      "uzasadnienie": "Linia biegnie przez gęsty park, a korony drzew zasłaniają prawie całą nawierzchnię ścieżki."
+    },
+    "w_s107575312_110": {
+      "klasa": "ciagly",
+      "ocena": 0.75,
+      "uzasadnienie": "Chodnik wzdłuż dolnej krawędzi obrazu jest widoczny na całej długości linii, bez wyraźnych przerw."
+    },
+    "w_s107637004_136": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Większość przebiegu linii, zwłaszcza odcinek pionowy, przykrywają korony drzew i cień, więc nawierzchni chodnika nie widać."
+    },
+    "w_s107637025_160": {
+      "klasa": "niewidoczny",
+      "ocena": 0.7,
+      "uzasadnienie": "Większość linii biegnie pod koronami drzew i w cieniu między budynkami, więc nawierzchni pieszej prawie nie widać."
+    },
+    "w_s107637032_179": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Większość przebiegu linii jest zasłonięta przez korony drzew i cień, więc nawierzchni chodnika nie widać."
+    },
+    "w_s107637033_180": {
+      "klasa": "ciagly",
+      "ocena": 0.6,
+      "uzasadnienie": "Wzdłuż linii widać ciemną, zacienioną nawierzchnię asfaltową bez wyraźnych przerw, łączącą parking z drogą."
+    },
+    "w_s107637034_188": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie przez teren zacieniony i zadrzewiony z zaparkowanym autem, a nawierzchnia ścieżki jest w większości zasłonięta lub nieczytelna."
+    },
+    "w_s1077277990_2373": {
+      "klasa": "niewidoczny",
+      "ocena": 0.9,
+      "uzasadnienie": "Prawie cały przebieg linii jest zasłonięty koronami drzew i cieniem, więc nawierzchni pieszej nie widać."
+    },
+    "w_s1077537898_2387": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie przez trawnik w cieniu budynku i pod koronami drzew, a nawierzchni ścieżki prawie nie widać."
+    },
+    "w_s1077537904_2402": {
+      "klasa": "niewidoczny",
+      "ocena": 0.55,
+      "uzasadnienie": "Większość przebiegu linii przykrywają korony drzew i cień, więc nawierzchnia ścieżki jest słabo widoczna, a tylko dolny koniec przy rozwidleniu ścieżek jest odsłonięty."
+    },
+    "w_s1077809261_2458": {
+      "klasa": "niewidoczny",
+      "ocena": 0.7,
+      "uzasadnienie": "Zaznaczona linia przebiega pod koronami drzew, które zasłaniają nawierzchnię, więc nie da się jej ocenić."
+    },
+    "w_s1077809267_2475": {
+      "klasa": "niewidoczny",
+      "ocena": 0.7,
+      "uzasadnienie": "Krótki odcinek linii leży w głębokim cieniu budynku i pod koronami drzew, więc nawierzchni nie widać i nie da się jej ocenić."
+    },
+    "w_s1079309939_2501": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie wzdłuż krawędzi dachu budynku, w cieniu i pod koronami drzew, więc nawierzchni prawie nie widać."
+    },
+    "w_s112656144_284": {
+      "klasa": "ciagly",
+      "ocena": 0.6,
+      "uzasadnienie": "Krótki odcinek biegnie wzdłuż widocznej jasnej nawierzchni obok budynku, bez wyraźnych przerw."
+    },
+    "w_s1127918859_2662": {
+      "klasa": "niewidoczny",
+      "ocena": 0.5,
+      "uzasadnienie": "Linia biegnie wzdłuż krawędzi parkingu i zieleni, a większość przebiegu zasłaniają korony drzew, krzewy i cień, więc nawierzchni pieszej nie widać."
+    },
+    "w_s1127987417_2695": {
+      "klasa": "niewidoczny",
+      "ocena": 0.8,
+      "uzasadnienie": "Zaznaczona linia biegnie przy krawędzi dachu budynku i w cieniu drzew, więc nawierzchni pieszej nie widać i nie da się jej ocenić."
+    },
+    "w_s1157054648_2723": {
+      "klasa": "przerwany",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie głównie po trawniku między murem rampy a chodnikiem, bez widocznej nawierzchni pieszej."
+    },
+    "w_s1163307025_2728": {
+      "klasa": "niewidoczny",
+      "ocena": 0.8,
+      "uzasadnienie": "Zaznaczona ścieżka biegnie pod koronami drzew, które zasłaniają nawierzchnię, więc nie da się jej ocenić."
+    },
+    "w_s1169593660_2744": {
+      "klasa": "ciagly",
+      "ocena": 0.6,
+      "uzasadnienie": "Krótki odcinek linii biegnie po utwardzonej nawierzchni przy parkingu, bez widocznych przerw, choć częściowo w cieniu budynku."
+    },
+    "w_s1182209816_2748": {
+      "klasa": "przerwany",
+      "ocena": 0.55,
+      "uzasadnienie": "Linia przecina jezdnię bez widocznego oznakowania przejścia ani chodnika, więc nawierzchnia piesza jest przerwana."
+    },
+    "w_s1212173221_2814": {
+      "klasa": "niewidoczny",
+      "ocena": 0.7,
+      "uzasadnienie": "Linia biegnie w głębokim cieniu między budynkiem a drzewami, więc nawierzchni pieszej prawie nie widać i nie da się jej ocenić."
+    },
+    "w_s1220376204_2824": {
+      "klasa": "niewidoczny",
+      "ocena": 0.8,
+      "uzasadnienie": "Krótki odcinek linii biegnie pod koronami drzew przy budynku i nawierzchni chodnika prawie nie widać."
+    },
+    "w_s1229753784_2843": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie przez parking i drogę w cieniu drzew, obok zaparkowanych aut, więc nawierzchni pieszej nie widać wyraźnie."
+    },
+    "w_s1232503130_2862": {
+      "klasa": "niewidoczny",
+      "ocena": 0.93,
+      "uzasadnienie": "Zaznaczona linia biegnie po płaskim dachu budynku, a nie po widocznym chodniku."
+    },
+    "w_s1259000402_2940": {
+      "klasa": "niewidoczny",
+      "ocena": 0.7,
+      "uzasadnienie": "Większość przebiegu linii przykrywają korony drzew i cień, więc nawierzchni chodnika prawie nie widać."
+    },
+    "w_s1270624738_2970": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie wzdłuż cmentarza w głębokim cieniu drzew i murów, więc nawierzchni ścieżki prawie nie widać i nie da się jej ocenić."
+    },
+    "w_s1270624749_2975": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Krótki odcinek linii biegnie w cieniu budynków i pod koroną drzew, więc nawierzchni chodnika prawie nie widać."
+    },
+    "w_s1270624764_2990": {
+      "klasa": "niewidoczny",
+      "ocena": 0.85,
+      "uzasadnienie": "Zaznaczona linia biegnie pod koronami drzew, więc nawierzchni ścieżki prawie nie widać."
+    },
+    "w_s1270624765_2991": {
+      "klasa": "niewidoczny",
+      "ocena": 0.55,
+      "uzasadnienie": "Krótki odcinek leży na skraju utwardzonego placu pod koronami drzew i w cieniu, więc nawierzchni nie da się wiarygodnie ocenić."
+    },
+    "w_s1270624797_3009": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie przez trawnik i zarośla między budynkami, bez widocznej nawierzchni chodnika, częściowo pod drzewami i w cieniu."
+    },
+    "w_s1279527454_3012": {
+      "klasa": "niewidoczny",
+      "ocena": 0.5,
+      "uzasadnienie": "Linia biegnie wzdłuż żywopłotu nad zaparkowanymi samochodami, więc nawierzchni pieszej prawie nie widać."
+    },
+    "w_s1282401951_3024": {
+      "klasa": "ciagly",
+      "ocena": 0.7,
+      "uzasadnienie": "Krótki odcinek leży na widocznej, utwardzonej nawierzchni wzdłuż budynku, częściowo w cieniu, ale bez widocznych przerw."
+    },
+    "w_s1282401958_3028": {
+      "klasa": "ciagly",
+      "ocena": 0.7,
+      "uzasadnienie": "Krótki odcinek linii przecina utwardzoną jezdnię/chodnik, nawierzchnia jest widoczna bez przerw."
+    },
+    "w_s128447575_367": {
+      "klasa": "niewidoczny",
+      "ocena": 0.8,
+      "uzasadnienie": "Linia biegnie pod gęstymi koronami drzew i w cieniu, więc nawierzchni pieszej prawie nie widać."
+    },
+    "w_s128447576_371": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie od narożnika budynku w stronę ścieżki, ale prawie cały jej przebieg jest zasłonięty przez korony drzew i cień, więc nawierzchni nie widać."
+    },
+    "w_s128447588_373": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Większość przebiegu linii przykrywają korony drzew i cień, więc nawierzchni chodnika prawie nie widać."
+    },
+    "w_s128447588_381": {
+      "klasa": "niewidoczny",
+      "ocena": 0.9,
+      "uzasadnienie": "Zaznaczona linia przebiega po płaskim dachu budynku, więc nawierzchni pieszej nie widać i nie da się jej ocenić."
+    },
+    "w_s128447590_393": {
+      "klasa": "niewidoczny",
+      "ocena": 0.8,
+      "uzasadnienie": "Zaznaczona linia biegnie pod koronami drzew i w cieniu, więc nawierzchni pieszej prawie nie widać i nie da się jej ocenić."
+    },
+    "w_s128504981_408": {
+      "klasa": "niewidoczny",
+      "ocena": 0.8,
+      "uzasadnienie": "Linia biegnie wzdłuż krawędzi dachu budynku i pod koronami drzew oraz w cieniu, więc nawierzchni chodnika nie widać."
+    },
+    "w_s128504981_409": {
+      "klasa": "niewidoczny",
+      "ocena": 0.85,
+      "uzasadnienie": "Linia przebiega po dachu bloku i pod koronami drzew, więc nawierzchni chodnika nie widać."
+    },
+    "w_s128505019_441": {
+      "klasa": "niewidoczny",
+      "ocena": 0.55,
+      "uzasadnienie": "Linia biegnie w cieniu budynku i drzew przy parkingu, więc nawierzchni pieszej nie widać wyraźnie i nie da się jej ocenić."
+    },
+    "w_s128505053_478": {
+      "klasa": "ciagly",
+      "ocena": 0.6,
+      "uzasadnienie": "Wąski chodnik przy skraju trawnika jest widoczny wzdłuż całej zaznaczonej linii, choć częściowo sąsiaduje z cieniem drzew, bez wyraźnych przerw."
+    },
+    "w_s128505070_504": {
+      "klasa": "niewidoczny",
+      "ocena": 0.65,
+      "uzasadnienie": "Linia biegnie w cieniu budynku i drzew przy jego północnej ścianie, nawierzchni prawie nie widać."
+    },
+    "w_s128505070_505": {
+      "klasa": "niewidoczny",
+      "ocena": 0.7,
+      "uzasadnienie": "Większość przebiegu linii przykrywają korony drzew i cień, więc nawierzchni chodnika nie widać; jedynie końcówka przy parkingu jest odsłonięta."
+    },
+    "w_s128505078_514": {
+      "klasa": "niewidoczny",
+      "ocena": 0.8,
+      "uzasadnienie": "Zaznaczona linia przebiega pod koronami drzew i w cieniu, więc nawierzchni chodnika prawie nie widać."
+    },
+    "w_s128505080_523": {
+      "klasa": "ciagly",
+      "ocena": 0.7,
+      "uzasadnienie": "Wzdłuż budynku widać jasną utwardzoną nawierzchnię chodnika bez wyraźnych przerw, miejscami w cieniu."
+    },
+    "w_s128614883_586": {
+      "klasa": "niewidoczny",
+      "ocena": 0.8,
+      "uzasadnienie": "Linia biegnie pod koronami drzew i w cieniu przy budynku, więc nawierzchni pieszej prawie nie widać."
+    },
+    "w_s128614920_643": {
+      "klasa": "niewidoczny",
+      "ocena": 0.5,
+      "uzasadnienie": "Krótki odcinek między budynkami jest w większości zacieniony i zasłonięty roślinnością, więc nawierzchni nie da się wyraźnie ocenić."
+    },
+    "w_s128614923_644": {
+      "klasa": "niewidoczny",
+      "ocena": 0.8,
+      "uzasadnienie": "Zaznaczona linia biegnie pod koronami drzew i w cieniu, więc nawierzchni chodnika prawie nie widać."
+    },
+    "w_s128614925_649": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie między dwoma budynkami w cieniu i pod koroną drzew, więc nawierzchni chodnika prawie nie widać."
+    },
+    "w_s1286404732_3038": {
+      "klasa": "przerwany",
+      "ocena": 0.5,
+      "uzasadnienie": "Linia biegnie przez parking od jezdni do budynku; początek zasłania biały samochód, a osobnej nawierzchni pieszej nie widać wyraźnie."
+    },
+    "w_s1287298903_3063": {
+      "klasa": "niewidoczny",
+      "ocena": 0.5,
+      "uzasadnienie": "Krótki odcinek biegnie wzdłuż trawnika i cienia przy budynku, nawierzchnia chodnika jest słabo widoczna i trudna do oceny."
+    },
+    "w_s1287298904_3066": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Krótki odcinek linii leży w cieniu drzew i obok zaparkowanych aut, więc nawierzchni pieszej prawie nie widać i nie da się jej ocenić."
+    },
+    "w_s128986774_663": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Większość linii biegnie pod koroną dużego drzewa i w cieniu, więc nawierzchni nie widać; wyraźna jest tylko na początku i na końcu."
+    },
+    "w_s1308888826_3175": {
+      "klasa": "ciagly",
+      "ocena": 0.55,
+      "uzasadnienie": "Linia biegnie po widocznej, ciągłej nawierzchni asfaltowej przy krawędzi jezdni, bez widocznych przerw."
+    },
+    "w_s1315565333_3223": {
+      "klasa": "niewidoczny",
+      "ocena": 0.7,
+      "uzasadnienie": "Linia przebiega przez zacienioną roślinność i przy dachu budynku, więc nawierzchni ścieżki nie widać."
+    },
+    "w_s1328915584_3249": {
+      "klasa": "ciagly",
+      "ocena": 0.8,
+      "uzasadnienie": "Linia biegnie przez czerwoną, ceglaną nawierzchnię placu/tarasu, która jest widoczna na całym odcinku bez przerw ani zasłonięć."
+    },
+    "w_s1333419929_3263": {
+      "klasa": "niewidoczny",
+      "ocena": 0.85,
+      "uzasadnienie": "Cała zaznaczona linia przebiega pod gęstymi koronami drzew, więc nawierzchni ścieżki nie widać."
+    },
+    "w_s1333426153_3290": {
+      "klasa": "niewidoczny",
+      "ocena": 0.45,
+      "uzasadnienie": "Krótki odcinek linii leży na jezdni/parkingu wśród zaparkowanych samochodów i cieni, więc nawierzchni pieszej nie widać wyraźnie."
+    },
+    "w_s1333426185_3321": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Krótki odcinek leży w cieniu drzew i budynku przy parkingu, więc nawierzchni pieszej nie widać wyraźnie."
+    },
+    "w_s1333426188_3324": {
+      "klasa": "niewidoczny",
+      "ocena": 0.5,
+      "uzasadnienie": "Krótki odcinek leży w cieniu budynku i drzew przy parkingu, więc nawierzchni pieszej nie da się wyraźnie ocenić."
+    },
+    "w_s1333426190_3327": {
+      "klasa": "niewidoczny",
+      "ocena": 0.55,
+      "uzasadnienie": "Krótki odcinek leży pod koronami drzew i w cieniu, więc nawierzchni pieszej prawie nie widać."
+    },
+    "w_s1338573503_3349": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Krótki odcinek leży w cieniu budynku i drzew, więc nawierzchni pieszej prawie nie widać i nie da się jej ocenić."
+    },
+    "w_s1338573503_3350": {
+      "klasa": "niewidoczny",
+      "ocena": 0.7,
+      "uzasadnienie": "Krótki odcinek leży w głębokim cieniu budynku i drzew, więc nawierzchni nie widać i nie da się jej ocenić."
+    },
+    "w_s1338723143_3365": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Krótki odcinek linii leży w cieniu drzew i budynku przy zaparkowanych samochodach, więc nawierzchni pieszej nie widać wyraźnie."
+    },
+    "w_s1340862610_3376": {
+      "klasa": "niewidoczny",
+      "ocena": 0.85,
+      "uzasadnienie": "Zaznaczona linia przebiega pod gęstymi koronami drzew, które całkowicie zasłaniają nawierzchnię, więc nie da się jej ocenić."
+    },
+    "w_s1340862610_3377": {
+      "klasa": "niewidoczny",
+      "ocena": 0.5,
+      "uzasadnienie": "Zachodnia część linii przebiega pod koronami drzew, a wschodnia w cieniu budynku, więc nawierzchni prawie nie widać i trudno ją ocenić."
+    },
+    "w_s1353023854_3403": {
+      "klasa": "ciagly",
+      "ocena": 0.6,
+      "uzasadnienie": "Wzdłuż drogi biegnie wąski chodnik, który jest widoczny na całej długości linii, choć miejscami częściowo zacieniony przez drzewa."
+    },
+    "w_s1353158954_3437": {
+      "klasa": "niewidoczny",
+      "ocena": 0.4,
+      "uzasadnienie": "Linia biegnie przez parking, częściowo pod koronami drzew i zasłonięta przez samochody, więc nawierzchni pieszej nie da się wyraźnie ocenić."
+    },
+    "w_s1355357746_3456": {
+      "klasa": "niewidoczny",
+      "ocena": 0.8,
+      "uzasadnienie": "Linia biegnie wzdłuż północnej krawędzi dachu budynku i pod koronami drzew, więc nawierzchni chodnika prawie nie widać."
+    },
+    "w_s1356385271_3469": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Zaznaczony odcinek jest bardzo krótki i leży na zacienionej jezdni przy zaparkowanych samochodach, więc nawierzchni pieszej nie widać wyraźnie."
+    },
+    "w_s1359701503_3540": {
+      "klasa": "niewidoczny",
+      "ocena": 0.8,
+      "uzasadnienie": "Zaznaczona linia biegnie wzdłuż budynku w cieniu i pod koronami drzew, więc nawierzchni pieszej prawie nie widać."
+    },
+    "w_s1359849740_3545": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie pod koronami drzew i w cieniu, więc nawierzchnia pieszej ścieżki jest w większości zasłonięta."
+    },
+    "w_s1359849740_3546": {
+      "klasa": "niewidoczny",
+      "ocena": 0.7,
+      "uzasadnienie": "Zaznaczona linia biegnie od przejścia dla pieszych w dół pod koronami drzew i w cieniu, więc nawierzchni prawie nie widać."
+    },
+    "w_s1359849741_3547": {
+      "klasa": "niewidoczny",
+      "ocena": 0.45,
+      "uzasadnienie": "Krótki odcinek biegnie przy krawędzi jezdni i parkingu, w cieniu drzew, więc odrębnej nawierzchni pieszej nie widać."
+    },
+    "w_s1359849744_3552": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Krótki odcinek linii leży na jezdni/parkingu przy zaparkowanych samochodach i pod koroną drzew, więc nawierzchni pieszej nie widać."
+    },
+    "w_s1359849747_3557": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Krótki odcinek linii leży na skraju jezdni przy koronach drzew i w cieniu, więc nawierzchni pieszej nie widać wyraźnie."
+    },
+    "w_s1359849748_3559": {
+      "klasa": "ciagly",
+      "ocena": 0.72,
+      "uzasadnienie": "Krótki odcinek leży na widocznej szarej nawierzchni asfaltowej, częściowo w cieniu drzew, bez widocznych przerw."
+    },
+    "w_s1360628824_3687": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Krótki odcinek ścieżki leży w cieniu i pod koronami drzew, więc nawierzchni prawie nie widać i nie da się jej ocenić."
+    },
+    "w_s1360885957_3690": {
+      "klasa": "niewidoczny",
+      "ocena": 0.8,
+      "uzasadnienie": "Linia biegnie pod koronami drzew i częściowo nad dachem budynku, więc nawierzchni pieszej nie widać."
+    },
+    "w_s1360885960_3694": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Krótki odcinek linii leży na zacienionym parkingu przy zaparkowanych samochodach i pod koronami drzew, więc nawierzchni pieszej nie widać wyraźnie."
+    },
+    "w_s1360885988_3696": {
+      "klasa": "niewidoczny",
+      "ocena": 0.8,
+      "uzasadnienie": "Krótki odcinek linii leży między koronami drzew a dachem budynku i cieniem, więc nawierzchni pieszej nie widać."
+    },
+    "w_s1361674993_3741": {
+      "klasa": "ciagly",
+      "ocena": 0.6,
+      "uzasadnienie": "Krótki odcinek ścieżki biegnie po utwardzonej nawierzchni przy budynku, widoczny bez przerw, choć częściowo w cieniu."
+    },
+    "w_s1362930406_3745": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Większość linii przebiega w cieniu i pod koronami drzew, więc nawierzchni ścieżki prawie nie widać."
+    },
+    "w_s1362930688_3762": {
+      "klasa": "niewidoczny",
+      "ocena": 0.7,
+      "uzasadnienie": "Krótki odcinek ścieżki leży pod koronami drzew i w cieniu, więc nawierzchni prawie nie widać."
+    },
+    "w_s1363144949_3801": {
+      "klasa": "przerwany",
+      "ocena": 0.45,
+      "uzasadnienie": "Wzdłuż linii widać głównie trawę i krzewy obok miejsc parkingowych, a utwardzony chodnik jest tylko miejscami i nie ciągnie się całą jej długością."
+    },
+    "w_s1363144951_3802": {
+      "klasa": "ciagly",
+      "ocena": 0.6,
+      "uzasadnienie": "Krótki odcinek biegnie po utwardzonej nawierzchni między budynkami a parkingiem i wydaje się widoczny bez wyraźnych przerw, choć częściowo w cieniu."
+    },
+    "w_s1363647130_3823": {
+      "klasa": "niewidoczny",
+      "ocena": 0.5,
+      "uzasadnienie": "Zachodnia część linii jest przykryta koroną drzewa i cieniem, więc nawierzchni nie da się wyraźnie ocenić na większości przebiegu."
+    },
+    "w_s1364260387_3841": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Krótki odcinek linii biegnie pod gęstymi koronami drzew i w cieniu, więc nawierzchni chodnika prawie nie widać."
+    },
+    "w_s1364260390_3848": {
+      "klasa": "ciagly",
+      "ocena": 0.6,
+      "uzasadnienie": "Krótki odcinek ścieżki leży na widocznym szarym chodniku przy skrzyżowaniu, bez widocznych przerw w nawierzchni, choć częściowo w cieniu drzew."
+    },
+    "w_s1364260400_3868": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Zaznaczona linia biegnie wzdłuż ulicy pod koronami drzew i w cieniu, więc nawierzchnia chodnika jest w większości zasłonięta i nie da się jej ocenić."
+    },
+    "w_s1364486601_3929": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Większość linii przebiega pod koronami drzew i w cieniu przy budynku, więc nawierzchni pieszej prawie nie widać."
+    },
+    "w_s1364490252_3994": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Większość przebiegu linii jest zasłonięta przez korony drzew i cień, więc nawierzchni chodnika nie widać."
+    },
+    "w_s1364574972_4003": {
+      "klasa": "niewidoczny",
+      "ocena": 0.7,
+      "uzasadnienie": "Linia biegnie wzdłuż budynku w głębokim cieniu, więc nawierzchni pieszej prawie nie widać i nie da się jej ocenić."
+    },
+    "w_s1364575166_4008": {
+      "klasa": "niewidoczny",
+      "ocena": 0.93,
+      "uzasadnienie": "Cały zaznaczony odcinek przykrywają korony drzew, więc nawierzchni pieszej nie widać i nie da się jej ocenić."
+    },
+    "w_s1366301177_4039": {
+      "klasa": "niewidoczny",
+      "ocena": 0.8,
+      "uzasadnienie": "Linia biegnie pod koronami drzew obok budynku, więc nawierzchni chodnika prawie nie widać i nie da się jej ocenić."
+    },
+    "w_s1367162421_4060": {
+      "klasa": "niewidoczny",
+      "ocena": 0.8,
+      "uzasadnienie": "Zaznaczona linia przebiega pod koronami drzew i w cieniu, więc nawierzchni chodnika nie widać."
+    },
+    "w_s1367270907_4066": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie po trawniku wzdłuż budynku, a wyraźnej nawierzchni chodnika pod nią nie widać, fragmentami zasłaniają ją cień i drzewa."
+    },
+    "w_s1388173179_4159": {
+      "klasa": "niewidoczny",
+      "ocena": 0.75,
+      "uzasadnienie": "Linia biegnie wzdłuż budynku przez gęstą roślinność i cień drzew, więc nawierzchni ścieżki praktycznie nie widać."
+    },
+    "w_s1388939525_4184": {
+      "klasa": "niewidoczny",
+      "ocena": 0.55,
+      "uzasadnienie": "Wzdłuż linii widać głównie trawę i cień drzew przy budynku, wyraźnej nawierzchni chodnika nie widać."
+    },
+    "w_s1413962211_4238": {
+      "klasa": "niewidoczny",
+      "ocena": 0.55,
+      "uzasadnienie": "Krótki odcinek leży w cieniu koron drzew, nawierzchnia jest słabo widoczna i trudno ją ocenić."
+    },
+    "w_s1413962405_4247": {
+      "klasa": "niewidoczny",
+      "ocena": 0.8,
+      "uzasadnienie": "Krótki odcinek linii leży pod koronami drzew, więc nawierzchni chodnika nie widać i nie da się jej ocenić."
+    },
+    "w_s1413962458_4266": {
+      "klasa": "niewidoczny",
+      "ocena": 0.85,
+      "uzasadnienie": "Krótki odcinek linii przebiega całkowicie pod koronami drzew i w cieniu, więc nawierzchni pieszej nie widać."
+    },
+    "w_s1418177933_4346": {
+      "klasa": "niewidoczny",
+      "ocena": 0.7,
+      "uzasadnienie": "Krótki odcinek linii biegnie pod koronami drzew i w cieniu obok zaparkowanego czerwonego samochodu, więc nawierzchni nie widać."
+    },
+    "w_s1418177938_4356": {
+      "klasa": "niewidoczny",
+      "ocena": 0.93,
+      "uzasadnienie": "Linia biegnie po dachu budynku mieszkalnego, który zasłania nawierzchnię pieszą."
+    },
+    "w_s1418889240_4380": {
+      "klasa": "niewidoczny",
+      "ocena": 0.7,
+      "uzasadnienie": "Krótki odcinek linii leży wśród gęstych koron drzew i cienia, więc nawierzchni pieszej prawie nie widać."
+    },
+    "w_s1418889242_4383": {
+      "klasa": "niewidoczny",
+      "ocena": 0.7,
+      "uzasadnienie": "Krótki odcinek linii leży pod koronami drzew i w cieniu, więc nawierzchni pieszej nie widać i nie da się jej ocenić."
+    },
+    "w_s1418929379_4421": {
+      "klasa": "niewidoczny",
+      "ocena": 0.5,
+      "uzasadnienie": "Krótki odcinek biegnie przez parking i cień drzew, więc nawierzchnia pieszą jest słabo widoczna i trudna do oceny."
+    },
+    "w_s1420055378_4422": {
+      "klasa": "ciagly",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie wzdłuż ciągłej asfaltowej nawierzchni parkingu i dojazdu, miejscami częściowo zasłoniętej przez zaparkowane auta i cień."
+    },
+    "w_s1420055378_4423": {
+      "klasa": "ciagly",
+      "ocena": 0.75,
+      "uzasadnienie": "Krótki odcinek linii biegnie po widocznej, jasnej nawierzchni utwardzonej (parking/dojazd) bez przerw ani zasłonięcia przez drzewa."
+    },
+    "w_s1420061428_4431": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Krótki odcinek linii leży w cieniu budynku i pod koronami drzew, więc nawierzchni pieszej nie widać wyraźnie."
+    },
+    "w_s1420061434_4438": {
+      "klasa": "niewidoczny",
+      "ocena": 0.8,
+      "uzasadnienie": "Zaznaczona linia biegnie po dachu i w cieniu budynku, więc nawierzchni pieszej nie widać i nie da się jej ocenić."
+    },
+    "w_s1420061437_4441": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Krótki odcinek linii biegnie w cieniu przy ścianie budynku w podwórku, a nawierzchnia pieszej jest zasłonięta cieniem i nie da się jej ocenić."
+    },
+    "w_s1433871183_4460": {
+      "klasa": "ciagly",
+      "ocena": 0.85,
+      "uzasadnienie": "Wzdłuż zaznaczonej linii widoczna jest nieprzerwana, jasna nawierzchnia ścieżki biegnącej od parkingu w dół do skrzyżowania z drogą."
+    },
+    "w_s1434813377_4468": {
+      "klasa": "niewidoczny",
+      "ocena": 0.85,
+      "uzasadnienie": "Zaznaczona linia przebiega pod koronami drzew i w cieniu, więc nawierzchni pieszej nie widać i nie da się jej ocenić."
+    },
+    "w_s1434813379_4470": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie łukiem w cieniu budynku i pod koronami drzew, więc nawierzchni chodnika prawie nie widać."
+    },
+    "w_s1434813379_4471": {
+      "klasa": "ciagly",
+      "ocena": 0.6,
+      "uzasadnienie": "Wzdłuż linii widać utwardzoną nawierzchnię między trawnikiem a drzewem, bez wyraźnych przerw, choć część jest lekko zacieniona."
+    },
+    "w_s1459204378_4562": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie wzdłuż parkingu i pod koronami drzew, a nawierzchnia pieszej ścieżki jest w większości zasłonięta przez drzewa, cień i zaparkowane auta."
+    },
+    "w_s1459204499_4563": {
+      "klasa": "niewidoczny",
+      "ocena": 0.5,
+      "uzasadnienie": "Zaznaczona ścieżka biegnie w cieniu drzew i przy krawędzi korony drzewa, więc nawierzchnia jest w większości zasłonięta i trudna do oceny."
+    },
+    "w_s1459239206_4569": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia przebiega w cieniu i pod koronami drzew obok zaparkowanych samochodów, więc nawierzchni prawie nie widać."
+    },
+    "w_s1467510345_4582": {
+      "klasa": "niewidoczny",
+      "ocena": 0.55,
+      "uzasadnienie": "Linia biegnie wzdłuż budynku w cieniu, po zacienionym asfalcie przy parkingu, więc nawierzchni pieszej nie da się wyraźnie ocenić."
+    },
+    "w_s1467510352_4588": {
+      "klasa": "ciagly",
+      "ocena": 0.8,
+      "uzasadnienie": "Linia biegnie wzdłuż widocznego, jasnego peronu przystankowego bez przerw w nawierzchni."
+    },
+    "w_s1467517477_4598": {
+      "klasa": "ciagly",
+      "ocena": 0.8,
+      "uzasadnienie": "Krótki odcinek biegnie wzdłuż budynku po jasnej, utwardzonej nawierzchni, widocznej na całej długości bez przerw."
+    },
+    "w_s1468667523_4603": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie wzdłuż budynku w cieniu i pod koronami drzew, więc nawierzchni chodnika prawie nie widać."
+    },
+    "w_s1468667530_4606": {
+      "klasa": "niewidoczny",
+      "ocena": 0.85,
+      "uzasadnienie": "Krótki odcinek ścieżki leży pod koronami drzew i zaroślami, więc nawierzchni nie widać i nie da się jej ocenić."
+    },
+    "w_s1468667532_4609": {
+      "klasa": "niewidoczny",
+      "ocena": 0.7,
+      "uzasadnienie": "Krótki odcinek linii biegnie w cieniu i pod koronami drzew obok parkingu, więc nawierzchni pieszej nie widać."
+    },
+    "w_s1469178561_4614": {
+      "klasa": "ciagly",
+      "ocena": 0.6,
+      "uzasadnienie": "Ścieżka biegnie od przejścia dla rowerów na północ jako widoczna utwardzona nawierzchnia, miejscami lekko zacieniona przez drzewa, ale bez wyraźnych przerw."
+    },
+    "w_s1523981154_4719": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie przez gęste drzewa i trawę, a nawierzchni piesza jest w większości niewidoczna, zasłonięta koronami drzew i cieniem."
+    },
+    "w_s1537153649_4735": {
+      "klasa": "niewidoczny",
+      "ocena": 0.8,
+      "uzasadnienie": "Prawie cały przebieg linii przykrywa korona dużego drzewa, więc nawierzchni ścieżki nie widać i nie da się jej ocenić."
+    },
+    "w_s153920530_678": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Większość przebiegu linii jest zasłonięta przez korony drzew i cień, więc nawierzchni chodnika nie widać wyraźnie."
+    },
+    "w_s153920534_681": {
+      "klasa": "ciagly",
+      "ocena": 0.6,
+      "uzasadnienie": "Krótki odcinek linii biegnie po widocznej, jednolitej nawierzchni asfaltowej drogi bez widocznych przerw, choć częściowo w cieniu drzew."
+    },
+    "w_s153920561_731": {
+      "klasa": "niewidoczny",
+      "ocena": 0.75,
+      "uzasadnienie": "Większość przebiegu linii jest zasłonięta przez korony drzew i cień, więc nawierzchni chodnika nie widać."
+    },
+    "w_s1543139949_4736": {
+      "klasa": "ciagly",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie wzdłuż budynku po widocznej asfaltowej nawierzchni placu parkingowego, bez wyraźnych przerw (jedynie zaparkowany samochód przy początku)."
+    },
+    "w_s186239828_753": {
+      "klasa": "ciagly",
+      "ocena": 0.6,
+      "uzasadnienie": "Wąska aleja cmentarna między grobami jest widoczna wzdłuż całej linii, choć miejscami przysłaniają ją korony drzew, bez wyraźnych przerw."
+    },
+    "w_s228553204_805": {
+      "klasa": "niewidoczny",
+      "ocena": 0.5,
+      "uzasadnienie": "Linia biegnie wokół budynku w cieniu, częściowo przez parking i pod drzewami, więc nawierzchni pieszej nie widać wyraźnie."
+    },
+    "w_s228553224_815": {
+      "klasa": "ciagly",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie wzdłuż utwardzonego placu/chodnika przy budynku, nawierzchnia jest w większości widoczna, choć przy końcu wschodnim częściowo zasłaniają ją drzewa i zaparkowane samochody."
+    },
+    "w_s232470220_850": {
+      "klasa": "ciagly",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie łukiem wokół parkingu i dalej wzdłuż utwardzonego dojazdu; nawierzchnia jest widoczna bez wyraźnych przerw, choć na końcu częściowo przykrywają ją drzewa."
+    },
+    "w_s232470221_854": {
+      "klasa": "niewidoczny",
+      "ocena": 0.9,
+      "uzasadnienie": "Cała zaznaczona linia przebiega pod koronami drzew i w cieniu budynku, więc nawierzchni pieszej nie widać."
+    },
+    "w_s234589354_899": {
+      "klasa": "ciagly",
+      "ocena": 0.8,
+      "uzasadnienie": "Linia biegnie wzdłuż wyraźnie widocznego, jasnego peronu przystankowego przy torach, bez widocznych przerw ani zasłonięć."
+    },
+    "w_s244318352_909": {
+      "klasa": "niewidoczny",
+      "ocena": 0.9,
+      "uzasadnienie": "Zaznaczona linia biegnie przez gęste korony drzew, które całkowicie zasłaniają nawierzchnię, więc nie da się jej ocenić."
+    },
+    "w_s244321639_915": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie głównie pod koronami drzew i krzewami między parkingiem a budynkami, więc nawierzchni pieszej prawie nie widać."
+    },
+    "w_s276803152_930": {
+      "klasa": "ciagly",
+      "ocena": 0.5,
+      "uzasadnienie": "Linia biegnie przez widoczną, ciągłą nawierzchnię asfaltową jezdni (przejście), bez przerw ani zasłonięć."
+    },
+    "w_s276803152_937": {
+      "klasa": "ciagly",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie po szarej, otwartej nawierzchni placu/jezdni bez widocznych przerw, częściowo w cieniu drzewa, ale nawierzchnia jest czytelna."
+    },
+    "w_s300071712_963": {
+      "klasa": "ciagly",
+      "ocena": 0.6,
+      "uzasadnienie": "Wzdłuż linii między trawnikiem a skwerem widać wąski chodnik biegnący bez wyraźnych przerw, choć górny odcinek i część przebiegu są częściowo zacienione drzewami i samochodami."
+    },
+    "w_s300114914_986": {
+      "klasa": "ciagly",
+      "ocena": 0.8,
+      "uzasadnienie": "Krótki odcinek biegnie po widocznym przejściu dla pieszych (zebra) przez jezdnię, bez przerw w nawierzchni."
+    },
+    "w_s300481957_997": {
+      "klasa": "ciagly",
+      "ocena": 0.6,
+      "uzasadnienie": "Krótki odcinek wzdłuż krawędzi asfaltowej drogi/placu przy budynku jest widoczny bez przerw, choć częściowo w cieniu."
+    },
+    "w_s300509968_1001": {
+      "klasa": "niewidoczny",
+      "ocena": 0.5,
+      "uzasadnienie": "Linia biegnie częściowo pod koronami drzew po lewej, wzdłuż dachu budynku i przez parking, więc nawierzchni pieszej prawie nie widać."
+    },
+    "w_s300509969_1003": {
+      "klasa": "niewidoczny",
+      "ocena": 0.45,
+      "uzasadnienie": "Linia biegnie wzdłuż parkingu i drogi pod cieniem drzew; nawierzchni pieszej praktycznie nie widać, zasłaniają ją samochody i korony drzew."
+    },
+    "w_s300509970_1004": {
+      "klasa": "niewidoczny",
+      "ocena": 0.85,
+      "uzasadnienie": "Linia biegnie pod gęstymi koronami drzew obok budynku i nie widać żadnej nawierzchni pieszej."
+    },
+    "w_s300509974_1012": {
+      "klasa": "niewidoczny",
+      "ocena": 0.85,
+      "uzasadnienie": "Cała zaznaczona linia przebiega pod koronami drzew, więc nawierzchni ścieżki nie widać i nie da się jej ocenić."
+    },
+    "w_s300509977_1013": {
+      "klasa": "niewidoczny",
+      "ocena": 0.9,
+      "uzasadnienie": "Cała zaznaczona linia przebiega pod gęstymi koronami drzew, więc nawierzchni pieszej nie widać i nie da się jej ocenić."
+    },
+    "w_s31670186_10": {
+      "klasa": "ciagly",
+      "ocena": 0.88,
+      "uzasadnienie": "Jasny utwardzony chodnik jest wyraźnie widoczny wzdłuż całej zaznaczonej linii, bez przerw ani zasłonięć."
+    },
+    "w_s31670518_15": {
+      "klasa": "ciagly",
+      "ocena": 0.8,
+      "uzasadnienie": "Wzdłuż zaznaczonej linii widać jasną, gruntową ścieżkę biegnącą bez przerw między zielenią a ogrodzeniem."
+    },
+    "w_s340319860_1080": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie w głębokim cieniu budynku i pod koronami drzew, więc nawierzchni chodnika prawie nie widać."
+    },
+    "w_s376133680_1092": {
+      "klasa": "niewidoczny",
+      "ocena": 0.8,
+      "uzasadnienie": "Linia biegnie w cieniu budynku i pod koronami drzew, więc nawierzchni chodnika prawie nie widać i nie da się jej ocenić."
+    },
+    "w_s376133680_1094": {
+      "klasa": "niewidoczny",
+      "ocena": 0.7,
+      "uzasadnienie": "Linia biegnie w cieniu budynku i pod koronami drzew, więc nawierzchni chodnika prawie nie widać i nie da się jej ocenić."
+    },
+    "w_s42383663_31": {
+      "klasa": "niewidoczny",
+      "ocena": 0.85,
+      "uzasadnienie": "Zaznaczona linia biegnie pod gęstymi koronami drzew, które zasłaniają nawierzchnię, więc nie da się jej ocenić."
+    },
+    "w_s552402693_1130": {
+      "klasa": "ciagly",
+      "ocena": 0.7,
+      "uzasadnienie": "Krótki odcinek biegnie po widocznym przejściu dla pieszych na asfalcie, bez przerw w nawierzchni."
+    },
+    "w_s625215680_1157": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie w cieniu budynku i pod koroną drzewa, więc nawierzchni chodnika prawie nie widać i nie da się jej ocenić."
+    },
+    "w_s752007928_1164": {
+      "klasa": "niewidoczny",
+      "ocena": 0.8,
+      "uzasadnienie": "Większość przebiegu linii zasłania korona dużego drzewa, więc nawierzchni pieszej nie widać."
+    },
+    "w_s752007931_1178": {
+      "klasa": "ciagly",
+      "ocena": 0.7,
+      "uzasadnienie": "Wzdłuż linii, przy krawędzi jezdni i budynku, widać ciągły chodnik bez przerw, choć miejscami częściowo zacieniony."
+    },
+    "w_s752008203_1183": {
+      "klasa": "ciagly",
+      "ocena": 0.6,
+      "uzasadnienie": "Wzdłuż drogi widać jasny chodnik biegnący równo z zaznaczoną linią, bez wyraźnych przerw, choć miejscami częściowo zacieniony drzewami."
+    },
+    "w_s757263637_1195": {
+      "klasa": "ciagly",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie po utwardzonej nawierzchni od parkingu do chodnika; fragment w cieniu, ale bez widocznych przerw."
+    },
+    "w_s887197403_1257": {
+      "klasa": "niewidoczny",
+      "ocena": 0.7,
+      "uzasadnienie": "Linia biegnie przez zacienioną część między budynkami i drzewami, gdzie nawierzchni pieszej prawie nie widać."
+    },
+    "w_s887197405_1267": {
+      "klasa": "niewidoczny",
+      "ocena": 0.8,
+      "uzasadnienie": "Linia biegnie pod koronami drzew i w cieniu przy budynku, więc nawierzchni pieszej prawie nie widać."
+    },
+    "w_s907785966_1287": {
+      "klasa": "ciagly",
+      "ocena": 0.75,
+      "uzasadnienie": "Linia biegnie wzdłuż widocznej asfaltowej nawierzchni drogi aż do placu z rondem, bez widocznych przerw."
+    },
+    "w_s907785966_1289": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Zaznaczona linia biegnie przez zacieniony parking i korony drzew, więc nawierzchni pieszej prawie nie widać."
+    },
+    "w_s907785968_1294": {
+      "klasa": "niewidoczny",
+      "ocena": 0.55,
+      "uzasadnienie": "Linia biegnie wzdłuż krawędzi jezdni, a chodnik w dużej części zasłaniają korony drzew i żywopłot, więc nie da się go ocenić."
+    },
+    "w_s914267727_1331": {
+      "klasa": "ciagly",
+      "ocena": 0.55,
+      "uzasadnienie": "Linia przecina jezdnię jako przejście dla pieszych; nawierzchnia jest widoczna, choć częściowo w cieniu drzewa, a na końcu widać pasy."
+    },
+    "w_s914278302_1345": {
+      "klasa": "niewidoczny",
+      "ocena": 0.8,
+      "uzasadnienie": "Krótki odcinek linii przebiega pod koronami drzew i w cieniu, więc nawierzchni chodnika nie widać."
+    },
+    "w_s914867688_1364": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie wąskim przejściem między budynkiem a parkingiem, w dużej części zasłoniętym przez korony drzew i cień, więc nawierzchni nie widać."
+    },
+    "w_s914867688_1367": {
+      "klasa": "ciagly",
+      "ocena": 0.6,
+      "uzasadnienie": "Wzdłuż krótkiej linii widać ciągły, ciemny asfaltowy chodnik/dojazd między budynkiem a zielenią, bez widocznych przerw, choć część leży w cieniu."
+    },
+    "w_s944367545_1476": {
+      "klasa": "ciagly",
+      "ocena": 0.85,
+      "uzasadnienie": "Zaznaczona linia biegnie po wyraźnie widocznym przejściu dla pieszych przez torowisko tramwajowe, bez przerw w nawierzchni."
+    },
+    "w_s954097783_1483": {
+      "klasa": "niewidoczny",
+      "ocena": 0.7,
+      "uzasadnienie": "Linia biegnie wzdłuż budynku w głębokim cieniu, częściowo pod koronami drzew i przy zaparkowanych samochodach, więc nawierzchni prawie nie widać."
+    },
+    "w_s955140604_1533": {
+      "klasa": "niewidoczny",
+      "ocena": 0.55,
+      "uzasadnienie": "Linia biegnie w cieniu przy ścianie budynku, na ciemnej nawierzchni z samochodami i częściowo pod drzewami, więc chodnika nie widać wyraźnie."
+    },
+    "w_s955140613_1546": {
+      "klasa": "niewidoczny",
+      "ocena": 0.8,
+      "uzasadnienie": "Linia biegnie w głębokim cieniu między drzewami a budynkiem, więc nawierzchni chodnika nie widać i nie da się jej ocenić."
+    },
+    "w_s956987986_1590": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie od parkingu pod korony drzew i samochody, więc nawierzchni pieszej prawie nie widać."
+    },
+    "w_s957870832_1624": {
+      "klasa": "niewidoczny",
+      "ocena": 0.8,
+      "uzasadnienie": "Zaznaczona linia przebiega pod koronami drzew i w cieniu, więc nawierzchni ścieżki nie widać i nie da się jej ocenić."
+    },
+    "w_s957870842_1651": {
+      "klasa": "niewidoczny",
+      "ocena": 0.55,
+      "uzasadnienie": "Linia biegnie wzdłuż krawędzi budynku przy ulicy z zaparkowanymi samochodami, a nawierzchnia chodnika jest w większości zacieniona i zasłonięta, więc trudno ją ocenić."
+    },
+    "w_s957870854_1673": {
+      "klasa": "niewidoczny",
+      "ocena": 0.55,
+      "uzasadnienie": "Linia biegnie wzdłuż krawędzi dachu budynku i zacienionego asfaltu parkingu, więc nawierzchni pieszej nie widać wyraźnie."
+    },
+    "w_s957870880_1708": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Krótki odcinek linii przebiega pod koronami drzew i w cieniu, więc nawierzchnia pieszej ścieżki jest prawie niewidoczna."
+    },
+    "w_s958504181_1720": {
+      "klasa": "niewidoczny",
+      "ocena": 0.7,
+      "uzasadnienie": "Linia biegnie w głębokim cieniu przy budynkach i nie widać nawierzchni chodnika, więc nie da się go ocenić."
+    },
+    "w_s962735669_1750": {
+      "klasa": "przerwany",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie przez trawiastą łąkę i teren budowy, bez widocznej utwardzonej nawierzchni chodnika."
+    },
+    "w_s963062670_1752": {
+      "klasa": "niewidoczny",
+      "ocena": 0.8,
+      "uzasadnienie": "Linia biegnie po krawędzi dachu budynku, przy zaparkowanych samochodach, więc nawierzchni chodnika nie widać."
+    },
+    "w_s964100280_1801": {
+      "klasa": "ciagly",
+      "ocena": 0.8,
+      "uzasadnienie": "Linia biegnie po wyraźnie widocznym przejściu dla pieszych (zebra) bez przerw w nawierzchni."
+    },
+    "w_s964100313_1848": {
+      "klasa": "przerwany",
+      "ocena": 0.55,
+      "uzasadnienie": "Linia biegnie od kostki chodnika przez asfaltową jezdnię, więc osobna nawierzchnia piesza jest przerwana na środku odcinka."
+    },
+    "w_s967398674_1910": {
+      "klasa": "niewidoczny",
+      "ocena": 0.75,
+      "uzasadnienie": "Większość przebiegu linii przykrywają korony drzew, więc nawierzchni pieszej nie widać i nie da się jej ocenić."
+    },
+    "w_s967398723_1933": {
+      "klasa": "ciagly",
+      "ocena": 0.7,
+      "uzasadnienie": "Krótki odcinek ścieżki przy budynku jest widoczny jako jasna nawierzchnia wzdłuż całej linii, bez wyraźnych przerw."
+    },
+    "w_s967398734_1945": {
+      "klasa": "przerwany",
+      "ocena": 0.45,
+      "uzasadnienie": "Wzdłuż linii chodnik przy parkingu jest częściowo zasłonięty przez zaparkowane samochody i pas zieleni, więc nawierzchnia nie jest ciągła."
+    },
+    "w_s968786522_2011": {
+      "klasa": "niewidoczny",
+      "ocena": 0.85,
+      "uzasadnienie": "Linia biegnie przez gęste drzewa i cień między budynkami, więc nawierzchni pieszej nie widać."
+    },
+    "w_s969876346_2037": {
+      "klasa": "przerwany",
+      "ocena": 0.55,
+      "uzasadnienie": "Linia przebiega przez trawnik i cień drzew, bez widocznej utwardzonej nawierzchni chodnika."
+    },
+    "w_s969876362_2042": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie w cieniu budynku i pod koroną drzew, więc nawierzchnia pieszej ścieżki jest prawie niewidoczna i nie da się jej ocenić."
+    },
+    "w_s969876369_2045": {
+      "klasa": "ciagly",
+      "ocena": 0.7,
+      "uzasadnienie": "Linia biegnie przez widoczną utwardzoną nawierzchnię (jezdnia/przejście) bez widocznych przerw."
+    },
+    "w_s969876369_2046": {
+      "klasa": "ciagly",
+      "ocena": 0.72,
+      "uzasadnienie": "Krótki odcinek leży na odsłoniętej, utwardzonej nawierzchni przed budynkiem, bez widocznych przerw."
+    },
+    "w_s970756713_2069": {
+      "klasa": "ciagly",
+      "ocena": 0.5,
+      "uzasadnienie": "Krótki odcinek przejścia przez jezdnię i chodnik, nawierzchnia asfaltowa jest widoczna na całej długości, choć lewy kraniec jest częściowo w cieniu."
+    },
+    "w_s993165382_2243": {
+      "klasa": "ciagly",
+      "ocena": 0.7,
+      "uzasadnienie": "Wzdłuż linii widać szarą utwardzoną nawierzchnię (dojazd/chodnik) bez wyraźnych przerw, z niewielkim zacienieniem przy drzewach."
+    },
+    "w_s993165383_2246": {
+      "klasa": "niewidoczny",
+      "ocena": 0.5,
+      "uzasadnienie": "Linia biegnie wzdłuż jezdni i parkingu w cieniu budynku i drzew, więc odrębnej nawierzchni pieszej nie widać wyraźnie."
+    },
+    "w_s993165389_2255": {
+      "klasa": "ciagly",
+      "ocena": 0.55,
+      "uzasadnienie": "Krótki odcinek leży na widocznym przejściu dla pieszych z pasami, choć częściowo w cieniu drzew."
+    },
+    "w_s993165390_2257": {
+      "klasa": "niewidoczny",
+      "ocena": 0.8,
+      "uzasadnienie": "Linia biegnie pod koronami drzew i w cieniu przy budynku, więc nawierzchni pieszej prawie nie widać."
+    },
+    "w_s993165393_2265": {
+      "klasa": "niewidoczny",
+      "ocena": 0.5,
+      "uzasadnienie": "Linia biegnie przez rozkopany teren budowy z częściowym zacienieniem drzew, a wyraźnej nawierzchni chodnika nie widać."
+    },
+    "w_s993165417_2294": {
+      "klasa": "niewidoczny",
+      "ocena": 0.6,
+      "uzasadnienie": "Linia biegnie przez plac budowy z rozkopami, gruzem i cieniem budynku, więc nawierzchni chodnika nie widać wyraźnie."
+    },
+    "w_s993165417_2297": {
+      "klasa": "niewidoczny",
+      "ocena": 0.7,
+      "uzasadnienie": "Linia biegnie wzdłuż budynku pod koronami drzew i w cieniu, więc nawierzchni pieszej prawie nie widać."
+    },
+    "w_s993165419_2300": {
+      "klasa": "przerwany",
+      "ocena": 0.55,
+      "uzasadnienie": "Wzdłuż linii widać plac budowy z rozkopem, ziemią i elementami rur, a nawierzchnia chodnika jest miejscami nieciągła i częściowo zasłonięta drzewami."
+    }
+  }
+}
