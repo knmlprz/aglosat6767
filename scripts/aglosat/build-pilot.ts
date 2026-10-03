@@ -222,6 +222,34 @@ function dowodyOdcinka(w: W, ids: number[], typ: TypOdcinka): Odcinek["dowody"] 
   return d;
 }
 
+// Oznaczenia dotykowe leżą zwykle na węzłach przejść, rzadziej na way.
+// Przejście bierze też węzły końcowe (jak przy krawężnikach); inne odcinki tylko węzły wewnętrzne.
+function tactileOdcinka(w: W, ids: number[], typ: TypOdcinka): string | null {
+  if (w.tags.tactile_paving) return w.tags.tactile_paving;
+  const doSprawdzenia = typ === "przejscie" ? ids : ids.slice(1, -1);
+  const wartosci = new Set(doSprawdzenia.map((id) => nodes.get(id)?.tags?.tactile_paving).filter((v): v is string => !!v));
+  if (wartosci.size === 0) return null;
+  if (wartosci.size === 1) return [...wartosci][0];
+  return wartosci.has("yes") ? "partial" : [...wartosci].join(";");
+}
+
+// Światła i ich sygnalizacja dla niewidomych leżą na węzłach (highway=traffic_signals, crossing=traffic_signals).
+// Wynik: "none" | "sound" | "vibration" | "sound;vibration" | "unknown"; null, gdy odcinek nie ma świateł.
+function sygnalizacjaOdcinka(w: W, ids: number[], typ: TypOdcinka): string | null {
+  const zrodla: Record<string, string>[] = [w.tags];
+  const doSprawdzenia = typ === "przejscie" ? ids : ids.slice(1, -1);
+  for (const id of doSprawdzenia) { const t = nodes.get(id)?.tags; if (t) zrodla.push(t); }
+  const swiatla = zrodla.filter((t) =>
+    t.highway === "traffic_signals" || t.crossing === "traffic_signals" ||
+    t["traffic_signals:sound"] !== undefined || t["traffic_signals:vibration"] !== undefined);
+  if (swiatla.length === 0) return null;
+  const tak = (k: string) => swiatla.some((t) => t[k] === "yes");
+  const nie = (k: string) => swiatla.some((t) => t[k] === "no");
+  const rodzaje = [tak("traffic_signals:sound") && "sound", tak("traffic_signals:vibration") && "vibration"].filter(Boolean);
+  if (rodzaje.length > 0) return rodzaje.join(";");
+  return nie("traffic_signals:sound") && nie("traffic_signals:vibration") ? "none" : "unknown";
+}
+
 const odcinki: Odcinek[] = [];
 const wezly: Record<string, LatLon> = {};
 for (const w of linie) {
@@ -244,7 +272,7 @@ for (const w of linie) {
       id: `s${w.id}_${odcinki.length}`, a, b, geometria, dlugoscM: Math.round(dl * 10) / 10, osmWayId: w.id, typ,
       ...(w.tags.name ? { nazwa: w.tags.name } : {}),
       dowody: dowodyOdcinka(w, ids, typ),
-      osm: osmDostepnoscZTagow(w.tags),
+      osm: { ...osmDostepnoscZTagow(w.tags), tactile_paving: tactileOdcinka(w, ids, typ), traffic_signals: sygnalizacjaOdcinka(w, ids, typ) },
     });
   }
 }

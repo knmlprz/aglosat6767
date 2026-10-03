@@ -62,6 +62,8 @@ export const OSM_DOSTEPNOSC_LABEL: Record<keyof OsmDostepnosc, string> = {
   smoothness: "gładkość (smoothness)",
   kerb: "krawężnik (kerb)",
   width: "szerokość (width)",
+  tactile_paving: "oznaczenia dotykowe (tactile_paving)",
+  traffic_signals: "sygnalizacja (traffic_signals:sound / :vibration)",
 };
 
 export const OSM_DOSTEPNOSC_POLA = Object.keys(OSM_DOSTEPNOSC_LABEL) as (keyof OsmDostepnosc)[];
@@ -96,6 +98,51 @@ export function opisIncline(i: string | null | undefined): string {
   const st = t.match(/^(-?\d+(?:[.,]\d+)?)\s*°$/);
   if (st) return `${st[1].replace(".", ",").replace(/^-/, "")}°${st[1].startsWith("-") ? " (w dół)" : ""}`;
   return t;
+}
+
+const HIGHWAY: Record<string, string> = {
+  footway: "droga dla pieszych",
+  path: "ścieżka",
+  pedestrian: "deptak",
+  steps: "schody",
+  living_street: "strefa zamieszkania",
+  cycleway: "droga rowerowa",
+  track: "droga gruntowa",
+  service: "droga serwisowa",
+  residential: "ulica osiedlowa",
+};
+
+/** Tag highway z OSM w języku interfejsu. */
+export function opisHighway(h: string | null | undefined): string {
+  if (!h) return "brak danych w OSM";
+  return HIGHWAY[h] ?? h;
+}
+
+const TACTILE: Record<string, string> = {
+  yes: "są",
+  no: "brak",
+  partial: "częściowo",
+  incorrect: "nieprawidłowe",
+};
+
+/** Tag tactile_paving z OSM w języku interfejsu. */
+export function opisTactile(t: string | null | undefined): string {
+  if (!t) return "brak danych w OSM";
+  return TACTILE[t] ?? t;
+}
+
+const SYGNALIZACJA: Record<string, string> = {
+  none: "brak",
+  sound: "dźwiękowa",
+  vibration: "wibracyjna",
+  "sound;vibration": "dźwiękowa i wibracyjna",
+  unknown: "brak danych w OSM",
+};
+
+/** Sygnalizacja dla niewidomych na światłach (pole traffic_signals odcinka). */
+export function opisSygnalizacji(s: string | null | undefined): string {
+  if (!s) return "brak danych w OSM";
+  return SYGNALIZACJA[s] ?? s;
 }
 
 export const TYP_LABEL: Record<string, string> = {

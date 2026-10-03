@@ -8,7 +8,7 @@ import L from "leaflet";
 import { MapContainer, TileLayer, ZoomControl, useMap } from "react-leaflet";
 import type { LatLon, Pilot } from "@/lib/aglosat/types.ts";
 import type { OcenaOdcinka } from "@/lib/aglosat/profile.ts";
-import { CECHA_LABEL, KATEGORIA_LABEL, TYP_LABEL, opisIncline, opisWheelchair } from "@/lib/aglosat/vocabulary.ts";
+import { CECHA_LABEL, KATEGORIA_LABEL, TYP_LABEL, opisHighway, opisIncline, opisSygnalizacji, opisTactile, opisWheelchair } from "@/lib/aglosat/vocabulary.ts";
 import { STYL_MAPY, kategoriaMapy, type KategoriaMapy } from "@/lib/aglosat/styl.ts";
 
 const ESRI_URL =
@@ -58,14 +58,18 @@ export type TrasaNaMapie = {
  */
 type ZRendererem = { renderer: L.Canvas };
 
-/** Wiersz podpowiedzi z tagiem wheelchair z OSM (dla odcinka albo wejścia do usługi). */
-function wierszWheelchair(etykieta: string, w: string | null | undefined): string {
-  return `<br>${etykieta}: <b>${opisWheelchair(w)}</b>`;
+/** Wiersz podpowiedzi z wartością z OSM. Brak danych nie dostaje wiersza: mapa pokazuje tylko to, co wiadomo. */
+function wiersz(etykieta: string, v: string | null | undefined, opis: (v: string) => string): string {
+  return v ? `<br>${etykieta}: <b>${opis(v)}</b>` : "";
 }
 
-function wierszIncline(i: string | null | undefined): string {
-  return `<br>nachylenie: <b>${opisIncline(i)}</b>`;
-}
+const wierszWheelchair = (etykieta: string, w: string | null | undefined) => wiersz(etykieta, w, opisWheelchair);
+const wierszIncline = (i: string | null | undefined) => wiersz("nachylenie", i, opisIncline);
+const wierszHighway = (h: string | null | undefined) => wiersz("droga", h, opisHighway);
+const wierszTactile = (t: string | null | undefined) => wiersz("oznaczenia dotykowe", t, opisTactile);
+/** "unknown" = światła są, ale bez informacji o sygnalizacji: to też brak danych. */
+const wierszSygnalizacji = (s: string | null | undefined) =>
+  wiersz("sygnalizacja", s === "unknown" ? null : s, opisSygnalizacji);
 
 function podpowiedzUslugi(u: Pilot["uslugi"][number], przedrostek = ""): string {
   return `${przedrostek}<b>${u.nazwa}</b><br>${KATEGORIA_LABEL[u.kategoria]}${wierszWheelchair("wejście", u.wejscie?.wheelchair)}`;
@@ -111,7 +115,7 @@ function WarstwaOdcinkow({
       const nie = ocena.niespelnione.length ? `<br>nie spełnia: ${ocena.niespelnione.map((c) => CECHA_LABEL[c]).join(", ")}` : "";
       L.polyline(odc.geometria, { ...styl.linia, opacity: krycie(styl.linia.opacity), renderer })
         .bindTooltip(
-          `<b>${TYP_LABEL[odc.typ] ?? odc.typ}</b>${odc.nazwa ? ` · ${odc.nazwa}` : ""}<br>${styl.etykieta}${brak}${nie}${wierszWheelchair("wózek", odc.osm?.wheelchair)}${wierszIncline(odc.osm?.incline)}<br>${Math.round(odc.dlugoscM)} m`,
+          `<b>${TYP_LABEL[odc.typ] ?? odc.typ}</b>${odc.nazwa ? ` · ${odc.nazwa}` : ""}<br>${styl.etykieta}${brak}${nie}${wierszHighway(odc.osm?.highway)}${wierszWheelchair("wózek", odc.osm?.wheelchair)}${wierszIncline(odc.osm?.incline)}${wierszTactile(odc.osm?.tactile_paving)}${wierszSygnalizacji(odc.osm?.traffic_signals)}<br>${Math.round(odc.dlugoscM)} m`,
           { sticky: true },
         )
         .on("click", () => wybierz.current(odc.id))
