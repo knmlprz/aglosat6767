@@ -131,6 +131,8 @@ export type Profil = {
   opis: string;
   wymagane: Cecha[];
   dopuszczalneNawierzchnie: string[];
+  /** Nawierzchnie przejezdne, ale utrudniające, np. kostka granitowa (sett). */
+  utrudnioneNawierzchnie: string[];
   maxKraweznikCm: number;
   minSzerokoscCm: number;
   maxNachylenieProc: number;

@@ -7,9 +7,10 @@ export const PROFILE: Profil[] = [
   {
     id: "wozek",
     nazwa: "Bez schodów, niski krawężnik",
-    opis: "Wózek inwalidzki albo dziecięcy: bez schodów, krawężnik do 3 cm, utwardzona nawierzchnia.",
+    opis: "Wózek inwalidzki albo dziecięcy: bez schodów, krawężnik do 3 cm, utwardzona nawierzchnia; kostka granitowa to utrudnienie.",
     wymagane: ["ciaglosc", "schody", "nawierzchnia", "kraweznik"],
     dopuszczalneNawierzchnie: ["asphalt", "paving_stones", "concrete", "concrete:plates", "paved"],
+    utrudnioneNawierzchnie: ["sett"],
     maxKraweznikCm: 3,
     minSzerokoscCm: 0,
     maxNachylenieProc: 100,
@@ -20,6 +21,7 @@ export const PROFILE: Profil[] = [
     opis: "Dodatkowo szerokość co najmniej 90 cm i nachylenie do 6%. Profil konfiguracyjny, poza demo.",
     wymagane: ["ciaglosc", "schody", "nawierzchnia", "kraweznik", "szerokosc", "nachylenie"],
     dopuszczalneNawierzchnie: ["asphalt", "paving_stones", "concrete", "concrete:plates", "paved"],
+    utrudnioneNawierzchnie: ["sett"],
     maxKraweznikCm: 3,
     minSzerokoscCm: 90,
     maxNachylenieProc: 6,
@@ -28,7 +30,8 @@ export const PROFILE: Profil[] = [
 
 export const PROFIL_DOMYSLNY = PROFILE[0];
 
-export type OcenaCechy = "spelnia" | "nie_spelnia" | "nieznane";
+/** „utrudnienie”: cecha pozwala przejechać, ale trasa jest trudniejsza (np. kostka granitowa). */
+export type OcenaCechy = "spelnia" | "utrudnienie" | "nie_spelnia" | "nieznane";
 export type Przejezdnosc = "przejezdny" | "nieprzejezdny" | "nieznany";
 
 export type OcenaOdcinka = {
@@ -36,6 +39,8 @@ export type OcenaOdcinka = {
   /** Wymagane cechy bez rozstrzygnięcia: lista do sprawdzenia w terenie. */
   nieznane: Cecha[];
   niespelnione: Cecha[];
+  /** Cechy przejezdne, ale utrudniające; pokazujemy je przy trasie, nie blokują jej. */
+  utrudnienia: Cecha[];
 };
 
 const KRAWEZNIK_CM: Record<string, number> = { nie_dotyczy: 0, zrownany: 0, obnizony: 2, wysoki: 12 };
@@ -47,7 +52,7 @@ function spelnia(cecha: Cecha, w: Wartosc, p: Profil): boolean {
     case "schody":
       return w === false;
     case "nawierzchnia":
-      return p.dopuszczalneNawierzchnie.includes(String(w));
+      return p.dopuszczalneNawierzchnie.includes(String(w)) || p.utrudnioneNawierzchnie.includes(String(w));
     case "kraweznik":
       return (typeof w === "number" ? w : (KRAWEZNIK_CM[String(w)] ?? Infinity)) <= p.maxKraweznikCm;
     case "szerokosc":
@@ -62,18 +67,22 @@ export function ocenCeche(stan: StanCechy, p: Profil): OcenaCechy {
   // sprzeczność i brak danych to niewiadoma, nigdy „spełnia”.
   if (stan.status !== "potwierdzone" && stan.status !== "otwarte_zrodlo") return "nieznane";
   if (stan.wartosc === null) return "nieznane";
-  return spelnia(stan.cecha, stan.wartosc, p) ? "spelnia" : "nie_spelnia";
+  if (!spelnia(stan.cecha, stan.wartosc, p)) return "nie_spelnia";
+  if (stan.cecha === "nawierzchnia" && p.utrudnioneNawierzchnie.includes(String(stan.wartosc))) return "utrudnienie";
+  return "spelnia";
 }
 
 export function ocenOdcinek(stany: Record<Cecha, StanCechy>, p: Profil): OcenaOdcinka {
   const nieznane: Cecha[] = [];
   const niespelnione: Cecha[] = [];
+  const utrudnienia: Cecha[] = [];
   for (const cecha of p.wymagane) {
     const o = ocenCeche(stany[cecha], p);
     if (o === "nieznane") nieznane.push(cecha);
     else if (o === "nie_spelnia") niespelnione.push(cecha);
+    else if (o === "utrudnienie") utrudnienia.push(cecha);
   }
   const przejezdnosc: Przejezdnosc =
     niespelnione.length > 0 ? "nieprzejezdny" : nieznane.length > 0 ? "nieznany" : "przejezdny";
-  return { przejezdnosc, nieznane, niespelnione };
+  return { przejezdnosc, nieznane, niespelnione, utrudnienia };
 }
