@@ -24,6 +24,8 @@ import { TYP_LABEL, formatujWartosc } from "@/lib/aglosat/vocabulary.ts";
 import type { KlasaObrazu, Wycinek } from "@/lib/aglosat/types.ts";
 
 const PUSTY_ZBIOR = new Set<string>();
+/** Zapis etykiet działa tylko lokalnie (plik w repo); na wdrożonej stronie próbkę i instrukcję można obejrzeć. */
+const ZAPIS = process.env.NODE_ENV === "development";
 const CEL = 40;
 /** Poniżej tylu sekund na wycinek ocena jest raczej zgadywaniem. */
 const ZA_SZYBKO_S = 4;
@@ -115,7 +117,7 @@ export function EtykietowanieView() {
   const zapisz = useCallback(
     async (klasa: KlasaObrazu | null) => {
       if (!wycinek) return;
-      if (klasa && zablokowany) return;
+      if (!ZAPIS || (klasa && zablokowany)) return;
       if (!osoba) {
         setBlad("Najpierw wpisz, kto opisuje.");
         return;
@@ -181,21 +183,28 @@ export function EtykietowanieView() {
         <h2 className="text-2xl font-black text-slate-900">Próbka referencyjna dla modelu</h2>
         <p className="max-w-3xl text-sm text-slate-600">
           Oceń, co widać na obrazie wzdłuż przerywanej linii, według instrukcji poniżej (wersja {WERSJA_INSTRUKCJI}, tę samą
-          dostaje model). Odpowiedź modelu jest ukryta. Poświęć około 10 sekund na wycinek: liczba, którą z tego policzymy,
-          trafi przed jury.
+          dostaje model). Odpowiedź modelu jest ukryta. Poświęć około 10 sekund na wycinek: z tych ocen liczymy, jak często
+          model zgadza się z człowiekiem.
         </p>
-        <label className="flex max-w-xs flex-col gap-1 text-sm font-medium text-slate-800">
-          Kto opisuje (wymagane; każda osoba ma osobne etykiety)
-          <input
-            value={kto}
-            onChange={(e) => {
-              setKto(e.target.value);
-              ulozKolejnosc(e.target.value.trim(), plik);
-            }}
-            className="rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
-            placeholder="np. Michał"
-          />
-        </label>
+        {ZAPIS ? (
+          <label className="flex max-w-xs flex-col gap-1 text-sm font-medium text-slate-800">
+            Kto opisuje (wymagane; każda osoba ma osobne etykiety)
+            <input
+              value={kto}
+              onChange={(e) => {
+                setKto(e.target.value);
+                ulozKolejnosc(e.target.value.trim(), plik);
+              }}
+              className="rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+              placeholder="np. Michał"
+            />
+          </label>
+        ) : (
+          <p role="note" className="max-w-3xl rounded-lg bg-cyan-50 p-2 text-sm text-cyan-950">
+            Podgląd: tak wygląda próbka i instrukcja, według której opisywaliśmy wycinki. Zapis etykiet działa w lokalnej kopii
+            projektu (npm run dev), dlatego tu przyciski klas są wyłączone.
+          </p>
+        )}
         <fieldset className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-800">
           <legend className="mb-1 font-medium">Zakres</legend>
           {(
@@ -255,7 +264,7 @@ export function EtykietowanieView() {
         </details>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,560px)_1fr]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,560px)_1fr]">
         <section aria-labelledby="wycinek-tytul" className="flex flex-col gap-2">
           <h3 id="wycinek-tytul" className="text-sm font-bold text-slate-800">
             Wycinek {nr + 1} z {kolejka.length}
@@ -286,16 +295,18 @@ export function EtykietowanieView() {
               ))}
             </ul>
           </div>
-          <p className="text-xs text-slate-600" aria-live="polite">
-            {zablokowany ? `Obejrzyj całą linię, ocena za ${zostalo} s.` : "\u00a0"}
-          </p>
+          {ZAPIS && (
+            <p className="text-xs text-slate-600" aria-live="polite">
+              {zablokowany ? `Obejrzyj całą linię, ocena za ${zostalo} s.` : "\u00a0"}
+            </p>
+          )}
           <div className="flex flex-col gap-2">
             {KLASY_OBRAZU.map((k) => (
               <button
                 key={k.klasa}
                 type="button"
                 aria-pressed={obecna === k.klasa}
-                disabled={!osoba || zablokowany}
+                disabled={!ZAPIS || !osoba || zablokowany}
                 onClick={() => void zapisz(k.klasa)}
                 className={`flex items-start gap-3 rounded-xl border p-3 text-left disabled:opacity-50 ${
                   obecna === k.klasa ? "border-slate-900 bg-slate-900 text-white" : "border-slate-300 bg-white hover:bg-slate-50"
@@ -358,7 +369,7 @@ export function EtykietowanieView() {
             </table>
           </details>
 
-          <p className="text-xs text-slate-600">
+          <p className="text-xs text-slate-600" hidden={!ZAPIS}>
             Etykiety zapisują się do pliku data/aglosat/etykiety-reczne.json (tylko w trybie deweloperskim). Po sesji wystarczy
             commit.
           </p>

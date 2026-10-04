@@ -212,3 +212,12 @@ export function odmiana(n: number, [jeden, kilka, wiele]: [string, string, strin
   const s = n % 100;
   return d >= 2 && d <= 4 && (s < 12 || s > 14) ? kilka : wiele;
 }
+
+/** Czytelna nazwa modelu z identyfikatora dostawcy, np. „anthropic/claude-sonnet-5.5” → „Claude Sonnet 5.5”. */
+export function nazwaModelu(id: string): string {
+  const nazwa = id.replace(/^.*\//, "");
+  return nazwa
+    .split("-")
+    .map((c) => (/^\d/.test(c) ? c : c.charAt(0).toUpperCase() + c.slice(1)))
+    .join(" ");
+}

@@ -3,7 +3,7 @@
 // Jak często model się myli: macierz pomyłek i trzy liczby z koncepcji.
 
 import { KLASY, procent, type OcenaModelu } from "@/lib/aglosat/metryki.ts";
-import { formatujWartosc, odmiana } from "@/lib/aglosat/vocabulary.ts";
+import { formatujWartosc, nazwaModelu, odmiana } from "@/lib/aglosat/vocabulary.ts";
 
 export function OcenaModeluKarta({
   ocena,
@@ -21,7 +21,7 @@ export function OcenaModeluKarta({
         Jak często model zgadza się z człowiekiem
       </h3>
       <p className="mt-1 text-xs text-slate-600">
-        Model {ocena.model}
+        Model {nazwaModelu(ocena.model)}
         {ocena.wersjaPromptu ? ` (prompt v${ocena.wersjaPromptu})` : ""}{" "}
         {ocena.osoby && ocena.osoby > 1
           ? `na ${Math.round(ocena.n / ocena.osoby)} wycinkach, każdy opisany niezależnie przez ${ocena.osoby === 2 ? "dwie osoby" : `${ocena.osoby} osoby`} (${ocena.n} ${odmiana(ocena.n, ["ocena", "oceny", "ocen"])})`
