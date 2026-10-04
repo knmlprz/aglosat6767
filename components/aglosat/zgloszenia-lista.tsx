@@ -4,7 +4,7 @@
 // przyjęcie liczy zgłoszenie jak udokumentowane źródło i od razu przelicza trasy,
 // odrzucenie usuwa je z dowodów, ale zostawia w historii razem z powodem.
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Pilot, StanZgloszenia, Zgloszenie } from "@/lib/aglosat/types.ts";
 import { CECHA_LABEL, formatujWartosc } from "@/lib/aglosat/vocabulary.ts";
 import { ETYKIETA_STANU } from "@/lib/aglosat/zgloszenia.ts";
@@ -27,6 +27,17 @@ export function ZgloszeniaLista({
   onRozpatrz: (id: string, stan: StanZgloszenia, uzasadnienie?: string) => void;
   onWybierzOdcinek: (odcinekId: string) => void;
 }) {
+  const [komunikat, setKomunikat] = useState("");
+  const rozpatrz = (id: string, stan: StanZgloszenia, uzasadnienie?: string) => {
+    onRozpatrz(id, stan, uzasadnienie);
+    setKomunikat(
+      stan === "przyjete"
+        ? "Zgłoszenie przyjęte. Trasy przeliczone."
+        : stan === "odrzucone"
+          ? "Zgłoszenie odrzucone. Nie liczy się jako źródło."
+          : "Decyzja cofnięta. Zgłoszenie czeka na decyzję.",
+    );
+  };
   const oczekujace = zgloszenia.filter((z) => z.stan === "oczekuje");
   const rozpatrzone = zgloszenia.filter((z) => z.stan !== "oczekuje");
 
@@ -56,9 +67,12 @@ export function ZgloszeniaLista({
         </p>
       </div>
 
+      <p role="status" className="sr-only">
+        {komunikat}
+      </p>
       <ul className="flex flex-col gap-3">
         {[...oczekujace, ...rozpatrzone].map((z) => (
-          <Karta key={z.id} z={z} pilot={pilot} onRozpatrz={onRozpatrz} onWybierzOdcinek={onWybierzOdcinek} />
+          <Karta key={z.id} z={z} pilot={pilot} onRozpatrz={rozpatrz} onWybierzOdcinek={onWybierzOdcinek} />
         ))}
       </ul>
     </div>
@@ -78,6 +92,19 @@ function Karta({
 }) {
   const [notatka, setNotatka] = useState("");
   const odcinek = pilot.odcinki.find((o) => o.id === z.odcinekId);
+  // Przyciski decyzji znikają po kliknięciu; fokus idzie na przycisk, który ją cofa (i z powrotem).
+  const poDecyzji = useRef(false);
+  const cofnijRef = useRef<HTMLButtonElement>(null);
+  const przyjmijRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!poDecyzji.current) return;
+    poDecyzji.current = false;
+    (z.stan === "oczekuje" ? przyjmijRef.current : cofnijRef.current)?.focus();
+  }, [z.stan]);
+  const decyzja = (stan: StanZgloszenia, uzasadnienie?: string) => {
+    poDecyzji.current = true;
+    onRozpatrz(z.id, stan, uzasadnienie);
+  };
 
   return (
     <li className={`rounded-xl border p-3 ${z.stan === "oczekuje" ? "border-violet-300 bg-violet-50/40" : "border-slate-200 bg-white"}`}>
@@ -121,20 +148,21 @@ function Karta({
               value={notatka}
               onChange={(e) => setNotatka(e.target.value)}
               placeholder="np. zdjęcie pokazuje obniżony krawężnik po obu stronach"
-              className="mt-1 w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+              className="mt-1 w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm focus-visible:border-slate-900 focus-visible:outline-2 focus-visible:outline-slate-900"
             />
           </label>
           <div className="flex gap-2">
             <button
+              ref={przyjmijRef}
               type="button"
-              onClick={() => onRozpatrz(z.id, "przyjete", notatka)}
+              onClick={() => decyzja("przyjete", notatka)}
               className="min-h-10 flex-1 rounded-lg bg-slate-900 px-3 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
             >
               Przyjmij
             </button>
             <button
               type="button"
-              onClick={() => onRozpatrz(z.id, "odrzucone", notatka)}
+              onClick={() => decyzja("odrzucone", notatka)}
               className="min-h-10 flex-1 rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-900 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
             >
               Odrzuć
@@ -145,8 +173,9 @@ function Karta({
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
           {z.uzasadnienie ? <p className="text-xs text-slate-700">Urząd: „{z.uzasadnienie}”</p> : <span />}
           <button
+            ref={cofnijRef}
             type="button"
-            onClick={() => onRozpatrz(z.id, "oczekuje")}
+            onClick={() => decyzja("oczekuje")}
             className="rounded px-2 py-0.5 text-xs text-slate-700 underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
           >
             Cofnij decyzję

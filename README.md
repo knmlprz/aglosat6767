@@ -1,6 +1,6 @@
 # AgloSat
 
-**Przeszkody, których miasto nie ma na mapie.** AgloSat wskazuje miastu, które niewiadome o chodnikach sprawdzić najpierw, bo od nich zależy najwięcej dojść do usług.
+**Przeszkody, których miasto nie ma na mapie.** AgloSat wskazuje miastu, które niewiadome o infrastrukturze pieszej (chodnikach, przejściach, krawężnikach, schodach) sprawdzić najpierw, bo od nich zależy najwięcej dojść do usług. Pokazujemy to na sieci pieszej, bo tu najłatwiej policzyć skutki dla ludzi; ta sama metoda działa dla innej infrastruktury, o której miasto czegoś nie wie (drogi rowerowe, windy i rampy, przystanki).
 
 Pilot: Nowa Huta, osiedla Wandy, Młodości i Na Skarpie (Kraków).
 
@@ -17,7 +17,10 @@ npm install
 npm run dev
 ```
 
-Aplikacja: http://localhost:3000. Widoki: `/app/planista` (główny) i `/app/mieszkaniec`. Przycisk **Tryb demo** w prawym dolnym rogu prowadzi przez scenariusz prezentacji (strzałki ← → przełączają kroki).
+Aplikacja: http://localhost:3000, wdrożenie: https://aglosat6767.vercel.app. Widoki: `/app/planista` (urząd), `/app/mieszkaniec` („Czy dotrę?”, instalowalny na telefonie) i `/app/etykiety` (próbka do oceny modelu; zapis etykiet tylko lokalnie).
+
+Przycisk **Tryb demo** w prawym dolnym rogu prowadzi przez scenariusz prezentacji (strzałki ← → przełączają kroki), 10 kroków:
+mieszkaniec pyta o trasę → brakuje informacji o jednym przejściu → to przejście jest pierwsze w rankingu → dowód z ortofotomapy → mieszkaniec zgłasza stan ze zdjęciem → urząd decyduje → trasa udokumentowana → przypadek sprzeczny (OSM kontra model) → błąd modelu pokazany celowo → strefa zmian Sentinel-2.
 
 Wszystkie dane demo są w repozytorium, więc aplikacja działa bez sieci, z wyjątkiem podkładu mapy (Esri World Imagery).
 
@@ -110,14 +113,14 @@ Ortofotomapa jest z kwietnia 2025, a teren się zmienia. Sentinel-2 (10 m, co ki
 
 ## Dostępność interfejsu
 
-Cel: WCAG 2.2 AA. Stan na 2026-10-03.
+Cel: WCAG 2.2 AA. Stan na 2026-10-04.
 
 **Sprawdzone i działa**
 
-- Audyt automatyczny (axe-core, reguły WCAG 2.0–2.2 A i AA): 0 naruszeń na stronie głównej, w widoku mieszkańca i w widoku planisty, także z otwartym panelem miejsca, trasą kontroli i paskiem trybu demo.
+- Audyt automatyczny (axe-core, reguły WCAG 2.0–2.2 A i AA): 0 naruszeń na stronie głównej, w widoku mieszkańca (także z otwartym formularzem zgłoszenia), w widoku planisty (z otwartym panelem miejsca, trasą kontroli, kolejką zgłoszeń i paskiem trybu demo) i na stronie próbki dla modelu.
 - Pełna obsługa klawiaturą głównego scenariusza: wybór miejsca z rankingu, wpis kontroli, cofnięcie, powrót do listy, tryb demo (strzałki ← →). Link „Przejdź do treści”, widoczny wskaźnik fokusa, logiczna kolejność.
-- Fokus nie ginie, gdy treść się zmienia: po wyborze miejsca przechodzi na nagłówek panelu, po zapisie kontroli na nagłówek formularza, po powrocie na nagłówek listy.
-- Komunikaty dla czytnika ekranu: wynik zapisu kontroli, przeliczone trasy, krok trybu demo.
+- Fokus nie ginie, gdy treść się zmienia: po wyborze miejsca przechodzi na nagłówek panelu, po zapisie kontroli na nagłówek formularza, po powrocie na nagłówek listy; w zgłoszeniu po dodaniu zdjęcia na „Usuń zdjęcie” (i z powrotem), w kolejce urzędu po decyzji na „Cofnij decyzję” (i z powrotem).
+- Komunikaty dla czytnika ekranu: wynik zapisu kontroli, przeliczone trasy, krok trybu demo, dodanie i usunięcie zdjęcia, przyjęcie, odrzucenie i cofnięcie zgłoszenia.
 - Wszystko z mapy jest też tekstem: ranking miejsc, legenda z liczbami, lista sprzecznych źródeł, opis trasy mieszkańca (z przyciskiem „Odczytaj na głos”), lista miejsc na trasie.
 - Kategorie na mapie różnią się nie tylko kolorem, ale też grubością i przerywaniem linii.
 - Zawijanie treści przy szerokości 320 px (powiększenie 400%) bez przewijania w poziomie.
