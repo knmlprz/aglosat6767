@@ -6,7 +6,7 @@
 // Zdjęcie jest zalecane, ale nie wymagane: bez niego zgłoszenie też jest informacją,
 // a wymóg odciąłby osoby, które nie zrobią zdjęcia.
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Dialog } from "@base-ui/react/dialog";
 import { CameraIcon, LoaderCircleIcon, XIcon } from "lucide-react";
 import type { Cecha, Wartosc, Zgloszenie } from "@/lib/aglosat/types.ts";
@@ -35,12 +35,23 @@ export function FormularzZgloszenia({
   const [opis, setOpis] = useState("");
   const [wczytujeZdjecie, setWczytujeZdjecie] = useState(false);
   const [blad, setBlad] = useState("");
+  const [komunikat, setKomunikat] = useState("");
+  // Po dodaniu albo usunięciu zdjęcia element z fokusem znika; przenosimy fokus na jego następcę.
+  const zmianaZdjecia = useRef(false);
+  const usunZdjecieRef = useRef<HTMLButtonElement>(null);
+  const plikRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (!zmianaZdjecia.current) return;
+    zmianaZdjecia.current = false;
+    (zdjecie ? usunZdjecieRef.current : plikRef.current)?.focus();
+  }, [zdjecie]);
 
   const wyczysc = () => {
     setOdpowiedzi({});
     setZdjecie(null);
     setOpis("");
     setBlad("");
+    setKomunikat("");
   };
 
   const zamknij = (otwarte: boolean) => {
@@ -52,9 +63,14 @@ export function FormularzZgloszenia({
     if (!plik) return;
     setWczytujeZdjecie(true);
     setBlad("");
+    setKomunikat("Przygotowuję zdjęcie…");
     try {
-      setZdjecie(await zmniejszZdjecie(plik));
+      const gotowe = await zmniejszZdjecie(plik);
+      zmianaZdjecia.current = true;
+      setZdjecie(gotowe);
+      setKomunikat("Zdjęcie dodane.");
     } catch {
+      setKomunikat("");
       setBlad("Nie udało się wczytać zdjęcia. Możesz wysłać zgłoszenie bez niego.");
     } finally {
       setWczytujeZdjecie(false);
@@ -116,8 +132,13 @@ export function FormularzZgloszenia({
                     className="w-full rounded-xl border-2 border-slate-900"
                   />
                   <button
+                    ref={usunZdjecieRef}
                     type="button"
-                    onClick={() => setZdjecie(null)}
+                    onClick={() => {
+                      zmianaZdjecia.current = true;
+                      setZdjecie(null);
+                      setKomunikat("Zdjęcie usunięte.");
+                    }}
                     className="mt-2 flex min-h-12 w-full items-center justify-center rounded-xl border border-slate-300 bg-white text-base font-semibold text-slate-900 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
                   >
                     Usuń zdjęcie
@@ -137,6 +158,7 @@ export function FormularzZgloszenia({
                     <span className="text-sm font-medium text-slate-600">albo wybierz z galerii</span>
                   )}
                   <input
+                    ref={plikRef}
                     type="file"
                     accept="image/*"
                     capture="environment"
@@ -158,7 +180,7 @@ export function FormularzZgloszenia({
                     {WARIANTY[cecha].map((w, i) => (
                       <label
                         key={String(w.wartosc)}
-                        className={`flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border px-4 py-2 ${
+                        className={`flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border px-4 py-2 has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-cyan-600 ${
                           odpowiedzi[cecha] === i ? "border-slate-900 bg-slate-900 text-white" : "border-slate-300 bg-white"
                         }`}
                       >
@@ -190,8 +212,11 @@ export function FormularzZgloszenia({
               />
             </label>
 
-            <p aria-live="polite" className={blad ? "mt-4 rounded-xl bg-rose-50 p-3 text-sm text-rose-900" : "sr-only"}>
+            <p role="alert" className={blad ? "mt-4 rounded-xl bg-rose-50 p-3 text-sm text-rose-900" : "sr-only"}>
               {blad}
+            </p>
+            <p role="status" className="sr-only">
+              {komunikat}
             </p>
           </div>
 
