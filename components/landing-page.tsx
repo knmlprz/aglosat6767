@@ -124,7 +124,7 @@ export function LandingPage({ liczby }: { liczby: LiczbyStrony }) {
               href="/app/mieszkaniec"
               className="inline-flex items-center gap-2 rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold hover:bg-slate-50"
             >
-              Czy dojadę? Widok mieszkańca
+              Czy dotrę? Widok mieszkańca
             </Link>
           </div>
         </section>

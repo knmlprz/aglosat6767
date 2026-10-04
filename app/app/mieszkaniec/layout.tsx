@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 
 export const metadata: Metadata = {
-  title: "Czy dojadę? — AgloSat",
+  title: "Czy dotrę? — AgloSat",
   description:
     "Sprawdź, co o drodze do przychodni, apteki czy sklepu wiadomo, skąd i od kiedy — i czego nikt jeszcze nie sprawdził.",
 };
