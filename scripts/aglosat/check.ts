@@ -2,7 +2,7 @@
 // Uruchomienie: npm run aglosat:check
 
 import { existsSync, readFileSync } from "node:fs";
-import type { Pilot, Weryfikacja } from "../../lib/aglosat/types.ts";
+import type { Pilot, Weryfikacja, Zgloszenie } from "../../lib/aglosat/types.ts";
 import { rozwinPilot, type PilotZapisany } from "../../lib/aglosat/data.ts";
 import { PROFIL_DOMYSLNY, ocenCeche } from "../../lib/aglosat/profile.ts";
 import { stanOdcinka, CECHY } from "../../lib/aglosat/status.ts";
@@ -27,7 +27,7 @@ for (const o of p.odcinki) {
   const stany = stanOdcinka(o, p.obserwacje, []);
   for (const c of CECHY) {
     const s = stany[c];
-    const udok = s.status === "potwierdzone" || s.status === "otwarte_zrodlo";
+    const udok = s.status === "potwierdzone" || s.status === "otwarte_zrodlo" || s.status === "przyjete_zgloszenie";
     if (!udok && ocenCeche(s, profil) !== "nieznane") naruszenia++;
     if (s.status === "nieznane" && s.dowody.some((d) => d.zrodlo !== "model")) naruszenia++;
   }
@@ -58,6 +58,25 @@ if (sprzeczne[0]) {
   const po = stanOdcinka(sprzeczne[0], p.obserwacje, [odrzucenie]).ciaglosc;
   sprawdz(po.status === "potwierdzone" && po.wartosc === "ciagly" && !po.dowody.some((d) => d.ref === obs.id),
     "odrzucenie wykrycia w terenie daje „potwierdzone” i usuwa obserwację z dowodów");
+}
+
+// 5. Zgłoszenie mieszkańca rozstrzyga cechę dopiero po decyzji urzędu.
+const bezKraweznika = p.odcinki.find((o) => stanOdcinka(o, p.obserwacje, []).kraweznik.status === "nieznane");
+if (bezKraweznika) {
+  const zgl: Zgloszenie = {
+    id: "test-zgloszenie", odcinekId: bezKraweznika.id, cecha: "kraweznik", wartosc: "obnizony",
+    zdjecie: null, dataZgloszenia: "2026-10-04", stan: "oczekuje",
+  };
+  const stan = (s: Zgloszenie["stan"]) => stanOdcinka(bezKraweznika, p.obserwacje, [], [{ ...zgl, stan: s }]).kraweznik;
+  const czeka = stan("oczekuje");
+  const przyjete = stan("przyjete");
+  const odrzucone = stan("odrzucone");
+  sprawdz(
+    czeka.status === "zgloszone" && ocenCeche(czeka, profil) === "nieznane" &&
+      przyjete.status === "przyjete_zgloszenie" && ocenCeche(przyjete, profil) === "spelnia" &&
+      odrzucone.status === "nieznane" && !odrzucone.dowody.some((d) => d.ref === zgl.id),
+    "zgłoszenie bez decyzji zostaje niewiadomą, przyjęte liczy się jak źródło, odrzucone znika z dowodów",
+  );
 }
 
 // 5. Skrajny przypadek: weryfikacja jedynej niewiadomej zmienia trasę na żywo.

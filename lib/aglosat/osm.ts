@@ -8,6 +8,8 @@ export const OSM_DOSTEPNOSC_PUSTE: OsmDostepnosc = {
   smoothness: null,
   kerb: null,
   width: null,
+  tactile_paving: null,
+  traffic_signals: null,
 };
 
 export function osmDostepnoscZTagow(tags?: Record<string, string> | null): OsmDostepnosc {
@@ -19,5 +21,7 @@ export function osmDostepnoscZTagow(tags?: Record<string, string> | null): OsmDo
     smoothness: tags?.smoothness ?? null,
     kerb: tags?.kerb ?? null,
     width: tags?.width ?? null,
+    tactile_paving: tags?.tactile_paving ?? null,
+    traffic_signals: null,
   };
 }

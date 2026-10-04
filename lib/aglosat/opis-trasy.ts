@@ -53,6 +53,7 @@ export function opisTrasy(
   trasy: TrasyRelacji,
   oceny: Map<string, OcenaOdcinka>,
   dataKontroli: string | null,
+  dataPrzyjetegoZgloszenia: string | null = null,
 ): string {
   const zdania: string[] = [];
   zdania.push(
@@ -100,8 +101,11 @@ export function opisTrasy(
   }
 
   zdania.push(`Wejście do celu: ${opisWejscia(cel, pilot.meta.pobranoOsm)}.`);
-  zdania.push(
-    `Źródło danych: OpenStreetMap, pobrane ${pilot.meta.pobranoOsm}${dataKontroli ? `; kontrola w terenie ${dataKontroli}` : ""}.`,
-  );
+  const zrodla = [`OpenStreetMap, pobrane ${pilot.meta.pobranoOsm}`];
+  if (dataKontroli) zrodla.push(`kontrola w terenie ${dataKontroli}`);
+  if (dataPrzyjetegoZgloszenia) {
+    zrodla.push(`zgłoszenie mieszkańca przyjęte przez urząd ${dataPrzyjetegoZgloszenia}`);
+  }
+  zdania.push(`Źródło danych: ${zrodla.join("; ")}.`);
   return zdania.join(" ");
 }

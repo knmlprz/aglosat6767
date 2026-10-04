@@ -12,6 +12,7 @@ import {
   OSM_DOSTEPNOSC_POLA,
   TRASA_LABEL,
   odmiana,
+  opisSygnalizacji,
 } from "@/lib/aglosat/vocabulary.ts";
 import { lokalizacja } from "@/lib/aglosat/opis.ts";
 import type { OcenaOdcinka } from "@/lib/aglosat/profile.ts";
@@ -192,7 +193,7 @@ function PodsumowanieOsmTrasy({ ids, odcinki }: { ids: string[]; odcinki: Map<st
   for (const id of ids) {
     const osm = odcinki.get(id)?.osm;
     if (!osm) continue;
-    for (const k of OSM_DOSTEPNOSC_POLA) if (osm[k]) zbiory[k].add(osm[k]!);
+    for (const k of OSM_DOSTEPNOSC_POLA) if (osm[k]) zbiory[k].add(k === "traffic_signals" ? opisSygnalizacji(osm[k]) : osm[k]!);
   }
   const wiersze = OSM_DOSTEPNOSC_POLA.filter((k) => zbiory[k].size > 0).map(
     (k) => `${OSM_DOSTEPNOSC_LABEL[k]}: ${[...zbiory[k]].join(", ")}`,
