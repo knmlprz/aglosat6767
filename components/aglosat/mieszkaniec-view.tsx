@@ -236,7 +236,7 @@ export function MieszkaniecView() {
     <Ramka>
       <h1 className="text-[1.75rem] font-black leading-tight text-slate-900">Czy dojadę?</h1>
       <p className="mt-1 text-sm text-slate-700">
-        Mówimy, co o drodze wiadomo, skąd i od kiedy — oraz czego nikt jeszcze nie sprawdził.
+        Mówimy, co o drodze wiadomo, skąd i od kiedy. Jeśli czegoś brakuje — zrób zdjęcie z miejsca.
       </p>
 
       <section aria-labelledby="wybor-tytul" className="mt-4">
@@ -313,6 +313,18 @@ export function MieszkaniecView() {
             </p>
           )}
           <p className="mt-2 text-sm text-slate-800">{wynik.tresc}</p>
+          {wynik.ton === "niepewny" && miejscaWeryfikacji.length > 0 && (
+            <button
+              type="button"
+              onClick={() =>
+                setZglaszane({ odcinek: miejscaWeryfikacji[0].odcinek, cechy: miejscaWeryfikacji[0].cechy })
+              }
+              className="mt-3 flex min-h-14 w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 text-base font-bold text-white hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+            >
+              <CameraIcon className="size-5" aria-hidden />
+              Zrób zdjęcie tego miejsca
+            </button>
+          )}
         </div>
 
         <div role="group" aria-label="Którą trasę pokazać" className="mt-2 grid grid-cols-2 gap-2">
@@ -397,18 +409,19 @@ export function MieszkaniecView() {
         )}
       </section>
 
-      <details className="group mt-4 overflow-hidden rounded-2xl border border-slate-300 bg-white">
-        <summary className="flex min-h-14 cursor-pointer list-none items-center gap-3 px-4 py-3 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-slate-900 [&::-webkit-details-marker]:hidden">
-          <span className="flex-1 text-base font-bold text-slate-900">
-            Miejsca na trasie{wybrana ? ` (${miejscaNaTrasie(wybrana, pilot, oceny).length})` : ""}
-          </span>
-          <ChevronDownIcon
-            className="size-5 shrink-0 text-slate-600 transition-transform group-open:rotate-180 motion-reduce:transition-none"
-            aria-hidden
-          />
-        </summary>
-        <div className="border-t border-slate-200 p-4">
-          {wybrana ? (
+      {wybrana && miejscaNaTrasie(wybrana, pilot, oceny).length > 0 ? (
+        <section aria-labelledby="zdjecie-tytul" className="mt-4 overflow-hidden rounded-2xl border-2 border-slate-900 bg-white">
+          <div className="bg-slate-900 px-4 py-3 text-white">
+            <h2 id="zdjecie-tytul" className="flex items-center gap-2 text-base font-bold">
+              <CameraIcon className="size-5 shrink-0" aria-hidden />
+              Wyślij zdjęcie z trasy
+            </h2>
+            <p className="mt-1 text-sm text-slate-200">
+              Na zdjęciu widać to, czego nie widać z satelity. Urząd obejrzy i zdecyduje — do tego czasu trasy się nie
+              zmieniają.
+            </p>
+          </div>
+          <div className="p-4">
             <ListaOdcinkow
               trasa={wybrana}
               pilot={pilot}
@@ -417,11 +430,24 @@ export function MieszkaniecView() {
               zgloszenia={zgloszenia}
               naZgloszenie={(odcinek, cechy) => setZglaszane({ odcinek, cechy })}
             />
-          ) : (
-            <p className="text-sm text-slate-700">Tej trasy nie ma dla wybranych preferencji.</p>
-          )}
-        </div>
-      </details>
+          </div>
+        </section>
+      ) : (
+        <details className="group mt-4 overflow-hidden rounded-2xl border border-slate-300 bg-white">
+          <summary className="flex min-h-14 cursor-pointer list-none items-center gap-3 px-4 py-3 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-slate-900 [&::-webkit-details-marker]:hidden">
+            <span className="flex-1 text-base font-bold text-slate-900">Miejsca na trasie</span>
+            <ChevronDownIcon
+              className="size-5 shrink-0 text-slate-600 transition-transform group-open:rotate-180 motion-reduce:transition-none"
+              aria-hidden
+            />
+          </summary>
+          <p className="border-t border-slate-200 p-4 text-sm text-slate-700">
+            {wybrana
+              ? "Na tej trasie każda wymagana cecha ma już źródło."
+              : "Tej trasy nie ma dla wybranych preferencji."}
+          </p>
+        </details>
+      )}
 
       {zgloszenia.length > 0 && (
         <details open className="group mt-2 overflow-hidden rounded-2xl border border-slate-300 bg-white">
@@ -665,10 +691,10 @@ function ListaOdcinkow({
               <button
                 type="button"
                 onClick={() => naZgloszenie(mm.odcinek, mm.cechy)}
-                className="mt-2 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-slate-400 bg-white px-3 text-base font-semibold text-slate-900 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+                className="mt-3 flex min-h-14 w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-3 text-base font-bold text-white hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
               >
                 <CameraIcon className="size-5" aria-hidden />
-                Zgłoś, jak tu jest
+                Zrób zdjęcie tego miejsca
               </button>
             </li>
           );
