@@ -54,15 +54,16 @@ const ROLE = [
   },
   {
     ikona: UserCheck,
-    tytul: "Człowiek rozstrzyga w terenie",
-    opis: "Planista dostaje trasę kontroli. Wynik z terenu zmienia status cechy, a trasy mieszkańców przeliczają się od razu.",
+    tytul: "Człowiek rozstrzyga na miejscu",
+    opis: "Mieszkaniec zgłasza stan ze zdjęciem, urząd je przyjmuje albo wysyła kontrolę. Decyzja zmienia status cechy, a trasy przeliczają się od razu.",
   },
 ];
 
 const DZIALA = [
   "graf sieci pieszej z OpenStreetMap, każda cecha ze źródłem, datą i statusem",
   "ranking miejsc do kontroli według wpływu na dojścia do usług",
-  "trasy dla profilu przeliczane na żywo po kontroli w terenie",
+  "trasy dla profilu przeliczane na żywo po kontroli w terenie albo przyjętym zgłoszeniu",
+  "zgłoszenia mieszkańców ze zdjęciem i ich akceptacja po stronie urzędu",
   "wycinki ortofotomapy GUGiK jako dowód obrazowy",
   "trasa kontroli na zadany czas",
   "widok mieszkańca z opisem tekstowym trasy",
@@ -70,14 +71,14 @@ const DZIALA = [
 /** Gdy wszystkie warstwy są z prawdziwych danych: zamiast pustej listy „przykładowych” mówimy, czego prototyp nie rozstrzyga. */
 const OGRANICZENIA = [
   "próbkę do oceny modelu opisały osoby z zespołu, nie audytorzy dostępności",
-  "kontrole w terenie zapisują się w przeglądarce, na czas sesji",
+  "kontrole i zgłoszenia zostają w przeglądarce na czas sesji, bez wspólnej bazy",
   "waga budynku to powierzchnia zabudowy × kondygnacje, przybliżenie liczby mieszkańców",
-  "Sentinel-2 daje sygnał zmiany terenu, nie wykrywa chodników",
+  "Sentinel-2 daje sygnał zmiany terenu, nie wykrywa samej infrastruktury pieszej",
 ];
 const ZAPROJEKTOWANE = [
-  "trwały zapis kontroli i wielu użytkowników",
-  "zgłoszenia od mieszkańców",
+  "trwały zapis kontroli i zgłoszeń, wielu użytkowników",
   "kolejne miasta: nowy obszar w konfiguracji potoku",
+  "inna infrastruktura z niewiadomymi, ta sama metoda: drogi rowerowe, windy i rampy w przejściach podziemnych, dostępność przystanków",
 ];
 
 const proc = (a: number, b: number) => `${Math.round((100 * a) / Math.max(b, 1))}%`;
@@ -108,7 +109,8 @@ export function LandingPage({ liczby }: { liczby: LiczbyStrony }) {
             Przeszkody, których miasto nie ma na mapie
           </h1>
           <p className="mt-5 max-w-3xl text-lg text-slate-700">
-            AgloSat wskazuje miastu, które niewiadome o chodnikach sprawdzić najpierw, bo od nich zależy najwięcej dojść
+            AgloSat wskazuje miastu, które niewiadome o infrastrukturze pieszej (chodnikach, przejściach, krawężnikach,
+            schodach) sprawdzić najpierw, bo od nich zależy najwięcej dojść
             do usług.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
@@ -180,7 +182,7 @@ export function LandingPage({ liczby }: { liczby: LiczbyStrony }) {
                 Model wizyjny, sprawdzony na próbce testowej
               </h2>
               <p className="mt-2 max-w-3xl text-2xl font-bold leading-snug">
-                Model ocenia ciągłość chodnika na zdjęciu prawie tak zgodnie z człowiekiem, jak dwie osoby ze sobą.
+                Model ocenia na zdjęciu ciągłość ciągu pieszego prawie tak zgodnie z człowiekiem, jak dwie osoby ze sobą.
               </p>
               <div className="mt-4 grid gap-3 sm:grid-cols-3">
                 <Liczba wartosc={proc1(liczby.ocena.trafnosc)} opis="zgodność modelu z człowiekiem" />
@@ -198,7 +200,7 @@ export function LandingPage({ liczby }: { liczby: LiczbyStrony }) {
                 {liczby.ocena.trafnoscV1 !== null ? ` (pierwsza wersja: ${proc1(liczby.ocena.trafnoscV1)})` : ""};{" "}
                 {liczby.ocena.wycinki} wycinków ortofotomapy GUGiK nieużywanych przy poprawianiu promptu, opisanych niezależnie przez{" "}
                 {liczby.ocena.osoby === 2 ? "dwie osoby" : `${liczby.ocena.osoby} osoby`} z zespołu. Groźne pomyłki (model „ciągły”, człowiek widzi przerwę albo nic):{" "}
-                {liczby.ocena.grozne} z {liczby.ocena.pary}. Model wskazuje, gdzie spojrzeć; o stanie chodnika rozstrzyga kontrola
+                {liczby.ocena.grozne} z {liczby.ocena.pary}. Model wskazuje, gdzie spojrzeć; o stanie miejsca rozstrzyga kontrola
                 w terenie.
               </p>
             </div>

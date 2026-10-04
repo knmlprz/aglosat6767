@@ -8,7 +8,8 @@ const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   title: "AgloSat",
-  description: "AgloSat wskazuje miastu, które niewiadome o chodnikach sprawdzić najpierw, bo od nich zależy najwięcej dojść do usług.",
+  description:
+    "AgloSat wskazuje miastu, które niewiadome o infrastrukturze pieszej sprawdzić najpierw, bo od nich zależy najwięcej dojść do usług.",
   applicationName: "AgloSat",
   // Nazwa na ekranie początkowym iPhone'a; iOS nie czyta short_name z manifestu.
   appleWebApp: { capable: true, title: "AgloSat", statusBarStyle: "default" },
