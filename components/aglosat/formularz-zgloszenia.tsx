@@ -1,6 +1,6 @@
 "use client";
 
-// Zgłoszenie mieszkańca na telefonie: co tu jest, zdjęcie, komentarz.
+// Zgłoszenie mieszkańca na telefonie: najpierw zdjęcie, potem co tu jest i komentarz.
 // Formularz nie pyta o niepełnosprawność ani o dane zgłaszającego i mówi wprost,
 // że zgłoszenie samo nie zmienia tras — zmienia je dopiero decyzja urzędu.
 // Zdjęcie jest zalecane, ale nie wymagane: bez niego zgłoszenie też jest informacją,
@@ -91,17 +91,66 @@ export function FormularzZgloszenia({
             >
               <XIcon className="size-5" aria-hidden />
             </Dialog.Close>
-            <Dialog.Title className="truncate text-base font-bold text-slate-900">Zgłoś, jak tu jest</Dialog.Title>
+            <Dialog.Title className="truncate text-base font-bold text-slate-900">Wyślij zdjęcie</Dialog.Title>
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4">
             <p className="text-lg font-bold leading-snug text-slate-900">{nazwaMiejsca}</p>
             <p className="mt-1 text-sm text-slate-700">
-              Nikt jeszcze nie opisał tego miejsca. Napisz, co tu zastajesz — urząd obejrzy zgłoszenie i zdecyduje,
-              czy przyjąć je jako źródło. Do tego czasu trasy się nie zmieniają.
+              Zrób zdjęcie tego, co tu zastajesz. Urząd obejrzy i zdecyduje, czy przyjąć je jako źródło. Do tego czasu
+              trasy się nie zmieniają.
             </p>
 
-            <div className="mt-4 flex flex-col gap-4">
+            <div className="mt-4">
+              <h3 className="text-base font-bold text-slate-900">Zdjęcie</h3>
+              <p className="mt-0.5 text-sm text-slate-700">
+                To najważniejsza część zgłoszenia: na zdjęciu widać to, czego nie widać w danych.
+              </p>
+              {zdjecie ? (
+                <div className="mt-2">
+                  {/* data URL z aparatu: next/image nic by tu nie zoptymalizował */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={zdjecie}
+                    alt="Zdjęcie dołączone do zgłoszenia"
+                    className="w-full rounded-xl border-2 border-slate-900"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setZdjecie(null)}
+                    className="mt-2 flex min-h-12 w-full items-center justify-center rounded-xl border border-slate-300 bg-white text-base font-semibold text-slate-900 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+                  >
+                    Usuń zdjęcie
+                  </button>
+                </div>
+              ) : (
+                <label className="mt-2 flex min-h-40 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-900 bg-slate-50 px-4 text-center hover:bg-slate-100 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-slate-900">
+                  {wczytujeZdjecie ? (
+                    <LoaderCircleIcon className="size-10 animate-spin text-slate-900 motion-reduce:animate-none" aria-hidden />
+                  ) : (
+                    <CameraIcon className="size-10 text-slate-900" aria-hidden />
+                  )}
+                  <span className="text-lg font-black text-slate-900">
+                    {wczytujeZdjecie ? "Przygotowuję zdjęcie…" : "Zrób zdjęcie"}
+                  </span>
+                  {!wczytujeZdjecie && (
+                    <span className="text-sm font-medium text-slate-600">albo wybierz z galerii</span>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    className="sr-only"
+                    onChange={(e) => {
+                      void wczytajZdjecie(e.target.files?.[0]);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              )}
+            </div>
+
+            <div className="mt-5 flex flex-col gap-4">
               {cechy.map((cecha) => (
                 <fieldset key={cecha}>
                   <legend className="text-base font-bold text-slate-900">{CECHA_LABEL[cecha]}</legend>
@@ -128,50 +177,6 @@ export function FormularzZgloszenia({
               ))}
             </div>
 
-            <div className="mt-5">
-              <h3 className="text-base font-bold text-slate-900">Zdjęcie</h3>
-              <p className="mt-0.5 text-sm text-slate-700">
-                Bardzo pomaga: na zdjęciu widać to, czego nie widać w danych. Nie jest obowiązkowe.
-              </p>
-              {zdjecie ? (
-                <div className="mt-2">
-                  {/* data URL z aparatu: next/image nic by tu nie zoptymalizował */}
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={zdjecie}
-                    alt="Zdjęcie dołączone do zgłoszenia"
-                    className="w-full rounded-xl border border-slate-300"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setZdjecie(null)}
-                    className="mt-2 flex min-h-12 w-full items-center justify-center rounded-xl border border-slate-300 bg-white text-base font-semibold text-slate-900 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
-                  >
-                    Usuń zdjęcie
-                  </button>
-                </div>
-              ) : (
-                <label className="mt-2 flex min-h-14 cursor-pointer items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 text-base font-semibold text-slate-900 hover:bg-slate-50 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-slate-900">
-                  {wczytujeZdjecie ? (
-                    <LoaderCircleIcon className="size-5 animate-spin motion-reduce:animate-none" aria-hidden />
-                  ) : (
-                    <CameraIcon className="size-5" aria-hidden />
-                  )}
-                  {wczytujeZdjecie ? "Przygotowuję zdjęcie…" : "Zrób zdjęcie albo wybierz z galerii"}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    className="sr-only"
-                    onChange={(e) => {
-                      void wczytajZdjecie(e.target.files?.[0]);
-                      e.target.value = "";
-                    }}
-                  />
-                </label>
-              )}
-            </div>
-
             <label className="mt-5 block">
               <span className="text-base font-bold text-slate-900">Komentarz</span>
               <span className="block text-sm text-slate-700">Opcjonalnie, własnymi słowami.</span>
@@ -196,7 +201,7 @@ export function FormularzZgloszenia({
               onClick={wyslij}
               className="flex min-h-14 w-full items-center justify-center rounded-xl bg-slate-900 px-4 text-base font-bold text-white hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
             >
-              Wyślij zgłoszenie
+              {zdjecie ? "Wyślij zdjęcie" : "Wyślij bez zdjęcia"}
             </button>
           </div>
         </Dialog.Popup>
