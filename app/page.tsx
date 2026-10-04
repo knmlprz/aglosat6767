@@ -4,7 +4,7 @@ import { LandingPage, type LiczbyStrony } from "@/components/landing-page";
 import { rozwinPilot, type PilotZapisany } from "@/lib/aglosat/data.ts";
 import { ocenWszystkie } from "@/lib/aglosat/routing.ts";
 import { PROFIL_DOMYSLNY } from "@/lib/aglosat/profile.ts";
-import { CECHA_LABEL } from "@/lib/aglosat/vocabulary.ts";
+import { CECHA_LABEL, nazwaModelu } from "@/lib/aglosat/vocabulary.ts";
 
 // Liczby strony głównej liczone przy budowaniu z tych samych danych i kodu co aplikacja.
 function policzLiczby(): LiczbyStrony {
@@ -36,13 +36,16 @@ function policzLiczby(): LiczbyStrony {
           }
         : null,
     dataNalotu: p.wycinki[0]?.dataObrazu ?? null,
-    model: p.obserwacje.find((o) => !o.przykladowe && o.model)?.model ?? null,
+    model: (() => {
+      const m = p.obserwacje.find((o) => !o.przykladowe && o.model)?.model;
+      return m ? nazwaModelu(m) : null;
+    })(),
     ocena: (() => {
       const o = p.ocenaModelu;
       if (!o || o.zbior !== "testowy" || !o.n || o.trafnosc === null) return null;
       const v1 = p.porownaniePromptow?.find((x) => x.wersjaPromptu === 1 && x.zbior === "testowy");
       return {
-        model: o.model.replace(/^.*\//, "").replace("claude-sonnet-", "Claude Sonnet ").replace(/-/g, " "),
+        model: nazwaModelu(o.model),
         wersjaPromptu: o.wersjaPromptu ?? 0,
         wycinki: Math.round(o.n / (o.osoby || 1)),
         osoby: o.osoby ?? 1,

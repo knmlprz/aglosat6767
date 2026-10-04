@@ -9,7 +9,7 @@ import { useCallback, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { ocenWszystkie, trasyRelacji, zbudujGraf } from "@/lib/aglosat/routing.ts";
 import { PROFIL_DOMYSLNY } from "@/lib/aglosat/profile.ts";
-import { ETYKIETA_ANALIZA_BAZOWA, ETYKIETA_PRZYKLADOWE } from "@/lib/aglosat/vocabulary.ts";
+import { ETYKIETA_ANALIZA_BAZOWA, ETYKIETA_PRZYKLADOWE, nazwaModelu } from "@/lib/aglosat/vocabulary.ts";
 import { KOLEJNOSC_KATEGORII, STYL_MAPY, kategoriaMapy, type KategoriaMapy } from "@/lib/aglosat/styl.ts";
 import type { WynikWplywu } from "@/lib/aglosat/types.ts";
 import { idWpisu } from "@/lib/aglosat/weryfikacja.ts";
@@ -219,7 +219,7 @@ export function PlanistaView() {
           </span>
           {pilot.obserwacje[0]?.model && (
             <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-600">
-              obserwacje z obrazu: model {pilot.obserwacje[0].model}
+              obserwacje z obrazu: model {nazwaModelu(pilot.obserwacje[0].model)}
             </span>
           )}
           {pilot.strefyZmian.length > 0 && !pilot.strefyZmian.some((s) => s.ilustracja) && (
@@ -272,7 +272,7 @@ export function PlanistaView() {
         />
       )}
 
-      <section aria-labelledby="mapa-tytul" className="grid gap-4 lg:grid-cols-[1fr_380px]">
+      <section aria-labelledby="mapa-tytul" className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_380px]">
         <h3 id="mapa-tytul" className="sr-only">
           Mapa odcinków według stanu wiedzy
         </h3>
