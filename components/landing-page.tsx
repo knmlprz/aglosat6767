@@ -44,8 +44,8 @@ export type LiczbyStrony = {
 const ROLE = [
   {
     ikona: Eye,
-    tytul: "Obraz z góry znajduje kandydatów",
-    opis: "Ortofotomapa pokazuje miejsca, gdzie ciąg pieszy może być przerwany. Sentinel-2 daje sygnał możliwej zmiany między dwiema datami.",
+    tytul: "Obraz z góry zawęża listę",
+    opis: "Model na ortofotomapie potwierdza, gdzie ciąg pieszy widać, i mówi, czego z góry nie widać. Przerwy znajduje rzadko, więc ich nie obiecujemy. Sentinel-2 daje sygnał zmiany terenu między dwiema datami.",
   },
   {
     ikona: Network,
@@ -171,7 +171,8 @@ export function LandingPage({ liczby }: { liczby: LiczbyStrony }) {
           </div>
           <p className="mt-3 text-xs text-slate-600">
             OpenStreetMap, dane pobrane {liczby.pobranoOsm}. Profil: bez schodów, krawężnik do 3 cm, utwardzona nawierzchnia.
-            Brak informacji to nie bariera: nie wiemy, czy przejście jest.
+            Brak informacji to nie bariera: nie wiemy, czy przejście jest. Założenie: krawężnik sprawdzamy tylko na
+            przejściach, bo tam opisuje go OSM; obniżeń przy wjazdach i końcach chodników nie ma w danych.
           </p>
         </section>
 

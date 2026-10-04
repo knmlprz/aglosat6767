@@ -27,6 +27,65 @@ type Krok = {
 };
 
 const K = {
+  // --- kroki filmu (do 3 minut) ---
+  pytanie: {
+    tytul: "Mieszkaniec pyta: czy dotrę?",
+    mowimy: (p) => {
+      const { start, cel, k } = przypadek(p);
+      return `${start} → ${cel}: ${k?.pieszoM ?? "?"} m pieszo. Dla preferencji „bez schodów, niski krawężnik” trasy udokumentowanej nie ma, bo brakuje informacji o jednym przejściu. Nie mówimy „niedostępne” i nie pytamy o niepełnosprawność.`;
+    },
+    widok: "/app/mieszkaniec",
+    wybierz: null,
+    kontrole: "brak",
+  },
+  ranking: {
+    tytul: "Urząd: to przejście jest pierwsze w rankingu",
+    mowimy: (p) => {
+      const n = p.ranking[0]?.uslugi.length ?? 0;
+      return `Od tego jednego przejścia zależą dojścia do ${n} ${odmiana(n, ["usługi", "usług", "usług"])} w całym obszarze. Na ortofotomapie z kwietnia 2025 krawężnika nie widać pod drzewami: obraz wskazuje miejsce, rozstrzyga człowiek.`;
+    },
+    widok: "/app/planista",
+    wybierz: "miejsce1",
+    kontrole: "brak",
+  },
+  zgloszenieZalozone: {
+    tytul: "Mieszkaniec zgłasza, jak tu jest",
+    mowimy:
+      "Scenariusz: mieszkaniec zgłasza „krawężnik obniżony”. Stanu tego przejścia jeszcze nie sprawdziliśmy, to założony wynik. Zgłoszenie czeka na urząd, trasa się nie zmienia.",
+    widok: "/app/mieszkaniec",
+    wybierz: null,
+    kontrole: "brak",
+    zgloszenia: "oczekuje",
+  },
+  decyzjaUrzedu: {
+    tytul: "Urząd decyduje",
+    mowimy:
+      "Kolejka zgłoszeń: miejsce, deklarowana wartość, komentarz i zdjęcie, jeśli jest. Przyjęcie liczy zgłoszenie jak źródło i od razu przelicza trasy; odrzucenie zostawia niewiadomą.",
+    widok: "/app/planista",
+    wybierz: null,
+    zakladka: "zgloszenia",
+    kontrole: "brak",
+    zgloszenia: "oczekuje",
+  },
+  zmianaTerenu: {
+    tytul: "Model i Sentinel-2: tu teren się zmienił",
+    mowimy: (p) => {
+      const { strefa, obserwacja } = odcinekSentinel(p);
+      const o = p.ocenaModelu;
+      const proc = (x: number | null | undefined) => (x == null ? "?" : `${Math.round(100 * x)}%`);
+      const model = obserwacja
+        ? `model (${nazwaModelu(obserwacja.model ?? "")}) widzi na zdjęciu z 2025 przerwę przy placu budowy`
+        : "model nie rozstrzyga";
+      const sentinel = strefa ? `, a Sentinel-2 pokazuje ubytek zieleni na ${strefa.opis.match(/ok\. (\d+) m²/)?.[1] ?? "?"} m² rok do roku` : "";
+      const ocena = o?.trafnosc != null ? ` Model zgadza się z człowiekiem w ${proc(o.trafnosc)}, ludzie między sobą w ${proc(o.zgodnoscLudzi?.zgodnosc)}.` : "";
+      return `Inne miejsce: OpenStreetMap ma tu drogę, ${model}${sentinel}. Źródła się nie zgadzają: pokazujemy wszystkie z datami i kierujemy tu kontrolę.${ocena}`;
+    },
+    widok: "/app/planista",
+    wybierz: "sentinel",
+    kontrole: "brak",
+    zgloszenia: "przyjete",
+  },
+  // --- kroki pełnej wersji ---
   mieszkaniec: {
     tytul: "Mieszkaniec pyta: czy dotrę?",
     mowimy: (p) => {
@@ -163,22 +222,11 @@ const K = {
 } satisfies Record<string, Krok>;
 
 /**
- * Jeden scenariusz, wersja skrócona: pytanie mieszkańca, ranking i dowód z obrazu mówią, gdzie sprawdzić,
- * zgłoszenie mieszkańca przyjęte przez urząd to rozstrzyga; potem model i Sentinel-2.
- * Kroki kontroli w terenie (kontrola, mieszkaniecPo, wysoki) zostają w K do pełnej wersji.
+ * Scenariusz filmu (do 3 minut), 6 kroków: pytanie mieszkańca, ranking z dowodem z obrazu, zgłoszenie
+ * (wynik założony, przejścia jeszcze nikt nie sprawdził), decyzja urzędu, trasa udokumentowana,
+ * miejsce, gdzie model i Sentinel-2 przeczą OSM. Pozostałe kroki zostają w K do dłuższej wersji.
  */
-export const KROKI: Krok[] = [
-  K.mieszkaniec,
-  K.brakInformacji,
-  K.miejsce1,
-  K.dowod,
-  K.zgloszenie,
-  K.decyzja,
-  K.przyjete,
-  K.sprzeczne,
-  K.odrzucenie,
-  K.sentinel,
-];
+export const KROKI: Krok[] = [K.pytanie, K.ranking, K.zgloszenieZalozone, K.decyzjaUrzedu, K.przyjete, K.zmianaTerenu];
 
 /** Główny przypadek demo: pierwszy kandydat z potoku (adres, cel, odległości). */
 function przypadek(p: Pilot) {
@@ -213,7 +261,7 @@ function zgloszeniaKroku(stan: StanDemoZgloszen, pilot: Pilot): Zgloszenie[] {
     cecha: "kraweznik",
     wartosc: "obnizony",
     zdjecie: null,
-    opis: "krawężnik obniżony po obu stronach (zgłoszenie demo)",
+    opis: "krawężnik obniżony po obu stronach (scenariusz demo, wynik założony)",
     dataZgloszenia: dzisiaj(),
     stan: stan === "przyjete" ? "przyjete" : "oczekuje",
   };
