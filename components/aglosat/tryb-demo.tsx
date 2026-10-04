@@ -28,7 +28,7 @@ type Krok = {
 
 const K = {
   mieszkaniec: {
-    tytul: "Mieszkaniec pyta: czy dojadę?",
+    tytul: "Mieszkaniec pyta: czy dotrę?",
     mowimy: (p) => {
       const { start, cel, k } = przypadek(p);
       return `${start}, ${cel}: ${k?.pieszoM ?? "?"} metrów pieszo. Preferencje: bez schodów, niski krawężnik. Nie pytamy o niepełnosprawność.`;
