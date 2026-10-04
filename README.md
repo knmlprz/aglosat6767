@@ -4,7 +4,7 @@
 
 Pilot: Nowa Huta, osiedla Wandy, Młodości i Na Skarpie (Kraków).
 
-1. **Obraz z góry znajduje kandydatów.** Wycinki ortofotomapy pokazują miejsca, gdzie ciąg pieszy może być przerwany.
+1. **Obraz z góry zawęża listę.** Model na wycinkach ortofotomapy potwierdza, gdzie ciąg pieszy widać, i mówi, czego z góry nie widać. Przerwy znajduje rzadko (3 z 18 zaznaczonych przez ludzi), więc ich nie obiecujemy.
 2. **Graf sieci pieszej nadaje im wagę.** Dla każdej niewiadomej liczymy, ile dojść z budynków mieszkalnych do przychodni, aptek, sklepów, poczty i bibliotek od niej zależy.
 3. **Człowiek rozstrzyga.** Mieszkaniec zgłasza, jak jest na miejscu (ze zdjęciem); urząd przyjmuje albo odrzuca. Kontrola w terenie nadal ma pierwszeństwo. Trasy przeliczają się od razu po decyzji.
 
@@ -19,8 +19,8 @@ npm run dev
 
 Aplikacja: http://localhost:3000, wdrożenie: https://aglosat6767.vercel.app. Widoki: `/app/planista` (urząd), `/app/mieszkaniec` („Czy dotrę?”, instalowalny na telefonie) i `/app/etykiety` (próbka do oceny modelu; zapis etykiet tylko lokalnie).
 
-Przycisk **Tryb demo** w prawym dolnym rogu prowadzi przez scenariusz prezentacji (strzałki ← → przełączają kroki), 10 kroków:
-mieszkaniec pyta o trasę → brakuje informacji o jednym przejściu → to przejście jest pierwsze w rankingu → dowód z ortofotomapy → mieszkaniec zgłasza stan ze zdjęciem → urząd decyduje → trasa udokumentowana → przypadek sprzeczny (OSM kontra model) → błąd modelu pokazany celowo → strefa zmian Sentinel-2.
+Przycisk **Tryb demo** w prawym dolnym rogu prowadzi przez scenariusz prezentacji (strzałki ← → przełączają kroki), 6 kroków na film do 3 minut:
+mieszkaniec pyta o trasę i słyszy, że brakuje informacji o jednym przejściu → urząd widzi to przejście na pierwszym miejscu rankingu, z ortofotomapą → mieszkaniec zgłasza „krawężnik obniżony” (**wynik założony: stanu tego przejścia jeszcze nikt nie sprawdził**) → urząd przyjmuje zgłoszenie → trasa mieszkańca jest udokumentowana → w innym miejscu model i Sentinel-2 przeczą OSM (plac budowy), więc tam idzie kontrola.
 
 Wszystkie dane demo są w repozytorium, więc aplikacja działa bez sieci, z wyjątkiem podkładu mapy (Esri World Imagery).
 
@@ -77,7 +77,7 @@ Gdy model mówi „ciągły”, zwykle ma rację (82% na zbiorze testowym, v4), 
 
 **Uwagi.**
 - Etykiety pochodzą od dwóch osób z zespołu, opisujących niezależnie, bez wglądu w odpowiedzi modelu (strona `/app/etykiety`). Opisywali szybko (mediana około 1–1,5 s na wycinek), więc liczby traktujemy jako orientacyjne.
-- Dane w aplikacji pochodzą z promptu v2 (`KLASYFIKACJA` w `scripts/aglosat/config.ts`), bo zawierają przypadek sprzeczny pokazywany w demo: przerwę, którą model zgłosił, bo ścieżkę zasłoniła nasza linia. Prompt v3 ten błąd naprawia.
+- Dane w aplikacji pochodzą z promptu v4, tego samego, który mierzymy (`KLASYFIKACJA` w `scripts/aglosat/config.ts`). Wcześniejsze wersje zgłaszały fałszywe przerwy tam, gdzie wąską ścieżkę zasłaniała nasza linia z OSM; od v3 model dostaje też obraz bez linii.
 - Podział na zbiór roboczy (112) i testowy (91) jest zamrożony w `data/aglosat/proba-oceny.json`; prompt poprawialiśmy, patrząc na zbiór roboczy. Przy tej liczbie wycinków liczby są orientacyjne.
 - Prototyp działa bez klucza API: wyniki modelu są w `data/aglosat/klasyfikacje/`. Klucz jest potrzebny tylko do ponownej klasyfikacji. Pierwszy przebieg (Qwen przez Groq, prompt v1, 56 wycinków) jest zachowany w historii.
 
@@ -107,6 +107,8 @@ Ortofotomapa jest z kwietnia 2025, a teren się zmienia. Sentinel-2 (10 m, co ki
 
 - **Przechył budynków na ortofotomapie.** Dachy wysokich bloków przykrywają chodniki wzdłuż ścian, więc model patrzący na wycinek może zgłosić przerwę, której nie ma. Dlatego decyduje kontrola w terenie.
 - **Krawężniki** są w OSM opisywane na przejściach. Na pozostałych odcinkach przyjmujemy jawne założenie, że krawężnika nie ma; interfejs pokazuje je jako założenie.
+- **Krawężniki tylko na przejściach.** OSM opisuje krawężniki na przejściach, więc dla pozostałych odcinków przyjmujemy, że krawężnika nie ma. Obniżeń przy wjazdach i końcach chodników nie ma w danych, więc odsetek tras udokumentowanych (81%) może być zawyżony.
+- **„Brak przejścia” (110 relacji, z 23 budynków)** wynika z przeszkód zapisanych w OSM: schody (`highway=steps`, `barrier=step`), nawierzchnia nieutwardzona (ground, gravel, compacted), metalowa kładka (`surface=metal`) i jeden `kerb=raised`. Nie sprawdzaliśmy ich w terenie. Gdyby kładkę metalową i nawierzchnię ubitą uznać za utrudnienie, a nie barierę, byłoby 100 relacji; ranking i główny przypadek się nie zmieniają.
 - **Waga budynku** to powierzchnia zabudowy razy liczba kondygnacji: przybliżenie skali zabudowy, nie liczby mieszkańców. Przy równych wagach skład pierwszej dziesiątki rankingu się nie zmienia (10/10 mieści się w pierwszej 20), zmienia się kolejność.
 - **Data ortofotomapy** pochodzi ze skorowidza GUGiK dla arkusza M-34-65-C-c-1-2; zakładamy, że usługa WMS HighResolution pokazuje najnowszy arkusz.
 - **Kostka granitowa** jest traktowana jako utrudnienie, nie bariera.

@@ -44,6 +44,7 @@ export const PRZYKLADOWE = {
 export const KLASYFIKACJA: { dostawca: string; model: string; wersjaPromptu?: number } | null = {
   dostawca: "openrouter",
   model: "anthropic/claude-sonnet-5.5",
-  // v3 nie wskazuje przerw, więc demo straciłoby przypadek sprzeczny; do decyzji zostajemy przy v2.
-  wersjaPromptu: 2,
+  // Dane aplikacji z tej samej wersji, którą mierzymy i pokazujemy (v4). Przypadek sprzeczny zostaje:
+  // v4 wskazuje przerwę przy placu budowy, gdzie OSM ma drogę, a Sentinel-2 widzi zmianę terenu.
+  wersjaPromptu: 4,
 };

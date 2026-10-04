@@ -244,10 +244,15 @@ export function PlanistaView() {
         </div>
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <Liczba tytul="relacje budynek–usługa" wartosc={String(m.relacje)} opis="najbliższa usługa każdej kategorii, do 1,2 km" />
-          <Liczba tytul="trasa udokumentowana" wartosc={procent(m.udokumentowane, m.relacje)} opis={`${m.udokumentowane} relacji`} ton="ok" />
+          <Liczba tytul="trasa udokumentowana" wartosc={procent(m.udokumentowane, m.relacje)} opis={`${m.udokumentowane} relacji; krawężniki liczymy tylko na przejściach (tak opisuje je OSM)`} ton="ok" />
           <Liczba tytul="trasa wymagająca weryfikacji" wartosc={procent(m.wymagajaceWeryfikacji, m.relacje)} opis={`${m.wymagajaceWeryfikacji} relacji: przejście zależy od niewiadomych`} ton="uwaga" />
-          <Liczba tytul="brak przejścia dla profilu" wartosc={procent(m.bezPrzejscia, m.relacje)} opis={`${m.bezPrzejscia} relacji, nawet licząc niewiadome jako przejezdne`} ton="zle" />
+          <Liczba tytul="brak przejścia dla profilu" wartosc={procent(m.bezPrzejscia, m.relacje)} opis={`${m.bezPrzejscia} relacji: przeszkody zapisane w OSM (schody, nieutwardzona nawierzchnia, wysoki krawężnik), niesprawdzone w terenie`} ton="zle" />
         </div>
+        <p className="text-xs text-slate-600">
+          Założenie: krawężnik sprawdzamy tylko na przejściach, bo tam OSM go opisuje. Obniżeń przy wjazdach i końcach
+          chodników nie ma w danych, więc odsetek tras udokumentowanych może być zawyżony. „Brak przejścia” opiera się na
+          danych OSM i nie był sprawdzany w terenie.
+        </p>
       </section>
 
       {relacja && trasy && trasyBazowe && (
