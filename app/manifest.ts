@@ -1,11 +1,11 @@
 import type { MetadataRoute } from "next";
 
-// Aplikacja instalowalna zaczyna się od widoku mieszkańca: to on odpowiada na pytanie „czy dojadę?”.
+// Aplikacja instalowalna zaczyna się od widoku mieszkańca: to on odpowiada na pytanie „czy dotrę?”.
 // Widok planisty zostaje w zasięgu (scope), więc po instalacji nie wypada do przeglądarki.
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: "/app/mieszkaniec",
-    name: "AgloSat — czy dojadę?",
+    name: "AgloSat — czy dotrę?",
     short_name: "AgloSat",
     description:
       "Sprawdź, czy dojdziesz pieszo albo dojedziesz wózkiem, i co po drodze nie jest sprawdzone. Dane: OpenStreetMap i kontrole w terenie.",
@@ -24,7 +24,7 @@ export default function manifest(): MetadataRoute.Manifest {
     ],
     shortcuts: [
       {
-        name: "Czy dojadę?",
+        name: "Czy dotrę?",
         short_name: "Trasa",
         description: "Wybierz skąd i dokąd, zobacz co jest udokumentowane",
         url: "/app/mieszkaniec",

@@ -215,7 +215,7 @@ export function MieszkaniecView() {
   };
 
   const udostepnij = async () => {
-    const dane = { title: "AgloSat — czy dojadę?", text: opis };
+    const dane = { title: "AgloSat — czy dotrę?", text: opis };
     if (navigator.share) {
       try {
         await navigator.share(dane);
@@ -234,7 +234,7 @@ export function MieszkaniecView() {
 
   return (
     <Ramka>
-      <h1 className="text-[1.75rem] font-black leading-tight text-slate-900">Czy dojadę?</h1>
+      <h1 className="text-[1.75rem] font-black leading-tight text-slate-900">Czy dotrę?</h1>
       <p className="mt-1 text-sm text-slate-700">
         Mówimy, co o drodze wiadomo, skąd i od kiedy. Jeśli czegoś brakuje — zrób zdjęcie z miejsca.
       </p>

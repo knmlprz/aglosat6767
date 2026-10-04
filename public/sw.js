@@ -1,4 +1,4 @@
-// Service worker AgloSat. Po instalacji aplikacja odpowiada na pytanie „czy dojadę?” bez sieci:
+// Service worker AgloSat. Po instalacji aplikacja odpowiada na pytanie „czy dotrę?” bez sieci:
 // dane pilota to jeden statyczny plik, a trasy liczą się w przeglądarce.
 // Offline zostaje bez zmian tylko to, czego nie mamy u siebie: podkład mapy spoza już obejrzanych kafelków.
 
