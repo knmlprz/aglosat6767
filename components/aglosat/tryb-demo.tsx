@@ -145,7 +145,7 @@ const K = {
       const { strefa, obserwacja } = odcinekSentinel(p);
       const ubytek = strefa ? ` Tu: ubytek roślinności na ${strefa.opis.match(/ok\. (\d+) m²/)?.[1] ?? "?"} m² w obu parach scen rok do roku.` : "";
       const model = obserwacja ? " Na tym samym odcinku model, patrząc na starsze zdjęcie, zgłosił przerwę przy budowie." : "";
-      return `Ortofotomapa jest z kwietnia 2025. Sentinel-2 nie zobaczy chodnika, ale wskaże, gdzie od tamtej pory coś się zmieniło.${ubytek}${model} Dwa niezależne źródła: dane mogą być nieaktualne, tu warto wysłać kontrolę.`;
+      return `Ortofotomapa jest z kwietnia 2025. Sentinel-2 nie zobaczy krawężnika ani ścieżki, ale wskaże, gdzie od tamtej pory coś się zmieniło.${ubytek}${model} Dwa niezależne źródła: dane mogą być nieaktualne, tu warto wysłać kontrolę.`;
     },
     widok: "/app/planista",
     wybierz: "sentinel",

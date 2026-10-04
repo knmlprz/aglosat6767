@@ -426,7 +426,7 @@ export function PlanistaView() {
               {pilot.strefyZmian.some((s) => s.ilustracja) ? (
                 <span className="block text-xs text-amber-700">ilustracja, {ETYKIETA_PRZYKLADOWE}</span>
               ) : (
-                <span className="block text-xs text-slate-600">ubytek roślinności w dwóch parach scen rok do roku; nie wykrywa chodników</span>
+                <span className="block text-xs text-slate-600">ubytek roślinności w dwóch parach scen rok do roku; sygnał zmiany terenu, nie wykrycie infrastruktury</span>
               )}
             </span>
           </div>
