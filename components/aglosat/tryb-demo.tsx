@@ -11,7 +11,7 @@ import { dzisiaj, wpisKontroli } from "@/lib/aglosat/weryfikacja.ts";
 import { KATEGORIA_LABEL, nazwaModelu, odmiana } from "@/lib/aglosat/vocabulary.ts";
 import { useAglosat, type ZadanieDemo } from "@/components/aglosat/stan-aglosat";
 
-type Kontrole = "brak" | "obnizony" | "wysoki" | "obnizony_odrzucenie";
+type Kontrole = "brak" | "obnizony" | "wysoki" | "odrzucenie" | "obnizony_odrzucenie";
 type StanDemoZgloszen = "brak" | "oczekuje" | "przyjete";
 
 type Krok = {
@@ -86,7 +86,7 @@ const K = {
   dowod: {
     tytul: "Dowód z obrazu",
     mowimy:
-      "Ortofotomapa GUGiK z kwietnia 2025: przejście jest pod drzewami, krawężnika z góry nie widać. Obraz wskazuje miejsce, rozstrzyga człowiek w terenie.",
+      "Ortofotomapa GUGiK z kwietnia 2025: przejście jest pod drzewami, krawężnika z góry nie widać. Obraz wskazuje miejsce; rozstrzyga człowiek, który tam był.",
     widok: "/app/planista",
     wybierz: "miejsce1",
     kontrole: "brak",
@@ -115,7 +115,8 @@ const K = {
     },
     widok: "/app/planista",
     wybierz: "sprzeczne",
-    kontrole: "obnizony",
+    kontrole: "brak",
+    zgloszenia: "przyjete",
   },
   odrzucenie: {
     tytul: "Błąd modelu, pokazany celowo",
@@ -125,16 +126,18 @@ const K = {
       // Liczby ze zbioru testowego, jeśli są na nim etykiety; inaczej ze wszystkich wycinków.
       const zbior = wersje.some((w) => w.zbior === "testowy" && w.n > 0) ? "testowy" : "wszystkie";
       const v2 = wersje.find((w) => w.wersjaPromptu === 2 && w.zbior === zbior);
-      const v3 = wersje.find((w) => w.wersjaPromptu === 3 && w.zbior === zbior);
+      const ostatnia = wersje.filter((w) => w.zbior === zbior).sort((a, b) => (b.wersjaPromptu ?? 0) - (a.wersjaPromptu ?? 0))[0];
+      const ludzie = ostatnia?.zgodnoscLudzi?.n ? `, a dwie osoby między sobą w ${proc(ostatnia.zgodnoscLudzi.zgodnosc)}` : "";
       const liczby =
-        v2 && v3
-          ? ` Poprawiliśmy wejście (obraz bez linii i z linią): trafność na próbce z ${proc(v2.trafnosc)} do ${proc(v3.trafnosc)}; gdy model mówi „ciągły”, człowiek zgadza się w ${proc(v3.precyzjaCiagly)}.`
+        v2 && ostatnia && ostatnia !== v2
+          ? ` Poprawiliśmy wejście (obraz bez linii i z linią) i zasady: model zgadza się z człowiekiem w ${proc(ostatnia.trafnosc)} zamiast ${proc(v2.trafnosc)}${ludzie}.`
           : "";
       return `Na zdjęciu bez nakładki ścieżka przez trawnik jest. Modelowi zasłoniła ją nasza własna linia z OSM.${liczby} Model wskazuje, gdzie spojrzeć; decyduje człowiek.`;
     },
     widok: "/app/planista",
     wybierz: "sprzeczne",
-    kontrole: "obnizony_odrzucenie",
+    kontrole: "odrzucenie",
+    zgloszenia: "przyjete",
   },
   sentinel: {
     tytul: "Teren się zmienia: Sentinel-2",
@@ -146,7 +149,8 @@ const K = {
     },
     widok: "/app/planista",
     wybierz: "sentinel",
-    kontrole: "obnizony_odrzucenie",
+    kontrole: "odrzucenie",
+    zgloszenia: "przyjete",
   },
   wysoki: {
     tytul: "A gdyby krawężnik był wysoki?",
@@ -158,21 +162,22 @@ const K = {
   },
 } satisfies Record<string, Krok>;
 
-/** Jeden scenariusz: od pytania mieszkańca, przez zgłoszenie i decyzję urzędu, do kontroli w terenie. */
+/**
+ * Jeden scenariusz, wersja skrócona: pytanie mieszkańca, ranking i dowód z obrazu mówią, gdzie sprawdzić,
+ * zgłoszenie mieszkańca przyjęte przez urząd to rozstrzyga; potem model i Sentinel-2.
+ * Kroki kontroli w terenie (kontrola, mieszkaniecPo, wysoki) zostają w K do pełnej wersji.
+ */
 export const KROKI: Krok[] = [
   K.mieszkaniec,
   K.brakInformacji,
+  K.miejsce1,
+  K.dowod,
   K.zgloszenie,
   K.decyzja,
   K.przyjete,
-  K.miejsce1,
-  K.dowod,
-  K.kontrola,
-  K.mieszkaniecPo,
   K.sprzeczne,
   K.odrzucenie,
   K.sentinel,
-  K.wysoki,
 ];
 
 /** Główny przypadek demo: pierwszy kandydat z potoku (adres, cel, odległości). */
@@ -198,7 +203,9 @@ function odcinekSentinel(pilot: Pilot) {
 }
 
 function zgloszeniaKroku(stan: StanDemoZgloszen, pilot: Pilot): Zgloszenie[] {
-  const odcinekId = pilot.ranking[0]?.odcinekId;
+  // Zgłoszenie dotyczy odcinka, który jest niewiadomą na trasie mieszkańca: miejsce z rankingu ma kilka odcinków,
+  // a zgłoszenie pierwszego z nich nie zmieniało trasy z demo.
+  const odcinekId = pilot.kandydaci[0]?.niewiadome[0] ?? pilot.ranking[0]?.odcinekId;
   if (!odcinekId || stan === "brak") return [];
   const z: Zgloszenie = {
     id: "demo-zgloszenie",
@@ -222,7 +229,7 @@ function kontroleKroku(k: Kontrole, pilot: Pilot): Weryfikacja[] {
   if (k === "wysoki") return krawedz("wysoki");
   const obs = odcinekSprzeczny(pilot);
   return [
-    ...krawedz("obnizony"),
+    ...(k === "obnizony_odrzucenie" ? krawedz("obnizony") : []),
     ...wpisKontroli([obs.odcinekId], "ciaglosc", "ciagly", {
       notatka: "ścieżka jest; na obrazie dla modelu zasłoniła ją nasza linia z OSM",
       odrzuca: { [obs.odcinekId]: obs.id },
